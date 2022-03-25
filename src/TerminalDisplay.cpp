@@ -208,6 +208,10 @@ void TerminalDisplay::setVTFont(const QFont& f)
 
     QFontMetrics metrics(font);
 
+    if (!QFontInfo(font).exactMatch()) {
+        kWarning() << "The font for use in the terminal has not been matched exactly. Perhaps it has not been found properly.";
+    }
+
     if (!QFontInfo(font).fixedPitch()) {
         kWarning() << "Using an unsupported variable-width font in the terminal.  This may produce display errors.";
     }
@@ -1599,7 +1603,9 @@ void TerminalDisplay::blinkCursorEvent()
 
 void TerminalDisplay::updateCursor()
 {
-    QRect cursorRect = imageToWidget(QRect(cursorPosition(), QSize(1, 1)));
+    int cursorLocation = loc(cursorPosition().x(), cursorPosition().y());
+    int charWidth = konsole_wcwidth(_image[cursorLocation].character);
+    QRect cursorRect = imageToWidget(QRect(cursorPosition(), QSize(charWidth, 1)));
     update(cursorRect);
 }
 
