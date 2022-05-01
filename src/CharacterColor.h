@@ -68,13 +68,13 @@ public:
      */
     ColorEntry() : fontWeight(UseCurrentFormat) {}
 
+    ColorEntry(const ColorEntry& rhs)
+        : color(rhs.color), fontWeight(rhs.fontWeight) {}
+
     /**
      * Sets the color and boldness of this color to those of @p rhs.
      */
-    void operator=(const ColorEntry& rhs) {
-        color = rhs.color;
-        fontWeight = rhs.fontWeight;
-    }
+    ColorEntry& operator=(const ColorEntry& rhs) = default;
 
     /** The color value of this entry for display. */
     QColor color;
