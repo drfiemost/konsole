@@ -844,7 +844,7 @@ void Vt102Emulation::sendString(const char* s , int length)
 
 void Vt102Emulation::reportCursorPosition()
 {
-  char tmp[20];
+  char tmp[30];
   snprintf(tmp, sizeof(tmp), "\033[%d;%dR", _currentScreen->getCursorY()+1, _currentScreen->getCursorX()+1);
   sendString(tmp);
 }
@@ -935,7 +935,7 @@ void Vt102Emulation::sendMouseEvent(int cb, int cx, int cy , int eventType)
     if ((getMode(MODE_Mouse1002) || getMode(MODE_Mouse1003)) && eventType == 1)
         cb += 0x20; //add 32 to signify motion event
 
-    char command[32];
+    char command[40];
     command[0] = '\0';
     // Check the extensions in decreasing order of preference. Encoding the release event above assumes that 1006 comes first.
     if (getMode(MODE_Mouse1006)) {
