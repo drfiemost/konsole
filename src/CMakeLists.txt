@@ -127,7 +127,7 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
 set(konsole_LIBS ${KDE4_KPTY_LIBS}
                  ${KDE4_KIO_LIBS}
                  ${KDE4_KNOTIFYCONFIG_LIBS}
-                 ${QT_QTXML_LIBRARY}
+                 Qt4::QtXml
                  ${X11_LIBRARIES})
 
 if(HAVE_LIBKONQ)
