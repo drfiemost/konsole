@@ -1,4 +1,5 @@
 # cmake-options : -WITH_LibKonq=ON or OFF; default is ON
+set(FPHSA_NAME_MISMATCHED TRUE)
 macro_optional_find_package(LibKonq)
 macro_bool_to_01(LIBKONQ_FOUND HAVE_LIBKONQ)
 
