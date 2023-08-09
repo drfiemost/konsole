@@ -10,6 +10,8 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
     add_compile_options("$<$<CONFIG:DEBUG>:-Wall;-Wextra;-pedantic>")
 endif()
 
+add_definitions(-DKDE_NO_DEPRECATED)
+
 find_package(KDE4 4.7.0 REQUIRED)
 include(KDE4Defaults)
 
