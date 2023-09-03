@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Service
+X-KDE-ServiceTypes=KonqPopupMenu/Plugin
+MimeType=inode/directory;
+Actions=OpenTerminalHereAsRoot;
+
+[Desktop Action OpenTerminalHereAsRoot]
+TryExec=konsole
+Exec=kdesu konsole --workdir %f
+Icon=utilities-terminal
+
+Name=Open Terminal Here as Root
+Name[it]=Apri terminale qui come root
