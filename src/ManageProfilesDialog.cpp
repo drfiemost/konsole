@@ -445,8 +445,7 @@ void ManageProfilesDialog::setShortcutEditorVisible(bool visible)
 void StyledBackgroundPainter::drawBackground(QPainter* painter, const QStyleOptionViewItem& option,
         const QModelIndex&)
 {
-    const QStyleOptionViewItemV3* v3option = qstyleoption_cast<const QStyleOptionViewItemV3*>(&option);
-    const QWidget* widget = v3option ? v3option->widget : 0;
+    const QWidget* widget = option.widget;
 
     QStyle* style = widget ? widget->style() : QApplication::style();
 
@@ -460,7 +459,7 @@ FavoriteItemDelegate::FavoriteItemDelegate(QObject* aParent)
 void FavoriteItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     // See implementation of QStyledItemDelegate::paint()
-    QStyleOptionViewItemV4 opt = option;
+    QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
 
     StyledBackgroundPainter::drawBackground(painter, opt, index);
