@@ -34,6 +34,8 @@
 #include <KDebug>
 #include <KStandardDirs>
 
+#include <algorithm>
+
 // Reasonable line size
 static const int LINE_SIZE = 1024;
 
@@ -492,7 +494,7 @@ void CompactHistoryScroll::addCellsVector(const TextLine& cells)
 void CompactHistoryScroll::addCells(const Character a[], int count)
 {
     TextLine newLine(count);
-    qCopy(a, a + count, newLine.begin());
+    std::copy(a, a + count, newLine.begin());
     addCellsVector(newLine);
 }
 

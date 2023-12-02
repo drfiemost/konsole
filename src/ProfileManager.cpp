@@ -39,6 +39,8 @@
 #include "ProfileReader.h"
 #include "ProfileWriter.h"
 
+#include <algorithm>
+
 using namespace Konsole;
 
 static bool profileIndexLessThan(const Profile::Ptr& p1, const Profile::Ptr& p2)
@@ -58,12 +60,12 @@ static bool stringLessThan(const QString& p1, const QString& p2)
 
 static void sortByIndexProfileList(QList<Profile::Ptr>& list)
 {
-    qStableSort(list.begin(), list.end(), profileIndexLessThan);
+    std::stable_sort(list.begin(), list.end(), profileIndexLessThan);
 }
 
 static void sortByNameProfileList(QList<Profile::Ptr>& list)
 {
-    qStableSort(list.begin(), list.end(), profileNameLessThan);
+    std::stable_sort(list.begin(), list.end(), profileNameLessThan);
 }
 
 ProfileManager::ProfileManager()
@@ -194,7 +196,7 @@ QStringList ProfileManager::availableProfilePaths() const
     QStringList paths;
     paths += kde4Reader.findProfiles();
 
-    qStableSort(paths.begin(), paths.end(), stringLessThan);
+    std::stable_sort(paths.begin(), paths.end(), stringLessThan);
 
     return paths;
 }
@@ -209,7 +211,7 @@ QStringList ProfileManager::availableProfileNames() const
         }
     }
 
-    qStableSort(names.begin(), names.end(), stringLessThan);
+    std::stable_sort(names.begin(), names.end(), stringLessThan);
 
     return names;
 }
