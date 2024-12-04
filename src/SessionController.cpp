@@ -505,7 +505,7 @@ bool SessionController::eventFilter(QObject* watched , QEvent* event)
         }
     }
 
-    return false;
+    return Konsole::ViewProperties::eventFilter(watched, event);
 }
 
 void SessionController::removeSearchFilter()
