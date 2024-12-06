@@ -142,8 +142,8 @@ FallbackProfile::FallbackProfile()
     : Profile()
 {
     // Fallback settings
-    setProperty(Name, i18n("Shell"));
-    setProperty(UntranslatedName, "Shell");
+    setProperty(Name, i18nc("Name of the default/builtin profile", "Default"));
+    setProperty(UntranslatedName, "Default");
     // magic path for the fallback profile which is not a valid
     // non-directory file name
     setProperty(Path, "FALLBACK/");
@@ -194,7 +194,6 @@ FallbackProfile::FallbackProfile()
     setProperty(AntiAliasFonts, true);
     setProperty(BoldIntense, true);
 
-    // default taken from KDE 3
     setProperty(WordCharacters, ":@-./_~?&=%+#");
 
     // Fallback should not be shown in menus
