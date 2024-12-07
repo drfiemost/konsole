@@ -105,7 +105,6 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
     , _copyToGroup(0)
     , _profileList(0)
     , _previousState(-1)
-    , _viewUrlFilter(0)
     , _searchFilter(0)
     , _copyInputToAllTabsAction(0)
     , _findAction(0)
@@ -147,6 +146,9 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
 
     view->installEventFilter(this);
     view->setSessionController(this);
+
+    // install filter on the view to highlight URLs
+    _view->filterChain()->addFilter(new UrlFilter);
 
     // listen for session resize requests
     connect(_session, SIGNAL(resizeRequest(QSize)), this,
@@ -455,49 +457,23 @@ void SessionController::sendSignal(QAction* action)
 
 bool SessionController::eventFilter(QObject* watched , QEvent* event)
 {
-    if (watched == _view) {
-        if (event->type() == QEvent::FocusIn) {
-            // notify the world that the view associated with this session has been focused
-            // used by the view manager to update the title of the MainWindow widget containing the view
-            emit focused(this);
+    if (event->type() == QEvent::FocusIn && watched == _view) {
+        // notify the world that the view associated with this session has been focused
+        // used by the view manager to update the title of the MainWindow widget containing the view
+        emit focused(this);
 
-            // when the view is focused, set bell events from the associated session to be delivered
-            // by the focused view
+        // when the view is focused, set bell events from the associated session to be delivered
+        // by the focused view
 
-            // first, disconnect any other views which are listening for bell signals from the session
-            disconnect(_session, SIGNAL(bellRequest(QString)), 0, 0);
-            // second, connect the newly focused view to listen for the session's bell signal
-            connect(_session, SIGNAL(bellRequest(QString)),
-                    _view, SLOT(bell(QString)));
+        // first, disconnect any other views which are listening for bell signals from the session
+        disconnect(_session.data(), SIGNAL(bellRequest()), 0, 0);
+        // second, connect the newly focused view to listen for the session's bell signal
+        connect(_session.data(), SIGNAL(bellRequest()), _view.data(), SLOT(bell()));
 
-            if (_copyInputToAllTabsAction && _copyInputToAllTabsAction->isChecked()) {
-                // A session with "Copy To All Tabs" has come into focus:
-                // Ensure that newly created sessions are included in _copyToGroup!
-                copyInputToAllTabs();
-            }
-        }
-        // when a mouse move is received, create the URL filter and listen for output changes if
-        // it has not already been created.  If it already exists, then update only if the output
-        // has changed since the last update ( _urlFilterUpdateRequired == true )
-        //
-        // also check that no mouse buttons are pressed since the URL filter only applies when
-        // the mouse is hovering over the view
-        if (event->type() == QEvent::MouseMove &&
-                (!_viewUrlFilter || _urlFilterUpdateRequired) &&
-                ((QMouseEvent*)event)->buttons() == Qt::NoButton) {
-            if (_view->screenWindow() && !_viewUrlFilter) {
-                connect(_view->screenWindow(), SIGNAL(scrolled(int)), this,
-                        SLOT(requireUrlFilterUpdate()));
-                connect(_view->screenWindow(), SIGNAL(outputChanged()), this,
-                        SLOT(requireUrlFilterUpdate()));
-
-                // install filter on the view to highlight URLs
-                _viewUrlFilter = new UrlFilter();
-                _view->filterChain()->addFilter(_viewUrlFilter);
-            }
-
-            _view->processFilters();
-            _urlFilterUpdateRequired = false;
+        if (_copyInputToAllTabsAction && _copyInputToAllTabsAction->isChecked()) {
+            // A session with "Copy To All Tabs" has come into focus:
+            // Ensure that newly created sessions are included in _copyToGroup!
+            copyInputToAllTabs();
         }
     }
 

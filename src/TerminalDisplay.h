@@ -573,6 +573,8 @@ public slots:
      */
     void setCenterContents(bool enable);
 
+    void updateFilters();
+
 signals:
 
     /**
@@ -876,6 +878,7 @@ private:
     // search highlight
     TerminalImageFilterChain* _filterChain;
     QRegion _mouseOverHotspotArea;
+    bool _filterUpdateRequired;
 
     Enum::CursorShapeEnum _cursorShape;
 

@@ -60,7 +60,6 @@ class ScreenWindow;
 class TerminalDisplay;
 class IncrementalSearchBar;
 class ProfileList;
-class UrlFilter;
 class RegExpFilter;
 class EditProfileDialog;
 
@@ -317,7 +316,6 @@ private:
     QString    _sessionIconName;
     int        _previousState;
 
-    UrlFilter*      _viewUrlFilter;
     RegExpFilter*   _searchFilter;
 
     KAction* _copyInputToAllTabsAction;

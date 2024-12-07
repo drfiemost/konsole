@@ -117,8 +117,14 @@ void TerminalDisplay::setScreenWindow(ScreenWindow* window)
         connect(_screenWindow , SIGNAL(outputChanged()) , this , SLOT(updateLineProperties()));
         connect(_screenWindow , SIGNAL(outputChanged()) , this , SLOT(updateImage()));
         connect(_screenWindow , SIGNAL(currentResultLineChanged()) , this , SLOT(updateImage()));
+        connect(_screenWindow.data(), SIGNAL(outputChanged()) , this , SLOT(updateFilters()));
+        connect(_screenWindow.data(),SIGNAL(scrolled()) , this , SLOT(updateFilters()));
         _screenWindow->setWindowLines(_lines);
     }
+}
+void TerminalDisplay::updateFilters()
+{
+    _filterUpdateRequired = true;
 }
 
 const ColorEntry* TerminalDisplay::colorTable() const
@@ -341,6 +347,7 @@ TerminalDisplay::TerminalDisplay(QWidget* parent)
     , _lineSpacing(0)
     , _blendColor(qRgba(0, 0, 0, 0xff))
     , _filterChain(new TerminalImageFilterChain())
+    , _filterUpdateRequired(true)
     , _cursorShape(Enum::BlockCursor)
     , _antialiasText(true)
     , _printerFriendly(false)
@@ -1031,8 +1038,13 @@ QRegion TerminalDisplay::hotSpotRegion() const
 
 void TerminalDisplay::processFilters()
 {
-    if (!_screenWindow)
+    if (!_screenWindow) {
         return;
+    }
+
+    if (!_filterUpdateRequired) {
+        return;
+    }
 
     QRegion preUpdateHotSpots = hotSpotRegion();
 
@@ -1050,6 +1062,7 @@ void TerminalDisplay::processFilters()
     QRegion postUpdateHotSpots = hotSpotRegion();
 
     update(preUpdateHotSpots | postUpdateHotSpots);
+    _filterUpdateRequired = false;
 }
 
 void TerminalDisplay::updateImage()
@@ -1306,6 +1319,10 @@ FilterChain* TerminalDisplay::filterChain() const
 
 void TerminalDisplay::paintFilters(QPainter& painter)
 {
+    if (_filterUpdateRequired) {
+        return;
+    }
+
     // get color of character under mouse and use it to draw
     // lines for filters
     QPoint cursorPos = mapFromGlobal(QCursor::pos());
@@ -2018,6 +2035,7 @@ void TerminalDisplay::mouseMoveEvent(QMouseEvent* ev)
     int charColumn = 0;
     getCharacterPosition(ev->pos(), charLine, charColumn);
 
+    processFilters();
     // handle filters
     // change link hot-spot appearance on mouse-over
     Filter::HotSpot* spot = _filterChain->hotSpotAt(charLine, charColumn);
@@ -3351,9 +3369,9 @@ bool AutoScrollHandler::eventFilter(QObject* watched, QEvent* event)
     Q_ASSERT(watched == parent());
     Q_UNUSED(watched);
 
-    QMouseEvent* mouseEvent = (QMouseEvent*)event;
     switch (event->type()) {
     case QEvent::MouseMove: {
+        QMouseEvent* mouseEvent = (QMouseEvent*)event;
         bool mouseInWidget = widget()->rect().contains(mouseEvent->pos());
         if (mouseInWidget) {
             if (_timerId)
@@ -3368,6 +3386,7 @@ bool AutoScrollHandler::eventFilter(QObject* watched, QEvent* event)
         break;
     }
     case QEvent::MouseButtonRelease: {
+        QMouseEvent* mouseEvent = (QMouseEvent*)event;
         if (_timerId && (mouseEvent->buttons() & ~Qt::LeftButton)) {
             killTimer(_timerId);
             _timerId = 0;
