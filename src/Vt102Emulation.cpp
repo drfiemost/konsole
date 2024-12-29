@@ -207,14 +207,14 @@ void Vt102Emulation::addDigit(int digit)
 
 void Vt102Emulation::addArgument()
 {
-    argc = qMin(argc + 1, MAXARGS - 1);
+    argc = std::min(argc + 1, MAXARGS - 1);
     argv[argc] = 0;
 }
 
 void Vt102Emulation::addToCurrentToken(int cc)
 {
     tokenBuffer[tokenBufferPos] = cc;
-    tokenBufferPos = qMin(tokenBufferPos + 1, MAX_TOKEN_LENGTH - 1);
+    tokenBufferPos = std::min(tokenBufferPos + 1, MAX_TOKEN_LENGTH - 1);
 }
 
 // Character Class flags used while decoding
@@ -952,7 +952,7 @@ void Vt102Emulation::sendMouseEvent(int cb, int cx, int cy , int eventType)
             coords[1] = cy + 0x20;
             QString coordsStr = QString(coords, 2);
             QByteArray utf8 = coordsStr.toUtf8();
-            snprintf(command, sizeof(command), "\033[M%c%s", cb + 0x20, (const char *)utf8);
+            snprintf(command, sizeof(command), "\033[M%c%s", cb + 0x20, utf8.constData());
         }
     } else if (cx <= 223 && cy <= 223) {
         snprintf(command, sizeof(command), "\033[M%c%c%c", cb + 0x20, cx + 0x20, cy + 0x20);

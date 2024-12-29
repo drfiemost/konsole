@@ -64,13 +64,13 @@ void ShellCommandTest::testExpandEnvironmentVariable()
     QString text = "PATH=$PATH:~/bin";
     const QString env = "PATH";
     const QString value = "/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin";
-    qputenv(env.toLocal8Bit(), value.toLocal8Bit());
+    qputenv(qPrintable(env), qPrintable(value));
     QString result = ShellCommand::expand(text);
     QString expected = text.replace('$' + env, value);
     QCOMPARE(result, expected);
 
     text = "PATH=$PATH:\\$ESCAPED:~/bin";
-    qputenv(env.toLocal8Bit(), value.toLocal8Bit());
+    qputenv(qPrintable(env), qPrintable(value));
     result = ShellCommand::expand(text);
     expected = text.replace('$' + env, value);
     QCOMPARE(result, expected);

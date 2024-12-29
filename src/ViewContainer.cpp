@@ -87,10 +87,10 @@ void ViewContainer::moveActiveView(MoveDirection direction)
 
     switch (direction) {
     case MoveViewLeft:
-        newIndex = qMax(currentIndex - 1 , 0);
+        newIndex = std::max(currentIndex - 1 , 0);
         break;
     case MoveViewRight:
-        newIndex = qMin(currentIndex + 1 , _views.count() - 1);
+        newIndex = std::min(currentIndex + 1 , _views.count() - 1);
         break;
     }
 

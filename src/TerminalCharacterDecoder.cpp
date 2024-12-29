@@ -115,7 +115,7 @@ void PlainTextDecoder::decodeLine(const Character* const characters, int count, 
             if (chars) {
                 const QString s = QString::fromUtf16(chars, extendedCharLength);
                 plainText.append(s);
-                i += qMax(1, string_width(s));
+                i += std::max(1, string_width(s));
             }
         } else {
             // All characters which appear before the last real character are
@@ -127,7 +127,7 @@ void PlainTextDecoder::decodeLine(const Character* const characters, int count, 
             // of `dialog --infobox "qwe" 10 10` .
             if (characters[i].isRealCharacter || i <= realCharacterGuard) {
                 plainText.append(QChar(characters[i].character));
-                i += qMax(1, konsole_wcwidth(characters[i].character));
+                i += std::max(1, konsole_wcwidth(characters[i].character));
             } else {
                 ++i;  // should we 'break' directly here?
             }

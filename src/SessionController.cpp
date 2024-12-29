@@ -1376,7 +1376,7 @@ void SessionController::print_screen()
     KConfigGroup configGroup(KGlobal::config(), "PrintOptions");
 
     if (configGroup.readEntry("ScaleOutput", true)) {
-        double scale = qMin(printer.pageRect().width() / static_cast<double>(_view->width()),
+        double scale = std::min(printer.pageRect().width() / static_cast<double>(_view->width()),
                             printer.pageRect().height() / static_cast<double>(_view->height()));
         painter.scale(scale, scale);
     }
@@ -1742,7 +1742,7 @@ void SaveHistoryTask::jobDataRequested(KIO::Job* job , QByteArray& data)
         if (sessionLines - 1 == info.lastLineFetched)
             return; // if there is no more data to transfer then stop the job
 
-        int copyUpToLine = qMin(info.lastLineFetched + LINES_PER_REQUEST ,
+        int copyUpToLine = std::min(info.lastLineFetched + LINES_PER_REQUEST ,
                                 sessionLines - 1);
 
         QTextStream stream(&data, QIODevice::ReadWrite);
@@ -1821,7 +1821,7 @@ void SearchHistoryTask::executeOnScreenWindow(SessionPtr session , ScreenWindowP
         //this balances the need to retrieve lots of data from the history each time
         //(for efficient searching)
         //without using silly amounts of memory if the history is very large.
-        const int maxDelta = qMin(window->lineCount(), 10000);
+        const int maxDelta = std::min(window->lineCount(), 10000);
         int delta = forwards ? maxDelta : -maxDelta;
 
         int endLine = line;
@@ -1845,9 +1845,9 @@ void SearchHistoryTask::executeOnScreenWindow(SessionPtr session , ScreenWindowP
                 endLine += delta;
 
                 if (forwards)
-                    endLine = qMin(startLine , endLine);
+                    endLine = std::min(startLine , endLine);
                 else
-                    endLine = qMax(startLine , endLine);
+                    endLine = std::max(startLine , endLine);
             } else {
                 endLine += delta;
 
@@ -1861,7 +1861,7 @@ void SearchHistoryTask::executeOnScreenWindow(SessionPtr session , ScreenWindowP
             }
 
             decoder.begin(&searchStream);
-            emulation->writeToStream(&decoder, qMin(endLine, line) , qMax(endLine, line));
+            emulation->writeToStream(&decoder, std::min(endLine, line) , std::max(endLine, line));
             decoder.end();
 
             // line number search below assumes that the buffer ends with a new-line
@@ -1882,7 +1882,7 @@ void SearchHistoryTask::executeOnScreenWindow(SessionPtr session , ScreenWindowP
                 // ignore the new line at the start of the buffer
                 newLines--;
 
-                int findPos = qMin(line, endLine) + newLines;
+                int findPos = std::min(line, endLine) + newLines;
 
                 highlightResult(window, findPos);
 

@@ -107,7 +107,7 @@ void ScreenWindow::fillUnusedArea()
 //
 int ScreenWindow::endWindowLine() const
 {
-    return qMin(currentLine() + windowLines() - 1,
+    return std::min(currentLine() + windowLines() - 1,
                 lineCount() - 1);
 }
 QVector<LineProperty> ScreenWindow::getLineProperties()
@@ -164,7 +164,7 @@ void ScreenWindow::setSelectionByLineRange(int start, int end)
 
 bool ScreenWindow::isSelected(int column , int line)
 {
-    return _screen->isSelected(column , qMin(line + currentLine(), endWindowLine()));
+    return _screen->isSelected(column , std::min(line + currentLine(), endWindowLine()));
 }
 
 void ScreenWindow::clearSelection()
@@ -299,19 +299,19 @@ void ScreenWindow::notifyOutputChanged()
     // if this window is currently tracking the bottom of the screen
     if (_trackOutput) {
         _scrollCount -= _screen->scrolledLines();
-        _currentLine = qMax(0, _screen->getHistLines() - (windowLines() - _screen->getLines()));
+        _currentLine = std::max(0, _screen->getHistLines() - (windowLines() - _screen->getLines()));
     } else {
         // if the history is not unlimited then it may
         // have run out of space and dropped the oldest
         // lines of output - in this case the screen
         // window's current line number will need to
         // be adjusted - otherwise the output will scroll
-        _currentLine = qMax(0, _currentLine -
+        _currentLine = std::max(0, _currentLine -
                             _screen->droppedLines());
 
         // ensure that the screen window's current position does
         // not go beyond the bottom of the screen
-        _currentLine = qMin(_currentLine , _screen->getHistLines());
+        _currentLine = std::min(_currentLine , _screen->getHistLines());
     }
 
     _bufferNeedsUpdate = true;

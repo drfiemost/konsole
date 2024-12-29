@@ -258,7 +258,7 @@ void TerminalDisplay::decreaseFontSize()
     const qreal MinimumFontSize = 6;
 
     QFont font = getVTFont();
-    font.setPointSizeF(qMax(font.pointSizeF() - 1, MinimumFontSize));
+    font.setPointSizeF(std::max(font.pointSizeF() - 1, MinimumFontSize));
     setVTFont(font);
 }
 
@@ -557,15 +557,15 @@ static void drawOtherChar(QPainter& paint, int x, int y, int w, int h, uchar cod
 
     // Double dashes
     if (0x4C <= code && code <= 0x4F) {
-        const int xHalfGap = qMax(w / 15, 1);
-        const int yHalfGap = qMax(h / 15, 1);
+        const int xHalfGap = std::max(w / 15, 1);
+        const int yHalfGap = std::max(h / 15, 1);
         switch (code) {
         case 0x4D: // BOX DRAWINGS HEAVY DOUBLE DASH HORIZONTAL
             paint.drawLine(x, cy - 1, cx - xHalfGap - 1, cy - 1);
             paint.drawLine(x, cy + 1, cx - xHalfGap - 1, cy + 1);
             paint.drawLine(cx + xHalfGap, cy - 1, ex, cy - 1);
             paint.drawLine(cx + xHalfGap, cy + 1, ex, cy + 1);
-            // No break!
+            [[fallthrough]];
         case 0x4C: // BOX DRAWINGS LIGHT DOUBLE DASH HORIZONTAL
             paint.drawLine(x, cy, cx - xHalfGap - 1, cy);
             paint.drawLine(cx + xHalfGap, cy, ex, cy);
@@ -575,7 +575,7 @@ static void drawOtherChar(QPainter& paint, int x, int y, int w, int h, uchar cod
             paint.drawLine(cx + 1, y, cx + 1, cy - yHalfGap - 1);
             paint.drawLine(cx - 1, cy + yHalfGap, cx - 1, ey);
             paint.drawLine(cx + 1, cy + yHalfGap, cx + 1, ey);
-            // No break!
+            [[fallthrough]];
         case 0x4E: // BOX DRAWINGS LIGHT DOUBLE DASH VERTICAL
             paint.drawLine(cx, y, cx, cy - yHalfGap - 1);
             paint.drawLine(cx, cy + yHalfGap, cx, ey);
@@ -751,7 +751,7 @@ void TerminalDisplay::drawCursor(QPainter& painter,
     if (_cursorShape == Enum::BlockCursor) {
         // draw the cursor outline, adjusting the area so that
         // it is draw entirely inside 'rect'
-        int penWidth = qMax(1, painter.pen().width());
+        int penWidth = std::max(1, painter.pen().width());
         painter.drawRect(cursorRect.adjusted(penWidth / 2,
                                              penWidth / 2,
                                              - penWidth / 2 - penWidth % 2,
@@ -927,7 +927,7 @@ void TerminalDisplay::scrollImage(int lines , const QRect& screenWindowRegion)
     // internal image - 2, so that the height of 'region' is strictly less
     // than the height of the internal image.
     QRect region = screenWindowRegion;
-    region.setBottom(qMin(region.bottom(), this->_lines - 2));
+    region.setBottom(std::min(region.bottom(), this->_lines - 2));
 
     // return if there is nothing to do
     if (lines == 0
@@ -1103,8 +1103,8 @@ void TerminalDisplay::updateImage()
 
     CharacterColor cf;       // undefined
 
-    const int linesToUpdate = qMin(this->_lines, qMax(0, lines));
-    const int columnsToUpdate = qMin(this->_columns, qMax(0, columns));
+    const int linesToUpdate = std::min(this->_lines, std::max(0, lines));
+    const int columnsToUpdate = std::min(this->_columns, std::max(0, columns));
 
     char* dirtyMask = new char[columnsToUpdate + 2];
     QRegion dirtyRegion;
@@ -1437,10 +1437,10 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
     const int    tLx = tL.x();
     const int    tLy = tL.y();
 
-    const int lux = qMin(_usedColumns - 1, qMax(0, (rect.left()   - tLx - _contentRect.left()) / _fontWidth));
-    const int luy = qMin(_usedLines - 1,  qMax(0, (rect.top()    - tLy - _contentRect.top()) / _fontHeight));
-    const int rlx = qMin(_usedColumns - 1, qMax(0, (rect.right()  - tLx - _contentRect.left()) / _fontWidth));
-    const int rly = qMin(_usedLines - 1,  qMax(0, (rect.bottom() - tLy - _contentRect.top()) / _fontHeight));
+    const int lux = std::min(_usedColumns - 1, std::max(0, (rect.left()   - tLx - _contentRect.left()) / _fontWidth));
+    const int luy = std::min(_usedLines - 1,  std::max(0, (rect.top()    - tLy - _contentRect.top()) / _fontHeight));
+    const int rlx = std::min(_usedColumns - 1, std::max(0, (rect.right()  - tLx - _contentRect.left()) / _fontWidth));
+    const int rly = std::min(_usedLines - 1,  std::max(0, (rect.bottom() - tLy - _contentRect.top()) / _fontHeight));
 
     const int numberOfColumns = _usedColumns;
     QString unistr;
@@ -1483,7 +1483,7 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
             }
 
             const bool lineDraw = _image[loc(x, y)].isLineChar();
-            const bool doubleWidth = (_image[ qMin(loc(x, y) + 1, _imageSize) ].character == 0);
+            const bool doubleWidth = (_image[ std::min(loc(x, y) + 1, _imageSize) ].character == 0);
             const CharacterColor currentForeground = _image[loc(x, y)].foregroundColor;
             const CharacterColor currentBackground = _image[loc(x, y)].backgroundColor;
             const quint8 currentRendition = _image[loc(x, y)].rendition;
@@ -1492,7 +1492,7 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
                     _image[loc(x + len, y)].foregroundColor == currentForeground &&
                     _image[loc(x + len, y)].backgroundColor == currentBackground &&
                     (_image[loc(x + len, y)].rendition & ~RE_EXTENDED_CHAR) == (currentRendition & ~RE_EXTENDED_CHAR) &&
-                    (_image[ qMin(loc(x + len, y) + 1, _imageSize) ].character == 0) == doubleWidth &&
+                    (_image[ std::min(loc(x + len, y) + 1, _imageSize) ].character == 0) == doubleWidth &&
                     _image[loc(x + len, y)].isLineChar() == lineDraw) {
                 const quint16 c = _image[loc(x + len, y)].character;
                 if (_image[loc(x + len, y)].rendition & RE_EXTENDED_CHAR) {
@@ -1737,8 +1737,8 @@ void TerminalDisplay::updateImageSize()
 
     if (oldImage) {
         // copy the old image to reduce flicker
-        int lines = qMin(oldLines, _lines);
-        int columns = qMin(oldColumns, _columns);
+        int lines = std::min(oldLines, _lines);
+        int columns = std::min(oldColumns, _columns);
         for (int line = 0; line < lines; line++) {
             memcpy((void*)&_image[_columns * line],
                    (void*)&oldImage[oldColumns * line],
@@ -1805,12 +1805,12 @@ void TerminalDisplay::calcGeometry()
     }
 
     // ensure that display is always at least one column wide
-    _columns = qMax(1, _contentRect.width() / _fontWidth);
-    _usedColumns = qMin(_usedColumns, _columns);
+    _columns = std::max(1, _contentRect.width() / _fontWidth);
+    _usedColumns = std::min(_usedColumns, _columns);
 
     // ensure that display is always at least one line high
-    _lines = qMax(1, _contentRect.height() / _fontHeight);
-    _usedLines = qMin(_usedLines, _lines);
+    _lines = std::max(1, _contentRect.height() / _fontHeight);
+    _usedLines = std::min(_usedLines, _lines);
 
     if(_centerContents) {
         QSize unusedPixels = _contentRect.size() - QSize(_columns * _fontWidth, _lines * _fontHeight);
@@ -2533,7 +2533,7 @@ QPoint TerminalDisplay::findLineStart(const QPoint &pnt)
             break;
 
         // _lineProperties is only for the visible screen, so grab new data
-        int newRegionStart = qMax(0, lineInHistory - visibleScreenLines);
+        int newRegionStart = std::max(0, lineInHistory - visibleScreenLines);
         lineProperties = screen->getLineProperties(newRegionStart, lineInHistory - 1);
         line = lineInHistory - newRegionStart;
     }
@@ -2563,14 +2563,14 @@ QPoint TerminalDisplay::findLineEnd(const QPoint &pnt)
         }
 
         line = 0;
-        lineProperties = screen->getLineProperties(lineInHistory, qMin(lineInHistory + visibleScreenLines, maxY));
+        lineProperties = screen->getLineProperties(lineInHistory, std::min(lineInHistory + visibleScreenLines, maxY));
     }
     return QPoint(_columns - 1, lineInHistory - topVisibleLine);
 }
 
 QPoint TerminalDisplay::findWordStart(const QPoint &pnt)
 {
-    const int regSize = qMax(_screenWindow->windowLines(), 10);
+    const int regSize = std::max(_screenWindow->windowLines(), 10);
     const int curLine = _screenWindow->currentLine();
     int i = pnt.y();
     int x = pnt.x();
@@ -2604,7 +2604,7 @@ QPoint TerminalDisplay::findWordStart(const QPoint &pnt)
                 goto out;
             }
         }
-        int newRegStart = qMax(0, y - regSize);
+        int newRegStart = std::max(0, y - regSize);
         lineProperties = screen->getLineProperties(newRegStart, y - 1);
         i = y - newRegStart;
         if (!tmp_image) {
@@ -2623,7 +2623,7 @@ out:
 
 QPoint TerminalDisplay::findWordEnd(const QPoint &pnt)
 {
-    const int regSize = qMax(_screenWindow->windowLines(), 10);
+    const int regSize = std::max(_screenWindow->windowLines(), 10);
     const int curLine = _screenWindow->currentLine();
     int i = pnt.y();
     int x = pnt.x();
@@ -2662,7 +2662,7 @@ QPoint TerminalDisplay::findWordEnd(const QPoint &pnt)
                 goto out;
             }
         }
-        int newRegEnd = qMin(y + regSize - 1, maxY);
+        int newRegEnd = std::min(y + regSize - 1, maxY);
         lineProperties = screen->getLineProperties(y, newRegEnd);
         i = 0;
         if (!tmp_image) {
@@ -3301,7 +3301,7 @@ void TerminalDisplay::dropEvent(QDropEvent* event)
 
     if (event->mimeData()->hasFormat("text/plain") ||
             event->mimeData()->hasFormat("text/uri-list")) {
-        emit sendStringToEmu(dropText.toLocal8Bit());
+        emit sendStringToEmu(qPrintable(dropText));
     }
 }
 
@@ -3310,7 +3310,7 @@ void TerminalDisplay::dropMenuPasteActionTriggered()
     if (sender()) {
         const QAction* action = qobject_cast<const QAction*>(sender());
         if (action) {
-            emit sendStringToEmu(action->data().toString().toLocal8Bit());
+            emit sendStringToEmu(qPrintable(action->data().toString()));
         }
     }
 }
@@ -3320,7 +3320,7 @@ void TerminalDisplay::dropMenuCdActionTriggered()
     if (sender()) {
         const QAction* action = qobject_cast<const QAction*>(sender());
         if (action) {
-            emit sendStringToEmu(action->data().toString().toLocal8Bit());
+            emit sendStringToEmu(qPrintable(action->data().toString()));
         }
     }
 }
