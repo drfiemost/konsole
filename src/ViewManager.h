@@ -84,12 +84,6 @@ public:
     void createView(Session* session);
 
     /**
-     * Applies the view-specific settings associated with specified @p profile
-     * to the terminal display @p view.
-     */
-    void applyProfileToView(TerminalDisplay* view , const Profile::Ptr profile);
-
-    /**
      * Return the main widget for the view manager which
      * holds all of the views managed by this ViewManager instance.
      */
@@ -176,6 +170,10 @@ public:
 
     /** Returns a list of sessions in this ViewManager */
     QList<Session*> sessions() { return _sessionMap.values(); }
+
+    void applyProfileToView(TerminalDisplay *view, const Profile::Ptr &profile);
+
+    static const ColorScheme *colorSchemeForProfile(const Profile::Ptr &profile);
 
 signals:
     /** Emitted when the last view is removed from the view manager */
@@ -343,7 +341,6 @@ private slots:
 
 private:
     void createView(Session* session, ViewContainer* container, int index);
-    static const ColorScheme* colorSchemeForProfile(const Profile::Ptr profile);
 
     void setupActions();
     void focusActiveView();
@@ -359,9 +356,7 @@ private:
     void removeContainer(ViewContainer* container);
 
     // creates a new terminal display
-    // the 'session' is used so that the terminal display's random seed
-    // can be set to something which depends uniquely on that session
-    TerminalDisplay* createTerminalDisplay(Session* session = 0);
+    TerminalDisplay* createTerminalDisplay();
 
     // creates a new controller for a session/display pair which provides the menu
     // actions associated with that view, and exposes basic information

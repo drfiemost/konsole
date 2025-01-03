@@ -71,6 +71,8 @@
 #include "TerminalDisplayAccessible.h"
 #include "SessionManager.h"
 #include "Session.h"
+#include "Profile.h"
+#include "ViewManager.h" // for colorSchemeForProfile. // TODO: Rewrite this.
 
 using namespace Konsole;
 
@@ -315,7 +317,6 @@ TerminalDisplay::TerminalDisplay(QWidget* parent)
     , _usedLines(1)
     , _usedColumns(1)
     , _image(0)
-    , _randomSeed(0)
     , _resizing(false)
     , _showTerminalSizeHint(true)
     , _bidiEnabled(false)
@@ -895,15 +896,6 @@ void TerminalDisplay::drawPrinterFriendlyTextFragment(QPainter& painter,
     drawCharacters(painter, rect, text, &print_style, false);
 
     painter.restore();
-}
-
-void TerminalDisplay::setRandomSeed(uint randomSeed)
-{
-    _randomSeed = randomSeed;
-}
-uint TerminalDisplay::randomSeed() const
-{
-    return _randomSeed;
 }
 
 // scrolls the image by 'lines', down if lines > 0 or up otherwise.
@@ -2445,7 +2437,7 @@ void TerminalDisplay::wheelEvent(QWheelEvent* ev)
     const int delta = ev->delta();
 
     // ctrl+<wheel> for zooming, like in konqueror and firefox
-    if ((modifiers & Qt::ControlModifier) && mouseWheelZoom()) {
+    if ((modifiers & Qt::ControlModifier) && _mouseWheelZoom) {
         if (delta > 0) {
             // wheel-up for increasing font size
             increaseFontSize();
@@ -3398,6 +3390,93 @@ bool AutoScrollHandler::eventFilter(QObject* watched, QEvent* event)
     };
 
     return false;
+}
+
+void TerminalDisplay::applyProfile(const Profile::Ptr &profile)
+{
+    // load color scheme
+    ColorEntry table[TABLE_COLORS];
+    _colorScheme = ViewManager::colorSchemeForProfile(profile);
+    _colorScheme->getColorTable(table, sessionController()->session()->sessionId());
+    setColorTable(table);
+    setOpacity(_colorScheme->opacity());
+    setWallpaper(_colorScheme->wallpaper());
+
+    // load font
+    _antialiasText = profile->antiAliasFonts();
+    _boldIntense = profile->boldIntense();
+    setVTFont(profile->font());
+
+    // set scroll-bar position
+    int scrollBarPosition = profile->property<int>(Profile::ScrollBarPosition);
+
+    if (scrollBarPosition == Enum::ScrollBarLeft)
+        setScrollBarPosition(Enum::ScrollBarLeft);
+    else if (scrollBarPosition == Enum::ScrollBarRight)
+        setScrollBarPosition(Enum::ScrollBarRight);
+    else if (scrollBarPosition == Enum::ScrollBarHidden)
+        setScrollBarPosition(Enum::ScrollBarHidden);
+
+    bool scrollFullPage = profile->property<bool>(Profile::ScrollFullPage);
+    setScrollFullPage(scrollFullPage);
+
+    // show hint about terminal size after resizing
+    _showTerminalSizeHint = profile->showTerminalSizeHint();
+
+    // terminal features
+    setBlinkingCursorEnabled(profile->blinkingCursorEnabled());
+    setBlinkingTextEnabled(profile->blinkingTextEnabled());
+
+    int tripleClickMode = profile->property<int>(Profile::TripleClickMode);
+    _tripleClickMode = Enum::TripleClickModeEnum(tripleClickMode);
+
+    setAutoCopySelectedText(profile->autoCopySelectedText());
+    setUnderlineLinks(profile->underlineLinksEnabled());
+    _ctrlRequiredForDrag = profile->property<bool>(Profile::CtrlRequiredForDrag);
+    _bidiEnabled = profile->bidiRenderingEnabled();
+    setLineSpacing(profile->lineSpacing());
+    _trimTrailingSpaces = profile->property<bool>(Profile::TrimTrailingSpacesInSelectedText);
+
+    _openLinksByDirectClick = profile->property<bool>(Profile::OpenLinksByDirectClickEnabled);
+
+    int middleClickPasteMode = profile->property<int>(Profile::MiddleClickPasteMode);
+    if (middleClickPasteMode == Enum::PasteFromX11Selection)
+        setMiddleClickPasteMode(Enum::PasteFromX11Selection);
+    else if (middleClickPasteMode == Enum::PasteFromClipboard)
+        setMiddleClickPasteMode(Enum::PasteFromClipboard);
+
+    // margin/center - these are hard-fixed ATM
+    setMargin(1);
+    setCenterContents(false);
+
+    // cursor shape
+    int cursorShape = profile->property<int>(Profile::CursorShape);
+
+    if (cursorShape == Enum::BlockCursor)
+        setKeyboardCursorShape(Enum::BlockCursor);
+    else if (cursorShape == Enum::IBeamCursor)
+        setKeyboardCursorShape(Enum::IBeamCursor);
+    else if (cursorShape == Enum::UnderlineCursor)
+        setKeyboardCursorShape(Enum::UnderlineCursor);
+
+    // cursor color
+    if (profile->useCustomCursorColor()) {
+        const QColor& cursorColor = profile->customCursorColor();
+        setKeyboardCursorColor(cursorColor);
+    } else {
+        // an invalid QColor is used to inform the view widget to
+        // draw the cursor using the default color( matching the text)
+        setKeyboardCursorColor(QColor());
+    }
+
+    // word characters
+    setWordCharacters(profile->wordCharacters());
+
+    // bell mode
+    setBellMode(profile->property<int>(Profile::BellMode));
+
+    // mouse wheel zoom
+    _mouseWheelZoom = profile->mouseWheelZoomEnabled() ;
 }
 
 #include "TerminalDisplay.moc"

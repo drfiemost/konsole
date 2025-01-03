@@ -32,6 +32,7 @@
 #include "ScreenWindow.h"
 #include "ColorScheme.h"
 #include "Enumeration.h"
+#include "Profile.h"
 
 class QDrag;
 class QDragEnterEvent;
@@ -51,6 +52,7 @@ namespace Konsole
 class FilterChain;
 class TerminalImageFilterChain;
 class SessionController;
+
 /**
  * A widget which displays output from a terminal emulation and sends input keypresses and mouse activity
  * to the terminal.
@@ -69,20 +71,12 @@ public:
     explicit TerminalDisplay(QWidget* parent = 0);
     virtual ~TerminalDisplay();
 
+    void applyProfile(const Profile::Ptr& profile);
+
     /** Returns the terminal color palette used by the display. */
     const ColorEntry* colorTable() const;
     /** Sets the terminal color palette used by the display. */
     void setColorTable(const ColorEntry table[]);
-    /**
-     * Sets the seed used to generate random colors for the display
-     * (in color schemes that support them).
-     */
-    void setRandomSeed(uint seed);
-    /**
-     * Returns the seed used to generate random colors for the display
-     * (in color schemes that support them).
-     */
-    uint randomSeed() const;
 
     /** Sets the opacity of the terminal display. */
     void setOpacity(qreal opacity);
@@ -95,9 +89,6 @@ public:
      * is shown on the left or right side of the display.
      */
     void setScrollBarPosition(Enum::ScrollBarPositionEnum position);
-    Enum::ScrollBarPositionEnum scrollBarPosition() const {
-        return _scrollbarLocation;
-    }
 
     /**
      * Sets the current position and range of the display's scroll bar.
@@ -147,29 +138,9 @@ public:
 
     /** Specifies whether or not the cursor can blink. */
     void setBlinkingCursorEnabled(bool blink);
-    /** Returns true if the cursor is allowed to blink or false otherwise. */
-    bool blinkingCursorEnabled() const {
-        return _allowBlinkingCursor;
-    }
 
     /** Specifies whether or not text can blink. */
     void setBlinkingTextEnabled(bool blink);
-
-    void setControlDrag(bool enable) {
-        _ctrlRequiredForDrag = enable;
-    }
-    bool ctrlRequiredForDrag() const {
-        return _ctrlRequiredForDrag;
-    }
-
-    /** Sets how the text is selected when the user triple clicks within the display. */
-    void setTripleClickMode(Enum::TripleClickModeEnum mode) {
-        _tripleClickMode = mode;
-    }
-    /** See setTripleClickSelectionMode() */
-    Enum::TripleClickModeEnum tripleClickMode() const {
-        return _tripleClickMode;
-    }
 
     /**
      * Specifies whether links and email addresses should be underlined when
@@ -184,35 +155,6 @@ public:
      */
     bool getUnderlineLinks() const {
         return _underlineLinks;
-    }
-
-    /**
-     * Specifies whether links and email addresses should be opened when
-     * clicked with the mouse. Defaults to false.
-     */
-    void setOpenLinksByDirectClick(bool value) {
-        _openLinksByDirectClick = value;
-    }
-    /**
-     * Returns true if links and email addresses should be opened when
-     * clicked with the mouse.
-     */
-    bool getOpenLinksByDirectClick() const {
-        return _openLinksByDirectClick;
-    }
-
-    /**
-     * Sets whether trailing spaces should be trimmed in selected text.
-     */
-    void setTrimTrailingSpaces(bool enabled) {
-        _trimTrailingSpaces = enabled;
-    }
-
-    /**
-     * Returns true if trailing spaces should be trimmed in selected text.
-     */
-    bool trimTrailingSpaces() const {
-        return _trimTrailingSpaces;
     }
 
     void setLineSpacing(uint);
@@ -310,15 +252,6 @@ public:
      * of a word ( in addition to letters and numbers ).
      */
     void setWordCharacters(const QString& wc);
-    /**
-     * Returns the characters which are considered part of a word for the
-     * purpose of selecting words in the display with the mouse.
-     *
-     * @see setWordCharacters()
-     */
-    QString wordCharacters() const {
-        return _wordCharacters;
-    }
 
     /**
      * Sets the type of effect used to alert the user when a 'bell' occurs in the
@@ -338,22 +271,6 @@ public:
 
     /** Play a visual bell for prompt or warning. */
     void visualBell();
-
-    /**
-     * Specified whether zoom terminal on Ctrl+mousewheel  is enabled or not.
-     * Defaults to enabled.
-     */
-    void setMouseWheelZoom(bool value) {
-        _mouseWheelZoom = value;
-    };
-    /**
-     * Returns the whether zoom terminal on Ctrl+mousewheel is enabled.
-     *
-     * See setMouseWheelZoom()
-     */
-    bool mouseWheelZoom() {
-        return _mouseWheelZoom;
-    };
 
     /**
      * Reimplemented.  Has no effect.  Use setVTFont() to change the font
@@ -377,65 +294,6 @@ public:
 
     /** Decreases the font size */
     void decreaseFontSize();
-
-    /**
-     * Specified whether anti-aliasing of text in the terminal display
-     * is enabled or not.  Defaults to enabled.
-     */
-    void setAntialias(bool value) {
-        _antialiasText = value;
-    }
-    /**
-     * Returns true if anti-aliasing of text in the terminal is enabled.
-     */
-    bool antialias() const {
-        return _antialiasText;
-    }
-
-    /**
-     * Specifies whether characters with intense colors should be rendered
-     * as bold. Defaults to true.
-     */
-    void setBoldIntense(bool value) {
-        _boldIntense = value;
-    }
-    /**
-     * Returns true if characters with intense colors are rendered in bold.
-     */
-    bool getBoldIntense() const {
-        return _boldIntense;
-    }
-
-    /**
-     * Sets whether or not the current height and width of the
-     * terminal in lines and columns is displayed whilst the widget
-     * is being resized.
-     */
-    void setShowTerminalSizeHint(bool on) {
-        _showTerminalSizeHint = on;
-    }
-    /**
-     * Returns whether or not the current height and width of
-     * the terminal in lines and columns is displayed whilst the widget
-     * is being resized.
-     */
-    bool showTerminalSizeHint() const {
-        return _showTerminalSizeHint;
-    }
-
-    /**
-     * Sets the status of the BiDi rendering inside the terminal display.
-     * Defaults to disabled.
-     */
-    void setBidiEnabled(bool set) {
-        _bidiEnabled = set;
-    }
-    /**
-     * Returns the status of the BiDi rendering in this widget.
-     */
-    bool isBidiEnabled() const {
-        return _bidiEnabled;
-    }
 
     /**
      * Sets the terminal screen section which is displayed in this widget.
@@ -572,6 +430,16 @@ public slots:
      * Sets whether the contents are centered between the margins.
      */
     void setCenterContents(bool enable);
+
+    ColorScheme const *colorScheme() const
+    {
+        return _colorScheme;
+    }
+
+    Enum::ScrollBarPositionEnum scrollBarPosition() const
+    {
+        return _scrollbarLocation;
+    }
 
     void updateFilters();
 
@@ -814,7 +682,6 @@ private:
     QVector<LineProperty> _lineProperties;
 
     ColorEntry _colorTable[TABLE_COLORS];
-    uint _randomSeed;
 
     bool _resizing;
     bool _showTerminalSizeHint;
@@ -872,6 +739,7 @@ private:
 
     QRgb _blendColor;
 
+    ColorScheme const* _colorScheme;
     ColorSchemeWallpaper::Ptr _wallpaper;
 
     // list of filters currently applied to the display.  used for links and

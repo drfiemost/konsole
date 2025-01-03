@@ -23,6 +23,7 @@
 #include "ColorScheme.h"
 
 // Qt
+#include <QApplication>
 #include <QtGui/QPainter>
 
 // KDE
@@ -193,13 +194,13 @@ void ColorScheme::setColorTableEntry(int index , const ColorEntry& entry)
 
     _table[index] = entry;
 }
-ColorEntry ColorScheme::colorEntry(int index , uint randomSeed) const
+ColorEntry ColorScheme::colorEntry(int index , uint sessionId) const
 {
     Q_ASSERT(index >= 0 && index < TABLE_COLORS);
 
     ColorEntry entry = colorTable()[index];
 
-    if (randomSeed == 0 || _randomTable == 0 || _randomTable[index].isNull()) {
+    if (sessionId == 0 || _randomTable == 0 || _randomTable[index].isNull()) {
         return entry;
     }
 
@@ -209,7 +210,7 @@ ColorEntry ColorScheme::colorEntry(int index , uint randomSeed) const
     // 32-bit Mersenne Twister
     // Can't use default_random_engine, because in GCC this maps to
     // minstd_rand0 which always gives us 0 on the first number.
-    std::mt19937 randomEngine(randomSeed);
+    std::mt19937 randomEngine(sessionId | qApp->applicationPid() << 10);
 
     int hueDifference = 0;
     if (range.hue) {
@@ -239,10 +240,10 @@ ColorEntry ColorScheme::colorEntry(int index , uint randomSeed) const
 
     return entry;
 }
-void ColorScheme::getColorTable(ColorEntry* table , uint randomSeed) const
+void ColorScheme::getColorTable(ColorEntry* table , uint sessionId) const
 {
     for (int i = 0 ; i < TABLE_COLORS ; i++)
-        table[i] = colorEntry(i, randomSeed);
+        table[i] = colorEntry(i, sessionId);
 }
 bool ColorScheme::randomizedBackgroundColor() const
 {

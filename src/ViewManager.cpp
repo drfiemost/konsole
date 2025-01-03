@@ -434,7 +434,7 @@ void ViewManager::splitView(Qt::Orientation orientation)
     // container and create a new view for that session in a new container
     foreach(QWidget* view,  _viewSplitter->activeContainer()->views()) {
         Session* session = _sessionMap[qobject_cast<TerminalDisplay*>(view)];
-        TerminalDisplay* display = createTerminalDisplay(session);
+        TerminalDisplay* display = createTerminalDisplay();
         const Profile::Ptr profile = SessionManager::instance()->sessionProfile(session);
         applyProfileToView(display, profile);
         ViewProperties* properties = createController(session, display);
@@ -552,7 +552,7 @@ void ViewManager::createView(Session* session, ViewContainer* container, int ind
     // Use Qt::UniqueConnection to avoid duplicate connection
     connect(session, SIGNAL(finished()), this, SLOT(sessionFinished()), Qt::UniqueConnection);
 
-    TerminalDisplay* display = createTerminalDisplay(session);
+    TerminalDisplay* display = createTerminalDisplay();
     const Profile::Ptr profile = SessionManager::instance()->sessionProfile(session);
     applyProfileToView(display, profile);
 
@@ -781,15 +781,14 @@ void ViewManager::viewDestroyed(QWidget* view)
 //        emit unplugController(_pluggedController);
 }
 
-TerminalDisplay* ViewManager::createTerminalDisplay(Session* session)
+TerminalDisplay* ViewManager::createTerminalDisplay()
 {
     TerminalDisplay* display = new TerminalDisplay(0);
-    display->setRandomSeed(session->sessionId() * 31);
 
     return display;
 }
 
-const ColorScheme* ViewManager::colorSchemeForProfile(const Profile::Ptr profile)
+const ColorScheme* ViewManager::colorSchemeForProfile(const Profile::Ptr &profile)
 {
     const ColorScheme* colorScheme = ColorSchemeManager::instance()->
                                      findColorScheme(profile->colorScheme());
@@ -800,95 +799,12 @@ const ColorScheme* ViewManager::colorSchemeForProfile(const Profile::Ptr profile
     return colorScheme;
 }
 
-void ViewManager::applyProfileToView(TerminalDisplay* view , const Profile::Ptr profile)
+void ViewManager::applyProfileToView(TerminalDisplay* view , const Profile::Ptr &profile)
 {
     Q_ASSERT(profile);
 
+    view->applyProfile(profile);
     emit updateWindowIcon();
-
-    // load color scheme
-    ColorEntry table[TABLE_COLORS];
-    const ColorScheme* colorScheme = colorSchemeForProfile(profile);
-    colorScheme->getColorTable(table , view->randomSeed());
-    view->setColorTable(table);
-    view->setOpacity(colorScheme->opacity());
-    view->setWallpaper(colorScheme->wallpaper());
-
-    // load font
-    view->setAntialias(profile->antiAliasFonts());
-    view->setBoldIntense(profile->boldIntense());
-    view->setVTFont(profile->font());
-
-    // set scroll-bar position
-    int scrollBarPosition = profile->property<int>(Profile::ScrollBarPosition);
-
-    if (scrollBarPosition == Enum::ScrollBarLeft)
-        view->setScrollBarPosition(Enum::ScrollBarLeft);
-    else if (scrollBarPosition == Enum::ScrollBarRight)
-        view->setScrollBarPosition(Enum::ScrollBarRight);
-    else if (scrollBarPosition == Enum::ScrollBarHidden)
-        view->setScrollBarPosition(Enum::ScrollBarHidden);
-
-    bool scrollFullPage = profile->property<bool>(Profile::ScrollFullPage);
-    view->setScrollFullPage(scrollFullPage);
-
-    // show hint about terminal size after resizing
-    view->setShowTerminalSizeHint(profile->showTerminalSizeHint());
-
-    // terminal features
-    view->setBlinkingCursorEnabled(profile->blinkingCursorEnabled());
-    view->setBlinkingTextEnabled(profile->blinkingTextEnabled());
-
-    int tripleClickMode = profile->property<int>(Profile::TripleClickMode);
-    view->setTripleClickMode(Enum::TripleClickModeEnum(tripleClickMode));
-
-    view->setAutoCopySelectedText(profile->autoCopySelectedText());
-    view->setUnderlineLinks(profile->underlineLinksEnabled());
-    view->setControlDrag(profile->property<bool>(Profile::CtrlRequiredForDrag));
-    view->setBidiEnabled(profile->bidiRenderingEnabled());
-    view->setLineSpacing(profile->lineSpacing());
-    view->setTrimTrailingSpaces(profile->property<bool>(Profile::TrimTrailingSpacesInSelectedText));
-
-    view->setOpenLinksByDirectClick(profile->property<bool>(Profile::OpenLinksByDirectClickEnabled));
-
-    int middleClickPasteMode = profile->property<int>(Profile::MiddleClickPasteMode);
-    if (middleClickPasteMode == Enum::PasteFromX11Selection)
-        view->setMiddleClickPasteMode(Enum::PasteFromX11Selection);
-    else if (middleClickPasteMode == Enum::PasteFromClipboard)
-        view->setMiddleClickPasteMode(Enum::PasteFromClipboard);
-
-    // margin/center - these are hard-fixed ATM
-    view->setMargin(1);
-    view->setCenterContents(false);
-
-    // cursor shape
-    int cursorShape = profile->property<int>(Profile::CursorShape);
-
-    if (cursorShape == Enum::BlockCursor)
-        view->setKeyboardCursorShape(Enum::BlockCursor);
-    else if (cursorShape == Enum::IBeamCursor)
-        view->setKeyboardCursorShape(Enum::IBeamCursor);
-    else if (cursorShape == Enum::UnderlineCursor)
-        view->setKeyboardCursorShape(Enum::UnderlineCursor);
-
-    // cursor color
-    if (profile->useCustomCursorColor()) {
-        const QColor& cursorColor = profile->customCursorColor();
-        view->setKeyboardCursorColor(cursorColor);
-    } else {
-        // an invalid QColor is used to inform the view widget to
-        // draw the cursor using the default color( matching the text)
-        view->setKeyboardCursorColor(QColor());
-    }
-
-    // word characters
-    view->setWordCharacters(profile->wordCharacters());
-
-    // bell mode
-    view->setBellMode(profile->property<int>(Profile::BellMode));
-
-    // mouse wheel zoom
-    view->setMouseWheelZoom(profile->mouseWheelZoomEnabled());
 }
 
 void ViewManager::updateViewsForSession(Session* session)
