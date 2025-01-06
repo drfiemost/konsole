@@ -553,6 +553,8 @@ void ViewManager::createView(Session* session, ViewContainer* container, int ind
     connect(session, SIGNAL(finished()), this, SLOT(sessionFinished()), Qt::UniqueConnection);
 
     TerminalDisplay* display = createTerminalDisplay();
+    ViewProperties* properties = createController(session, display);
+
     const Profile::Ptr profile = SessionManager::instance()->sessionProfile(session);
     applyProfileToView(display, profile);
 
@@ -571,7 +573,6 @@ void ViewManager::createView(Session* session, ViewContainer* container, int ind
     }
 
     display->setSize(preferredSize.width(), preferredSize.height() + heightAdjustment);
-    ViewProperties* properties = createController(session, display);
 
     _sessionMap[display] = session;
     container->addView(display, properties, index);
