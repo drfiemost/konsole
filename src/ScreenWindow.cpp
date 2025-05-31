@@ -211,7 +211,7 @@ QPoint ScreenWindow::cursorPosition() const
 
 int ScreenWindow::currentLine() const
 {
-    return qBound(0, _currentLine, lineCount() - windowLines());
+    return std::clamp(_currentLine, 0, lineCount() - windowLines());
 }
 
 int ScreenWindow::currentResultLine() const
@@ -249,7 +249,7 @@ bool ScreenWindow::atEndOfOutput() const
 void ScreenWindow::scrollTo(int line)
 {
     int maxCurrentLineNumber = lineCount() - windowLines();
-    line = qBound(0, line, maxCurrentLineNumber);
+    line = std::clamp(line, 0, maxCurrentLineNumber);
 
     const int delta = line - _currentLine;
     _currentLine = line;
