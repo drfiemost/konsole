@@ -506,13 +506,13 @@ void EditProfileDialog::updateColorSchemeList(bool selectCurrentScheme)
 
     model->clear();
 
-    QStandardItem* selectedItem = 0;
+    QStandardItem* selectedItem = nullptr;
 
     QList<const ColorScheme*> schemeList = ColorSchemeManager::instance()->allColorSchemes();
 
-    foreach(const ColorScheme* scheme, schemeList) {
+    for(const ColorScheme* scheme: schemeList) {
         QStandardItem* item = new QStandardItem(scheme->description());
-        item->setData(QVariant::fromValue(scheme) ,  Qt::UserRole + 1);
+        item->setData(QVariant::fromValue(scheme), Qt::UserRole + 1);
         item->setFlags(item->flags());
 
         if (currentScheme == scheme)
@@ -551,7 +551,7 @@ void EditProfileDialog::updateKeyBindingsList(bool selectCurrentTranslator)
     QStandardItem* selectedItem = 0;
 
     QStringList translatorNames = keyManager->allTranslators();
-    foreach(const QString& translatorName, translatorNames) {
+    for(const QString& translatorName: translatorNames) {
         const KeyboardTranslator* translator = keyManager->findTranslator(translatorName);
 
         QStandardItem* item = new QStandardItem(translator->description());
@@ -765,7 +765,7 @@ void EditProfileDialog::enableIfNonEmptySelection(QWidget* widget, QItemSelectio
 void EditProfileDialog::updateTransparencyWarning()
 {
     // zero or one indexes can be selected
-    foreach(const QModelIndex & index , _ui->colorSchemeList->selectionModel()->selectedIndexes()) {
+    for(const QModelIndex & index: _ui->colorSchemeList->selectionModel()->selectedIndexes()) {
         bool needTransparency = index.data(Qt::UserRole + 1).value<const ColorScheme*>()->opacity() < 1.0;
 
         if (!needTransparency) {
