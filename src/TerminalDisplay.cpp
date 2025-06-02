@@ -120,7 +120,7 @@ void TerminalDisplay::setScreenWindow(ScreenWindow* window)
         connect(_screenWindow , SIGNAL(outputChanged()) , this , SLOT(updateImage()));
         connect(_screenWindow , SIGNAL(currentResultLineChanged()) , this , SLOT(updateImage()));
         connect(_screenWindow.data(), SIGNAL(outputChanged()) , this , SLOT(updateFilters()));
-        connect(_screenWindow.data(),SIGNAL(scrolled()) , this , SLOT(updateFilters()));
+        connect(_screenWindow.data(), SIGNAL(scrolled(int)) , this , SLOT(updateFilters()));
         _screenWindow->setWindowLines(_lines);
     }
 }
