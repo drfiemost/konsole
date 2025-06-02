@@ -432,12 +432,12 @@ void ViewManager::splitView(Qt::Orientation orientation)
 
     // iterate over each session which has a view in the current active
     // container and create a new view for that session in a new container
-    foreach(QWidget* view,  _viewSplitter->activeContainer()->views()) {
+    for(QWidget* view: _viewSplitter->activeContainer()->views()) {
         Session* session = _sessionMap[qobject_cast<TerminalDisplay*>(view)];
         TerminalDisplay* display = createTerminalDisplay();
+        ViewProperties* properties = createController(session, display);
         const Profile::Ptr profile = SessionManager::instance()->sessionProfile(session);
         applyProfileToView(display, profile);
-        ViewProperties* properties = createController(session, display);
 
         _sessionMap[display] = session;
 
@@ -461,7 +461,7 @@ void ViewManager::splitView(Qt::Orientation orientation)
 void ViewManager::removeContainer(ViewContainer* container)
 {
     // remove session map entries for views in this container
-    foreach(QWidget* view , container->views()) {
+    for(QWidget* view: container->views()) {
         TerminalDisplay* display = qobject_cast<TerminalDisplay*>(view);
         Q_ASSERT(display);
         _sessionMap.remove(display);
@@ -497,7 +497,7 @@ void ViewManager::closeOtherContainers()
 {
     ViewContainer* active = _viewSplitter->activeContainer();
 
-    foreach(ViewContainer* container, _viewSplitter->containers()) {
+    for(ViewContainer* container: _viewSplitter->containers()) {
         if (container != active)
             removeContainer(container);
     }
@@ -612,7 +612,7 @@ void ViewManager::createView(Session* session)
     // iterate over the view containers owned by this view manager
     // and create a new terminal display for the session in each of them, along with
     // a controller for the session/display pair
-    foreach(ViewContainer* container,  _viewSplitter->containers()) {
+    for(ViewContainer* container: _viewSplitter->containers()) {
         createView(session, container, index);
     }
 }
@@ -784,9 +784,7 @@ void ViewManager::viewDestroyed(QWidget* view)
 
 TerminalDisplay* ViewManager::createTerminalDisplay()
 {
-    TerminalDisplay* display = new TerminalDisplay(0);
-
-    return display;
+    return new TerminalDisplay(0);
 }
 
 const ColorScheme* ViewManager::colorSchemeForProfile(const Profile::Ptr &profile)
@@ -812,7 +810,7 @@ void ViewManager::updateViewsForSession(Session* session)
 {
     const Profile::Ptr profile = SessionManager::instance()->sessionProfile(session);
 
-    foreach(TerminalDisplay* view, _sessionMap.keys(session)) {
+    for(TerminalDisplay* view: _sessionMap.keys(session)) {
         applyProfileToView(view, profile);
     }
 }
@@ -841,7 +839,7 @@ QList<ViewProperties*> ViewManager::viewProperties() const
 
     Q_ASSERT(container);
 
-    foreach(QWidget* view, container->views()) {
+    for(QWidget* view: container->views()) {
         ViewProperties* properties = container->viewProperties(view);
         Q_ASSERT(properties);
         list << properties;
@@ -875,7 +873,7 @@ void ViewManager::saveSessions(KConfigGroup& group)
 
     // second: all other sessions, in random order
     // we don't want to have sessions restored that are not connected
-    foreach(Session * session, _sessionMap) {
+    for(Session * session: _sessionMap) {
         if (!unique.contains(session)) {
             ids << SessionManager::instance()->getRestoreId(session);
             unique.insert(session, 1);
@@ -892,7 +890,7 @@ void ViewManager::restoreSessions(const KConfigGroup& group)
     TerminalDisplay* display = 0;
 
     int tab = 1;
-    foreach(int id, ids) {
+    for(int id: ids) {
         Session* session = SessionManager::instance()->idToSession(id);
         createView(session);
         if (!session->isRunning())
@@ -1016,7 +1014,7 @@ void ViewManager::setNavigationVisibility(int visibility)
     _navigationVisibility =
         static_cast<ViewContainer::NavigationVisibility>(visibility);
 
-    foreach(ViewContainer* container, _viewSplitter->containers()) {
+    for(ViewContainer* container: _viewSplitter->containers()) {
         container->setNavigationVisibility(_navigationVisibility);
     }
 }
@@ -1036,7 +1034,7 @@ void ViewManager::setNavigationStyleSheet(const QString& styleSheet)
 {
     _navigationStyleSheet = styleSheet;
 
-    foreach(ViewContainer* container, _viewSplitter->containers()) {
+    for(ViewContainer* container: _viewSplitter->containers()) {
         container->setStyleSheet(_navigationStyleSheet);
     }
 }
@@ -1045,7 +1043,7 @@ void ViewManager::setShowQuickButtons(bool show)
 {
     _showQuickButtons = show;
 
-    foreach(ViewContainer* container, _viewSplitter->containers()) {
+    for(ViewContainer* container: _viewSplitter->containers()) {
         if (_showQuickButtons) {
             container->setFeatures(container->features()
                                    | ViewContainer::QuickNewView

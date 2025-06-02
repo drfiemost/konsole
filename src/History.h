@@ -287,20 +287,20 @@ protected:
 
 class KONSOLEPRIVATE_EXPORT CompactHistoryScroll : public HistoryScroll
 {
-    typedef QList<CompactHistoryLine*> HistoryArray;
+    using HistoryArray = QList<CompactHistoryLine*>;
 
 public:
     explicit CompactHistoryScroll(unsigned int maxNbLines = 1000);
     virtual ~CompactHistoryScroll();
 
-    virtual int  getLines();
-    virtual int  getLineLen(int lineno);
-    virtual void getCells(int lineno, int colno, int count, Character res[]);
-    virtual bool isWrappedLine(int lineno);
+    int  getLines() override;
+    int  getLineLen(int lineno) override;
+    void getCells(int lineno, int colno, int count, Character res[]) override;
+    bool isWrappedLine(int lineno) override;
 
-    virtual void addCells(const Character a[], int count);
-    virtual void addCellsVector(const TextLine& cells);
-    virtual void addLine(bool previousWrapped = false);
+    void addCells(const Character a[], int count) override;
+    void addCellsVector(const TextLine& cells) override;
+    void addLine(bool previousWrapped = false) override;
 
     void setMaxNbLines(unsigned int nbLines);
 
@@ -350,10 +350,10 @@ class KONSOLEPRIVATE_EXPORT HistoryTypeNone : public HistoryType
 public:
     HistoryTypeNone();
 
-    virtual bool isEnabled() const;
-    virtual int maximumLineCount() const;
+    bool isEnabled() const override;
+    int maximumLineCount() const override;
 
-    virtual HistoryScroll* scroll(HistoryScroll *) const;
+    HistoryScroll* scroll(HistoryScroll *) const override;
 };
 
 class KONSOLEPRIVATE_EXPORT HistoryTypeFile : public HistoryType
@@ -361,10 +361,10 @@ class KONSOLEPRIVATE_EXPORT HistoryTypeFile : public HistoryType
 public:
     explicit HistoryTypeFile(const QString& fileName = QString());
 
-    virtual bool isEnabled() const;
-    virtual int maximumLineCount() const;
+    bool isEnabled() const override;
+    int maximumLineCount() const override;
 
-    virtual HistoryScroll* scroll(HistoryScroll *) const;
+    HistoryScroll* scroll(HistoryScroll *) const override;
 
 protected:
     QString _fileName;
@@ -375,10 +375,10 @@ class KONSOLEPRIVATE_EXPORT CompactHistoryType : public HistoryType
 public:
     explicit CompactHistoryType(unsigned int size);
 
-    virtual bool isEnabled() const;
-    virtual int maximumLineCount() const;
+    bool isEnabled() const override;
+    int maximumLineCount() const override;
 
-    virtual HistoryScroll* scroll(HistoryScroll *) const;
+    HistoryScroll* scroll(HistoryScroll *) const override;
 
 protected:
     unsigned int _maxLines;
