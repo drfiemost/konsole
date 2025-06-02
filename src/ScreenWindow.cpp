@@ -211,7 +211,7 @@ QPoint ScreenWindow::cursorPosition() const
 
 int ScreenWindow::currentLine() const
 {
-    return std::clamp(_currentLine, 0, lineCount() - windowLines());
+    return std::clamp(_currentLine, 0, std::max(0, lineCount() - windowLines()));
 }
 
 int ScreenWindow::currentResultLine() const
