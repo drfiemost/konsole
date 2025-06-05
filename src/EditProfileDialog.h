@@ -122,7 +122,7 @@ private slots:
 
     // appearance page
     void setFontSize(double pointSize);
-    void setFontInputValue(const QFont&);
+    void setFontInputValue(const QFont& font);
     void setAntialiasText(bool enable);
     void setBoldIntense(bool enable);
     void showFontDialog();
@@ -262,13 +262,13 @@ class ColorSchemeViewDelegate : public QAbstractItemDelegate
     Q_OBJECT
 
 public:
-    explicit ColorSchemeViewDelegate(QObject* parent = 0);
+    explicit ColorSchemeViewDelegate(QObject* parent = nullptr);
 
     // reimplemented
-    virtual void paint(QPainter* painter, const QStyleOptionViewItem& option,
-                       const QModelIndex& index) const;
-    virtual QSize sizeHint(const QStyleOptionViewItem& option,
-                           const QModelIndex& index) const;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option,
+                       const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem& option,
+                           const QModelIndex& index) const override;
 };
 }
 

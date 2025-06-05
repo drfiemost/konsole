@@ -67,7 +67,7 @@ using namespace Konsole;
 EditProfileDialog::EditProfileDialog(QWidget* aParent)
     : KDialog(aParent)
     , _delayedPreviewTimer(new QTimer(this))
-    , _colorDialog(0)
+    , _colorDialog(nullptr)
 {
     setCaption(i18n("Edit Profile"));
     setButtons(KDialog::Ok | KDialog::Cancel | KDialog::Apply);
@@ -548,7 +548,7 @@ void EditProfileDialog::updateKeyBindingsList(bool selectCurrentTranslator)
 
     model->clear();
 
-    QStandardItem* selectedItem = 0;
+    QStandardItem* selectedItem = nullptr;
 
     QStringList translatorNames = keyManager->allTranslators();
     for(const QString& translatorName: translatorNames) {
@@ -1248,13 +1248,13 @@ void EditProfileDialog::setFontSize(double pointSize)
     updateTempProfileProperty(Profile::Font, newFont);
 }
 
-void EditProfileDialog::setFontInputValue(const QFont& aFont)
+void EditProfileDialog::setFontInputValue(const QFont& font)
 {
-    _ui->fontSizeInput->setValue(aFont.pointSizeF());
+    _ui->fontSizeInput->setValue(font.pointSizeF());
 }
 
-ColorSchemeViewDelegate::ColorSchemeViewDelegate(QObject* aParent)
-    : QAbstractItemDelegate(aParent)
+ColorSchemeViewDelegate::ColorSchemeViewDelegate(QObject* parent)
+    : QAbstractItemDelegate(parent)
 {
 }
 
