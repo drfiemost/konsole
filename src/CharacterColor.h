@@ -112,12 +112,12 @@ inline bool operator != (const ColorEntry& a, const ColorEntry& b)
 
 // Colors
 
-#define BASE_COLORS   (2+8)
-#define INTENSITIES   2
-#define TABLE_COLORS  (INTENSITIES*BASE_COLORS)
+constexpr int BASE_COLORS  = (2+8);
+constexpr int INTENSITIES  = 2;
+constexpr int TABLE_COLORS = (INTENSITIES*BASE_COLORS);
 
-#define DEFAULT_FORE_COLOR 0
-#define DEFAULT_BACK_COLOR 1
+constexpr int DEFAULT_FORE_COLOR = 0;
+constexpr int DEFAULT_BACK_COLOR = 1;
 
 /* CharacterColor is a union of the various color spaces.
 
@@ -135,11 +135,11 @@ inline bool operator != (const ColorEntry& a, const ColorEntry& b)
    default foreground and default background color.
 */
 
-#define COLOR_SPACE_UNDEFINED   0
-#define COLOR_SPACE_DEFAULT     1
-#define COLOR_SPACE_SYSTEM      2
-#define COLOR_SPACE_256         3
-#define COLOR_SPACE_RGB         4
+constexpr quint8 COLOR_SPACE_UNDEFINED  = 0;
+constexpr quint8 COLOR_SPACE_DEFAULT    = 1;
+constexpr quint8 COLOR_SPACE_SYSTEM     = 2;
+constexpr quint8 COLOR_SPACE_256        = 3;
+constexpr quint8 COLOR_SPACE_RGB        = 4;
 
 /**
  * Describes the color of a single character in the terminal.
