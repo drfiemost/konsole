@@ -74,6 +74,8 @@
 #include "Profile.h"
 #include "ViewManager.h" // for colorSchemeForProfile. // TODO: Rewrite this.
 
+#define MAX_LINE_WIDTH 1024
+
 using namespace Konsole;
 
 #ifndef loc
@@ -406,7 +408,7 @@ TerminalDisplay::TerminalDisplay(QWidget* parent)
     // that TerminalDisplay will handle repainting its entire area.
     setAttribute(Qt::WA_OpaquePaintEvent);
 
-    _gridLayout = new QGridLayout(this);
+    _gridLayout = new QGridLayout;
     _gridLayout->setContentsMargins(0, 0, 0, 0);
 
     setLayout(_gridLayout);
@@ -426,8 +428,6 @@ TerminalDisplay::~TerminalDisplay()
 
     delete[] _image;
 
-    delete _gridLayout;
-    delete _outputSuspendedLabel;
     delete _filterChain;
 }
 
@@ -1788,8 +1788,9 @@ void TerminalDisplay::calcGeometry()
         break;
     }
 
-    // ensure that display is always at least one column wide
-    _columns = std::max(1, _contentRect.width() / _fontWidth);
+    // // ensure that display is always at least one column wide,
+    // and clamp it to MAX_LINE_WIDTH-1 wide to prevent text shaping buffer overflows
+    _columns = std::clamp(_contentRect.width() / _fontWidth, 1, MAX_LINE_WIDTH - 1);
     _usedColumns = std::min(_usedColumns, _columns);
 
     // ensure that display is always at least one line high
