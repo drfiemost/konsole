@@ -831,22 +831,10 @@ void TerminalDisplay::drawCharacters(QPainter& painter,
         // This still allows RTL characters to be rendered in the RTL way.
         painter.setLayoutDirection(Qt::LeftToRight);
 
-        // the drawText(rect,flags,string) overload is used here with null flags
-        // instead of drawText(rect,string) because the (rect,string) overload causes
-        // the application's default layout direction to be used instead of
-        // the widget-specific layout direction, which should always be
-        // Qt::LeftToRight for this widget
-        //
-        // This was discussed in: http://lists.kde.org/?t=120552223600002&r=1&w=2
         if (_bidiEnabled) {
-            painter.drawText(rect, 0, text);
+            painter.drawText(rect.x(), rect.y() + _fontAscent + _lineSpacing, text);
         } else {
-            // See bug 280896 for more info
-#if QT_VERSION >= 0x040800
-            painter.drawText(rect, Qt::AlignBottom, LTR_OVERRIDE_CHAR + text);
-#else
-            painter.drawText(rect, 0, LTR_OVERRIDE_CHAR + text);
-#endif
+            painter.drawText(rect.x(), rect.y() + _fontAscent + _lineSpacing, LTR_OVERRIDE_CHAR + text);
         }
     }
 }
@@ -908,6 +896,11 @@ void TerminalDisplay::drawPrinterFriendlyTextFragment(QPainter& painter,
 // Instead only new lines have to be drawn
 void TerminalDisplay::scrollImage(int lines , const QRect& screenWindowRegion)
 {
+    // return if there is nothing to do
+    if ((lines == 0) || (_image == nullptr)) {
+        return;
+    }
+
     // if the flow control warning is enabled this will interfere with the
     // scrolling optimizations and cause artifacts.  the simple solution here
     // is to just disable the optimization whilst it is visible
@@ -922,9 +915,7 @@ void TerminalDisplay::scrollImage(int lines , const QRect& screenWindowRegion)
     region.setBottom(std::min(region.bottom(), this->_lines - 2));
 
     // return if there is nothing to do
-    if (lines == 0
-            || _image == 0
-            || !region.isValid()
+    if (!region.isValid()
             || (region.top() + abs(lines)) >= region.bottom()
             || this->_lines <= region.height()) return;
 
@@ -1710,7 +1701,8 @@ void TerminalDisplay::updateCursor()
 
 void TerminalDisplay::resizeEvent(QResizeEvent*)
 {
-    updateImageSize();
+    if (contentsRect().isValid())
+        updateImageSize();
 }
 
 void TerminalDisplay::propagateSize()
@@ -2895,14 +2887,11 @@ QVariant TerminalDisplay::inputMethodQuery(Qt::InputMethodQuery query) const
     switch (query) {
     case Qt::ImMicroFocus:
         return imageToWidget(QRect(cursorPos.x(), cursorPos.y(), 1, 1));
-        break;
     case Qt::ImFont:
         return font();
-        break;
     case Qt::ImCursorPosition:
         // return the cursor position within the current line
         return cursorPos.x();
-        break;
     case Qt::ImSurroundingText: {
         // return the text from the current line
         QString lineText;
@@ -2913,10 +2902,8 @@ QVariant TerminalDisplay::inputMethodQuery(Qt::InputMethodQuery query) const
         decoder.end();
         return lineText;
     }
-    break;
     case Qt::ImCurrentSelection:
         return QString();
-        break;
     default:
         break;
     }
