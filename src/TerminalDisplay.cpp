@@ -971,7 +971,7 @@ void TerminalDisplay::scrollImage(int lines , const QRect& screenWindowRegion)
         Q_ASSERT((lines * this->_columns) < _imageSize);
 
         //scroll internal image down
-        memmove(firstCharPos , lastCharPos , bytesToMove);
+        std::memmove(firstCharPos , lastCharPos , bytesToMove);
 
         //set region of display to scroll
         scrollRect.setTop(top);
@@ -981,7 +981,7 @@ void TerminalDisplay::scrollImage(int lines , const QRect& screenWindowRegion)
                  (char*)(_image + (this->_lines * this->_columns)));
 
         //scroll internal image up
-        memmove(lastCharPos , firstCharPos , bytesToMove);
+        std::memmove(lastCharPos , firstCharPos , bytesToMove);
 
         //set region of the display to scroll
         scrollRect.setTop(top + abs(lines) * _fontHeight);
@@ -1115,7 +1115,7 @@ void TerminalDisplay::updateImage()
         // The dirty mask indicates which characters need repainting. We also
         // mark surrounding neighbors dirty, in case the character exceeds
         // its cell boundaries
-        memset(dirtyMask, 0, columnsToUpdate + 2);
+        std::memset(dirtyMask, 0, columnsToUpdate + 2);
 
         for (x = 0 ; x < columnsToUpdate ; ++x) {
             if (newLine[x] != currentLine[x]) {
@@ -1193,7 +1193,7 @@ void TerminalDisplay::updateImage()
 
         // replace the line of characters in the old _image with the
         // current line of the new _image
-        memcpy((void*)currentLine, (const void*)newLine, columnsToUpdate * sizeof(Character));
+        std::memcpy((void*)currentLine, (const void*)newLine, columnsToUpdate * sizeof(Character));
     }
 
     // if the new _image is smaller than the previous _image, then ensure that the area
@@ -1732,7 +1732,7 @@ void TerminalDisplay::updateImageSize()
         int lines = std::min(oldLines, _lines);
         int columns = std::min(oldColumns, _columns);
         for (int line = 0; line < lines; line++) {
-            memcpy((void*)&_image[_columns * line],
+            std::memcpy((void*)&_image[_columns * line],
                    (void*)&oldImage[oldColumns * line],
                    columns * sizeof(Character));
         }
