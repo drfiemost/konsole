@@ -73,7 +73,7 @@ static bool useTransparency()
 MainWindow::MainWindow()
     : KXmlGuiWindow()
     , _bookmarkHandler(0)
-    , _pluggedController(0)
+    , _pluggedController(nullptr)
     , _menuBarInitialVisibility(true)
     , _menuBarInitialVisibilityApplied(false)
 {
@@ -228,7 +228,7 @@ void MainWindow::activeViewChanged(SessionController* controller)
     connect(bookmarkHandler(), SIGNAL(openUrl(KUrl)), controller,
             SLOT(openUrl(KUrl)));
 
-    if (_pluggedController)
+    if (!_pluggedController.isNull())
         disconnectController(_pluggedController);
 
     Q_ASSERT(controller);
@@ -264,7 +264,7 @@ void MainWindow::activeViewTitleChanged(ViewProperties* properties)
 
 void MainWindow::updateWindowCaption()
 {
-    if (!_pluggedController)
+    if (_pluggedController.isNull())
         return;
 
     const QString& title = _pluggedController->title();
@@ -287,7 +287,7 @@ void MainWindow::updateWindowCaption()
 
 void MainWindow::updateWindowIcon()
 {
-    if (_pluggedController)
+    if (!_pluggedController.isNull())
         setWindowIcon(_pluggedController->icon());
 }
 
@@ -420,7 +420,7 @@ void MainWindow::profileListChanged(const QList<QAction*>& sessionActions)
 
 QString MainWindow::activeSessionDir() const
 {
-    if (_pluggedController) {
+    if (!_pluggedController.isNull()) {
         if (Session* session = _pluggedController->session()) {
             // For new tabs to get the correct working directory,
             // force the updating of the currentWorkingDirectory.
@@ -589,7 +589,7 @@ bool MainWindow::queryClose()
     case KMessageBox::Yes:
         return true;
     case KMessageBox::No:
-        if (_pluggedController && _pluggedController->session()) {
+        if (!_pluggedController.isNull() && !_pluggedController->session().isNull()) {
             disconnectController(_pluggedController);
             _pluggedController->closeSession();
         }

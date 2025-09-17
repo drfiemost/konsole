@@ -71,7 +71,7 @@ CopyInputDialog::~CopyInputDialog()
 void CopyInputDialog::setChosenSessions(const QSet<Session*>& sessions)
 {
     QSet<Session*> checked = sessions;
-    if (_masterSession)
+    if (!_masterSession.isNull())
         checked.insert(_masterSession);
 
     _model->setCheckedSessions(checked);
@@ -82,7 +82,7 @@ QSet<Session*> CopyInputDialog::chosenSessions() const
 }
 void CopyInputDialog::setMasterSession(Session* session)
 {
-    if (_masterSession)
+    if (!_masterSession.isNull())
         _model->setCheckable(_masterSession, true);
 
     _model->setCheckable(session, false);

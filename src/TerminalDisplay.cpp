@@ -109,13 +109,13 @@ ScreenWindow* TerminalDisplay::screenWindow() const
 void TerminalDisplay::setScreenWindow(ScreenWindow* window)
 {
     // disconnect existing screen window if any
-    if (_screenWindow) {
+    if (!_screenWindow.isNull()) {
         disconnect(_screenWindow , 0 , this , 0);
     }
 
     _screenWindow = window;
 
-    if (_screenWindow) {
+    if (!_screenWindow.isNull()) {
         connect(_screenWindow , SIGNAL(outputChanged()) , this , SLOT(updateLineProperties()));
         connect(_screenWindow , SIGNAL(outputChanged()) , this , SLOT(updateImage()));
         connect(_screenWindow , SIGNAL(currentResultLineChanged()) , this , SLOT(updateImage()));
@@ -1030,7 +1030,7 @@ QRegion TerminalDisplay::hotSpotRegion() const
 
 void TerminalDisplay::processFilters()
 {
-    if (!_screenWindow) {
+    if (_screenWindow.isNull()) {
         return;
     }
 
@@ -1059,7 +1059,7 @@ void TerminalDisplay::processFilters()
 
 void TerminalDisplay::updateImage()
 {
-    if (!_screenWindow)
+    if (_screenWindow.isNull())
         return;
 
     // optimization - scroll the existing image where possible and
@@ -1298,7 +1298,7 @@ void TerminalDisplay::printContent(QPainter& painter, bool friendly)
 
 QPoint TerminalDisplay::cursorPosition() const
 {
-    if (_screenWindow)
+    if (!_screenWindow.isNull())
         return _screenWindow->cursorPosition();
     else
         return QPoint(0, 0);
@@ -1739,7 +1739,7 @@ void TerminalDisplay::updateImageSize()
         delete[] oldImage;
     }
 
-    if (_screenWindow)
+    if (!_screenWindow.isNull())
         _screenWindow->setWindowLines(_lines);
 
     _resizing = (oldLines != _lines) || (oldColumns != _columns);
@@ -1882,7 +1882,7 @@ void TerminalDisplay::setScrollBarPosition(Enum::ScrollBarPositionEnum position)
 
 void TerminalDisplay::scrollBarPositionChanged(int)
 {
-    if (!_screenWindow)
+    if (_screenWindow.isNull())
         return;
 
     _screenWindow->scrollTo(_scrollBar->value());
@@ -1942,7 +1942,7 @@ void TerminalDisplay::mousePressEvent(QMouseEvent* ev)
 
     if (!contentsRect().contains(ev->pos())) return;
 
-    if (!_screenWindow) return;
+    if (_screenWindow.isNull()) return;
 
     int charLine;
     int charColumn;
@@ -2137,7 +2137,7 @@ void TerminalDisplay::leaveEvent(QEvent *)
 
 void TerminalDisplay::extendSelection(const QPoint& position)
 {
-    if (!_screenWindow)
+    if (_screenWindow.isNull())
         return;
 
     //if ( !contentsRect().contains(ev->pos()) ) return;
@@ -2290,7 +2290,7 @@ void TerminalDisplay::extendSelection(const QPoint& position)
 
 void TerminalDisplay::mouseReleaseEvent(QMouseEvent* ev)
 {
-    if (!_screenWindow)
+    if (_screenWindow.isNull())
         return;
 
     int charLine;
@@ -2345,7 +2345,7 @@ void TerminalDisplay::getCharacterPosition(const QPoint& widgetPoint, int& line,
 
 void TerminalDisplay::updateLineProperties()
 {
-    if (!_screenWindow)
+    if (_screenWindow.isNull())
         return;
 
     _lineProperties = _screenWindow->getLineProperties();
@@ -2381,7 +2381,7 @@ void TerminalDisplay::mouseDoubleClickEvent(QMouseEvent* ev)
     }
 
     if (ev->button() != Qt::LeftButton) return;
-    if (!_screenWindow) return;
+    if (_screenWindow.isNull()) return;
 
     int charLine = 0;
     int charColumn = 0;
@@ -2676,7 +2676,7 @@ out:
 
 void TerminalDisplay::mouseTripleClickEvent(QMouseEvent* ev)
 {
-    if (!_screenWindow) return;
+    if (_screenWindow.isNull()) return;
 
     int charLine;
     int charColumn;
@@ -2715,7 +2715,7 @@ void TerminalDisplay::selectLine(QPoint pos, bool entireLine)
 
 void TerminalDisplay::selectCurrentLine()
 {
-    if (!_screenWindow) return;
+    if (_screenWindow.isNull()) return;
 
     selectLine(cursorPosition(), true);
 }
@@ -2791,7 +2791,7 @@ bool TerminalDisplay::bracketedPasteMode() const
 
 void TerminalDisplay::doPaste(QString text, bool appendReturn)
 {
-    if (!_screenWindow)
+    if (_screenWindow.isNull())
         return;
 
     if (appendReturn)
@@ -2833,7 +2833,7 @@ void TerminalDisplay::setMiddleClickPasteMode(Enum::MiddleClickPasteModeEnum mod
 
 void TerminalDisplay::copyToX11Selection()
 {
-    if (!_screenWindow)
+    if (_screenWindow.isNull())
         return;
 
     QString text = _screenWindow->selectedText(_preserveLineBreaks, _trimTrailingSpaces);
@@ -2848,7 +2848,7 @@ void TerminalDisplay::copyToX11Selection()
 
 void TerminalDisplay::copyToClipboard()
 {
-    if (!_screenWindow)
+    if (_screenWindow.isNull())
         return;
 
     QString text = _screenWindow->selectedText(_preserveLineBreaks, _trimTrailingSpaces);

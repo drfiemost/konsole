@@ -459,7 +459,7 @@ TabbedViewContainer::~TabbedViewContainer()
 
 void TabbedViewContainer::startTabDrag(int tab)
 {
-    QDrag* drag = new QDrag(_tabBar);
+    QPointer<QDrag> drag = new QDrag(_tabBar);
     const QRect tabRect = _tabBar->tabRect(tab);
     QPixmap tabPixmap = _tabBar->dragDropPixmap(tab);
 
@@ -479,7 +479,7 @@ void TabbedViewContainer::startTabDrag(int tab)
     // start dragging
     const Qt::DropAction action = drag->exec();
 
-    if (drag->target()) {
+    if ((!drag.isNull()) && drag->target()) {
         switch (action) {
         case Qt::MoveAction:
             // The MoveAction indicates the widget has been successfully
@@ -495,7 +495,7 @@ void TabbedViewContainer::startTabDrag(int tab)
             // deleted if this view container is destroyed.
             //
             // FIXME: Resolve this properly
-            drag->setParent(0);
+            drag->setParent(nullptr);
             removeView(view);
             break;
         case Qt::IgnoreAction:
@@ -651,7 +651,7 @@ void TabbedViewContainer::addViewWidget(QWidget* view , int index)
 }
 void TabbedViewContainer::removeViewWidget(QWidget* view)
 {
-    if (!_stackWidget)
+    if (_stackWidget.isNull())
         return;
     const int index = _stackWidget->indexOf(view);
 
@@ -752,7 +752,7 @@ void StackedViewContainer::addViewWidget(QWidget* view , int)
 }
 void StackedViewContainer::removeViewWidget(QWidget* view)
 {
-    if (!_stackWidget)
+    if (_stackWidget.isNull())
         return;
     const int index = _stackWidget->indexOf(view);
 

@@ -218,7 +218,7 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
 
 SessionController::~SessionController()
 {
-    if (_view)
+    if (!_view.isNull())
         _view->setScreenWindow(0);
 
     _allControllers.remove(this);
@@ -258,7 +258,7 @@ void SessionController::requireUrlFilterUpdate()
 }
 void SessionController::snapshot()
 {
-    Q_ASSERT(_session != 0);
+    Q_ASSERT(!_session.isNull());
 
     QString title = _session->getDynamicTitle();
     title         = title.simplified();
@@ -493,14 +493,14 @@ void SessionController::removeSearchFilter()
 void SessionController::setSearchBar(IncrementalSearchBar* searchBar)
 {
     // disconnect the existing search bar
-    if (_searchBar) {
+    if (!_searchBar.isNull()) {
         disconnect(this, 0, _searchBar, 0);
         disconnect(_searchBar, 0, this, 0);
     }
 
     // connect new search bar
     _searchBar = searchBar;
-    if (_searchBar) {
+    if (!_searchBar.isNull()) {
         connect(_searchBar, SIGNAL(unhandledMovementKeyPressed(QKeyEvent*)), this, SLOT(movementKeyFromSearchBarReceived(QKeyEvent*)));
         connect(_searchBar, SIGNAL(closeClicked()), this, SLOT(searchClosed()));
         connect(_searchBar, SIGNAL(searchFromClicked()), this, SLOT(searchFrom()));
@@ -809,7 +809,7 @@ void SessionController::renameSession()
 
     QPointer<Session> guard(_session);
     int result = dialog->exec();
-    if (!guard)
+    if (guard.isNull())
         return;
 
     if (result) {
@@ -1022,7 +1022,7 @@ void SessionController::copyInputToSelectedTabs()
 
     QPointer<Session> guard(_session);
     int result = dialog->exec();
-    if (!guard)
+    if (guard.isNull())
         return;
 
     if (result == QDialog::Accepted) {
@@ -1097,7 +1097,7 @@ void SessionController::listenForScreenWindowUpdates()
 
 void SessionController::updateSearchFilter()
 {
-    if (_searchFilter && _searchBar) {
+    if (_searchFilter && !_searchBar.isNull()) {
         _view->processFilters();
     }
 }
@@ -1118,7 +1118,7 @@ void SessionController::searchBarEvent()
 
 void SessionController::enableSearchBar(bool showSearchBar)
 {
-    if (!_searchBar)
+    if (_searchBar.isNull())
         return;
 
     if (showSearchBar && !_searchBar->isVisible()) {
@@ -1140,7 +1140,7 @@ void SessionController::enableSearchBar(bool showSearchBar)
                    SLOT(findPreviousInHistory()));
         disconnect(_searchBar, SIGNAL(searchShiftPlusReturnPressed()), this,
                    SLOT(findNextInHistory()));
-        if (_view && _view->screenWindow()) {
+        if ((!_view.isNull()) && _view->screenWindow()) {
             _view->screenWindow()->setCurrentResultLine(-1);
         }
     }
@@ -1172,7 +1172,7 @@ void SessionController::searchHistory(bool showSearchBar)
 {
     enableSearchBar(showSearchBar);
 
-    if (_searchBar) {
+    if (!_searchBar.isNull()) {
         if (showSearchBar) {
             removeSearchFilter();
 
@@ -1221,7 +1221,7 @@ void SessionController::searchCompleted(bool success)
 {
     _prevSearchResultLine = _view->screenWindow()->currentResultLine();
 
-    if (_searchBar)
+    if (!_searchBar.isNull())
         _searchBar->setFoundMatch(success);
 }
 
@@ -1330,7 +1330,7 @@ void SessionController::showHistoryOptions()
 
     QPointer<Session> guard(_session);
     int result = dialog->exec();
-    if (!guard)
+    if (guard.isNull())
         return;
 
     if (result) {
@@ -1955,7 +1955,7 @@ QRegExp SearchHistoryTask::regExp() const
 
 QString SessionController::userTitle() const
 {
-    if (_session) {
+    if (!_session.isNull()) {
         return _session->userTitle();
     } else {
         return QString();

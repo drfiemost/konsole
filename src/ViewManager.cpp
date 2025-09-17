@@ -56,7 +56,7 @@ int ViewManager::lastManagerId = 0;
 
 ViewManager::ViewManager(QObject* parent , KActionCollection* collection)
     : QObject(parent)
-    , _viewSplitter(0)
+    , _viewSplitter(nullptr)
     , _actionCollection(collection)
     , _containerSignalMapper(new QSignalMapper(this))
     , _navigationMethod(TabbedNavigation)
@@ -364,7 +364,7 @@ void ViewManager::sessionFinished()
 {
     // if this slot is called after the view manager's main widget
     // has been destroyed, do nothing
-    if (!_viewSplitter)
+    if (_viewSplitter.isNull())
         return;
 
     Session* session = qobject_cast<Session*>(sender());
@@ -749,7 +749,7 @@ ViewManager::NavigationMethod ViewManager::navigationMethod() const
 
 void ViewManager::containerViewsChanged(QObject* container)
 {
-    if (_viewSplitter && container == _viewSplitter->activeContainer()) {
+    if ((!_viewSplitter.isNull()) && container == _viewSplitter->activeContainer()) {
         emit viewPropertiesChanged(viewProperties());
     }
 }
@@ -772,7 +772,7 @@ void ViewManager::viewDestroyed(QWidget* view)
             session->close();
     }
     //we only update the focus if the splitter is still alive
-    if (_viewSplitter) {
+    if (!_viewSplitter.isNull()) {
         focusActiveView();
         updateDetachViewState();
     }
