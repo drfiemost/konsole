@@ -119,14 +119,14 @@ void TerminalDisplay::setScreenWindow(ScreenWindow* window)
         connect(_screenWindow , SIGNAL(outputChanged()) , this , SLOT(updateLineProperties()));
         connect(_screenWindow , SIGNAL(outputChanged()) , this , SLOT(updateImage()));
         connect(_screenWindow , SIGNAL(currentResultLineChanged()) , this , SLOT(updateImage()));
-        connect(_screenWindow.data(), SIGNAL(outputChanged()) , this , SLOT(updateFilters()));
-        connect(_screenWindow.data(), SIGNAL(scrolled(int)) , this , SLOT(updateFilters()));
+        connect(_screenWindow, &Konsole::ScreenWindow::outputChanged, [this]() {
+            _filterUpdateRequired = true;
+        });
+        connect(_screenWindow, &Konsole::ScreenWindow::scrolled, [this](int) {
+            _filterUpdateRequired = true;
+        });
         _screenWindow->setWindowLines(_lines);
     }
-}
-void TerminalDisplay::updateFilters()
-{
-    _filterUpdateRequired = true;
 }
 
 const ColorEntry* TerminalDisplay::colorTable() const

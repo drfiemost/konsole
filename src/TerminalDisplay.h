@@ -441,8 +441,6 @@ public slots:
         return _scrollbarLocation;
     }
 
-    void updateFilters();
-
 signals:
 
     /**
