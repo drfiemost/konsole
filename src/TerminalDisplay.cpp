@@ -818,7 +818,7 @@ void TerminalDisplay::drawCharacters(QPainter& painter,
     QPen pen = painter.pen();
     if (pen.color() != color) {
         pen.setColor(color);
-        painter.setPen(color);
+        painter.setPen(pen);
     }
 
     // draw text
