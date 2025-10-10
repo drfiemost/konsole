@@ -63,10 +63,10 @@ public:
         : color(c), fontWeight(weight) {}
 
     /**
-     * Constructs a new color palette entry with an undefined color, and
-     * with the bold flags set to false.
+     * Constructs a new color palette entry using black color and font weight set to
+     * use current format.
      */
-    ColorEntry() : fontWeight(UseCurrentFormat) {}
+    ColorEntry() : color(QColor(0x00, 0x00, 0x00)), fontWeight(UseCurrentFormat) {}
 
     ColorEntry(const ColorEntry& rhs)
         : color(rhs.color), fontWeight(rhs.fontWeight) {}
