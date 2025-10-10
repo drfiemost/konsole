@@ -153,7 +153,7 @@ QString EditProfileDialog::groupProfileNames(const ProfileGroup::Ptr group, int 
             caption += ',';
             // limit caption length to prevent very long window titles
             if (maxLength > 0 && caption.length() > maxLength) {
-                caption += "...";
+                caption += QLatin1String("...");
                 break;
             }
         }
@@ -312,7 +312,7 @@ void EditProfileDialog::showEnvironmentEditor()
 
     QStringList currentEnvironment = profile->environment();
 
-    edit->setPlainText(currentEnvironment.join("\n"));
+    edit->setPlainText(currentEnvironment.join(QStringLiteral("\n")));
     edit->setToolTip(i18nc("@info:tooltip", "One environment variable per line"));
 
     dialog.data()->setPlainCaption(i18n("Edit Environment"));

@@ -64,8 +64,9 @@ QStringList ShellCommand::arguments() const
 QStringList ShellCommand::expand(const QStringList& items)
 {
     QStringList result;
+    result.reserve(items.size());
 
-    foreach(const QString & item , items) {
+    for(const QString & item: items) {
         result << expand(item);
     }
 

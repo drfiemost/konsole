@@ -66,7 +66,7 @@ ColorSchemeEditor::ColorSchemeEditor(QWidget* aParent)
 
     // transparency slider
     QFontMetrics metrics(font());
-    _ui->transparencyPercentLabel->setMinimumWidth(metrics.width("100%"));
+    _ui->transparencyPercentLabel->setMinimumWidth(metrics.width(QStringLiteral("100%")));
 
     connect(_ui->transparencySlider , SIGNAL(valueChanged(int)) , this , SLOT(setTransparencyPercentLabel(int)));
 
@@ -101,7 +101,7 @@ ColorSchemeEditor::ColorSchemeEditor(QWidget* aParent)
     _ui->colorTable->horizontalHeader()->setResizeMode(COLOR_COLUMN, QHeaderView::Stretch);
     _ui->colorTable->horizontalHeader()->setResizeMode(INTENSE_COLOR_COLUMN, QHeaderView::Stretch);
 
-    QTableWidgetItem* item = new QTableWidgetItem("Test");
+    QTableWidgetItem* item = new QTableWidgetItem(QStringLiteral("Test"));
     _ui->colorTable->setItem(0, 0, item);
 
     _ui->colorTable->verticalHeader()->hide();
@@ -184,7 +184,7 @@ void ColorSchemeEditor::setDescription(const QString& text)
 }
 void ColorSchemeEditor::setTransparencyPercentLabel(int percent)
 {
-    _ui->transparencyPercentLabel->setText(QString("%1%").arg(percent));
+    _ui->transparencyPercentLabel->setText(QStringLiteral("%1%").arg(percent));
 
     const qreal opacity = (100.0 - percent) / 100.0;
     _colors->setOpacity(opacity);
