@@ -385,7 +385,7 @@ UrlFilter::HotSpot::HotSpot(int startLine, int startColumn, int endLine, int end
 
 UrlFilter::HotSpot::UrlType UrlFilter::HotSpot::urlType() const
 {
-    const QString url = capturedTexts().first();
+    const QString url = capturedTexts().at(0);
 
     if (FullUrlRegExp.exactMatch(url))
         return StandardUrl;
@@ -397,7 +397,7 @@ UrlFilter::HotSpot::UrlType UrlFilter::HotSpot::urlType() const
 
 void UrlFilter::HotSpot::activate(QObject* object)
 {
-    QString url = capturedTexts().first();
+    QString url = capturedTexts().at(0);
 
     const UrlType kind = urlType();
 

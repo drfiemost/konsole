@@ -1349,7 +1349,7 @@ void ColorSchemeViewDelegate::paint(QPainter* painter, const QStyleOptionViewIte
     painter->setPen(pen);
 
     painter->drawText(option.rect , Qt::AlignCenter ,
-                      index.data(Qt::DisplayRole).value<QString>());
+                      index.data(Qt::DisplayRole).toString());
 }
 
 QSize ColorSchemeViewDelegate::sizeHint(const QStyleOptionViewItem& option,

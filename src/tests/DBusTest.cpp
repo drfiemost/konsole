@@ -79,7 +79,7 @@ void DBusTest::initTestCase()
     //kDebug()<< "Using service: " + _interfaceName.toLatin1();
 
     QDBusInterface iface(_interfaceName,
-                         QLatin1String("/Konsole"),
+                         QLatin1String("/Windows/1"),
                          QLatin1String("org.kde.konsole.Konsole"));
     QVERIFY(iface.isValid());
 }
