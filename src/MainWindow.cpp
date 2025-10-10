@@ -47,13 +47,13 @@
 #include "BookmarkHandler.h"
 #include "SessionController.h"
 #include "ProfileList.h"
-#include "ManageProfilesDialog.h"
 #include "Session.h"
 #include "ViewManager.h"
 #include "SessionManager.h"
 #include "ProfileManager.h"
 #include "KonsoleSettings.h"
 #include "settings/GeneralSettings.h"
+#include "settings/ProfileSettings.h"
 #include "settings/TabBarSettings.h"
 
 using namespace Konsole;
@@ -440,7 +440,7 @@ void MainWindow::openUrls(const QList<KUrl>& urls)
 {
     Profile::Ptr defaultProfile = ProfileManager::instance()->defaultProfile();
 
-    foreach(const KUrl& url, urls) {
+    for(const KUrl& url: urls) {
         if (url.isLocalFile())
             createSession(defaultProfile, url.path());
 
@@ -668,27 +668,34 @@ void MainWindow::newFromProfile(Profile::Ptr profile)
 }
 void MainWindow::showManageProfilesDialog()
 {
-    ManageProfilesDialog* dialog = new ManageProfilesDialog(this);
-    dialog->show();
+    showSettingsDialog(true);
 }
 
-void MainWindow::showSettingsDialog()
+void MainWindow::showSettingsDialog(const bool showProfilePage)
 {
     if (KConfigDialog::showDialog("settings"))
         return;
 
     KConfigDialog* settingsDialog = new KConfigDialog(this, "settings", KonsoleSettings::self());
-    settingsDialog->setFaceType(KPageDialog::List);
+    settingsDialog->setFaceType(KPageDialog::Tabbed);
 
     GeneralSettings* generalSettings = new GeneralSettings(settingsDialog);
     settingsDialog->addPage(generalSettings,
                             i18nc("@title Preferences page name", "General"),
                             "utilities-terminal");
 
+    ProfileSettings* profileSettings = new ProfileSettings(settingsDialog);
+    KPageWidgetItem* profilePage = settingsDialog->addPage(profileSettings,
+                            i18nc("@title Preferences page name", "Profiles"),
+                            "configure");
+
     TabBarSettings* tabBarSettings = new TabBarSettings(settingsDialog);
     settingsDialog->addPage(tabBarSettings,
                             i18nc("@title Preferences page name", "TabBar"),
                             "system-run");
+
+    if (showProfilePage)
+        settingsDialog->setCurrentPage(profilePage);
 
     settingsDialog->show();
 }

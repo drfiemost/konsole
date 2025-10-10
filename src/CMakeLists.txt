@@ -91,7 +91,6 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         KeyBindingEditor.cpp
                         KeyboardTranslator.cpp
                         KeyboardTranslatorManager.cpp
-                        ManageProfilesDialog.cpp
                         ProcessInfo.cpp
                         Profile.cpp
                         ProfileList.cpp
@@ -141,13 +140,13 @@ kde4_add_ui_files(konsoleprivate_SRCS ColorSchemeEditor.ui
                                       CopyInputDialog.ui
                                       EditProfileDialog.ui
                                       KeyBindingEditor.ui
-                                      ManageProfilesDialog.ui
                                       RenameTabDialog.ui
                                       RenameTabWidget.ui
                                       HistorySizeDialog.ui
                                       HistorySizeWidget.ui
                                       PrintOptions.ui
                                       settings/GeneralSettings.ui
+                                      settings/ProfileSettings.ui
                                       settings/TabBarSettings.ui)
 
 kde4_add_library(konsoleprivate SHARED ${konsoleprivate_SRCS})
@@ -159,6 +158,7 @@ set(konsole_KDEINIT_SRCS
    MainWindow.cpp
    main.cpp
    settings/GeneralSettings.cpp
+   settings/ProfileSettings.cpp
    settings/TabBarSettings.cpp)
 
 kde4_add_kcfg_files(konsole_KDEINIT_SRCS settings/KonsoleSettings.kcfgc)
