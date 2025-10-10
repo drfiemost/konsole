@@ -209,6 +209,8 @@ void MainWindow::disconnectController(SessionController* controller)
                this, SLOT(activeViewTitleChanged(ViewProperties*)));
     disconnect(controller, SIGNAL(rawTitleChanged()),
                this, SLOT(updateWindowCaption()));
+    disconnect(controller, &Konsole::SessionController::iconChanged,
+               this, &Konsole::MainWindow::updateWindowIcon);
 
     // KXmlGuiFactory::removeClient() will try to access actions associated
     // with the controller internally, which may not be valid after the controller
@@ -239,6 +241,8 @@ void MainWindow::activeViewChanged(SessionController* controller)
             this, SLOT(activeViewTitleChanged(ViewProperties*)));
     connect(controller, SIGNAL(rawTitleChanged()),
             this, SLOT(updateWindowCaption()));
+    connect(controller, &Konsole::SessionController::iconChanged,
+            this, &Konsole::MainWindow::updateWindowIcon);
 
     controller->setShowMenuAction(_toggleMenuBarAction);
 

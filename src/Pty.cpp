@@ -263,11 +263,11 @@ void Pty::setWriteable(bool writeable)
     KDE_struct_stat sbuf;
     if (KDE::stat(pty()->ttyName(), &sbuf) == 0) {
         if (writeable) {
-            if (KDE::chmod(pty()->ttyName(), sbuf.st_mode | S_IWGRP) < 0) {
+            if (::chmod(pty()->ttyName(), sbuf.st_mode | S_IWGRP) < 0) {
                 kWarning() << "Could not set writeable on "<<pty()->ttyName();
             }
         } else {
-            if (KDE::chmod(pty()->ttyName(), sbuf.st_mode & ~(S_IWGRP | S_IWOTH)) < 0) {
+            if (::chmod(pty()->ttyName(), sbuf.st_mode & ~(S_IWGRP | S_IWOTH)) < 0) {
                 kWarning() << "Could not unset writeable on "<<pty()->ttyName();
             }
         }

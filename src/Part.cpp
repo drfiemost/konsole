@@ -30,7 +30,6 @@
 #include <KActionCollection>
 #include <KLocale>
 #include <KPluginFactory>
-#include <kde_file.h>
 
 // Konsole
 #include "EditProfileDialog.h"
@@ -335,14 +334,8 @@ bool Part::openUrl(const KUrl& aUrl)
     //kdDebug() << "Set Window Caption to " << url.pathOrUrl();
     emit started(0);
 
-    if (aUrl.isLocalFile() /*&& b_openUrls*/) {
-        KDE_struct_stat buff;
-        if (KDE::stat(QFile::encodeName(aUrl.path()), &buff) == 0) {
-            QString text = (S_ISDIR(buff.st_mode) ? aUrl.path() : aUrl.directory());
-            showShellInDir(text);
-        } else {
-            showShellInDir(QDir::homePath());
-        }
+    if (aUrl.isLocalFile()) {
+        showShellInDir(aUrl.path());
     } else {
         showShellInDir(QDir::homePath());
     }
