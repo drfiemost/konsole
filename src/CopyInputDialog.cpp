@@ -168,7 +168,7 @@ bool CheckableSessionModel::setData(const QModelIndex& index, const QVariant& va
         return SessionListModel::setData(index, value, role);
     }
 }
-void CheckableSessionModel::setCheckedSessions(const QSet<Session*> sessions)
+void CheckableSessionModel::setCheckedSessions(const QSet<Session*>& sessions)
 {
     _checkedSessions = sessions;
     reset();

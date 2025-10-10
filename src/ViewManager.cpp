@@ -916,11 +916,6 @@ void ViewManager::restoreSessions(const KConfigGroup& group)
     }
 }
 
-uint qHash(QPointer<TerminalDisplay> display)
-{
-    return qHash((TerminalDisplay*)display);
-}
-
 int ViewManager::sessionCount()
 {
     return this->_sessionMap.size();
@@ -946,7 +941,7 @@ int ViewManager::newSession()
     return session->sessionId();
 }
 
-int ViewManager::newSession(QString profile, QString directory)
+int ViewManager::newSession(const QString&  profile, const QString&  directory)
 {
     const QList<Profile::Ptr> profilelist = ProfileManager::instance()->allProfiles();
     Profile::Ptr profileptr = ProfileManager::instance()->defaultProfile();
