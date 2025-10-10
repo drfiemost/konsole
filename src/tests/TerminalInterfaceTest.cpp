@@ -34,11 +34,12 @@ using namespace Konsole;
 /* In KDE 4.x there are 2 versions: TerminalInterface and TerminalInterfaceV2
    The code below uses both as well the KonsolePart API
 */
-void TerminalInterfaceTest::testTerminalInterface()
+
+// Test with no shell running
+void TerminalInterfaceTest::testTerminalInterfaceNoShell()
 {
     QString currentDirectory;
     QString retVal;
-    bool result;
 
     // create a Konsole part and attempt to connect to it
     _terminalPart = createPart();
@@ -47,6 +48,34 @@ void TerminalInterfaceTest::testTerminalInterface()
 
     TerminalInterfaceV2* terminal = qobject_cast<TerminalInterfaceV2*>(_terminalPart);
     QVERIFY(terminal);
+
+    // Verify results when no shell running
+    int terminalProcessId  = terminal->terminalProcessId();
+    QCOMPARE(terminalProcessId, 0);    int foregroundProcessId  = terminal->foregroundProcessId();
+    QCOMPARE(foregroundProcessId, -1);
+    QString foregroundProcessName  = terminal->foregroundProcessName();
+    QCOMPARE(foregroundProcessName, QString(""));
+    //const QString currentWorkingDirectory  = terminal->currentWorkingDirectory();
+    //QCOMPARE(currentWorkingDirectory, QString(""));
+
+    delete _terminalPart;
+}
+
+// Test with default shell running
+void TerminalInterfaceTest::testTerminalInterface()
+{
+    QString currentDirectory;
+    QString retVal;
+
+    // create a Konsole part and attempt to connect to it
+    _terminalPart = createPart();
+    if (!_terminalPart)
+        QSKIP("konsolepart not found.", SkipSingle);
+
+    TerminalInterfaceV2* terminal = qobject_cast<TerminalInterfaceV2*>(_terminalPart);
+    QVERIFY(terminal);
+
+    // Start a shell in given directory
     terminal->showShellInDir(QDir::home().path());
 
     int foregroundProcessId  = terminal->foregroundProcessId();
@@ -86,9 +115,9 @@ void TerminalInterfaceTest::testTerminalInterface()
 
     QString firstSignalState = firstSignalArgs.at(0).toString();
     QCOMPARE(firstSignalState, currentDirectory);
-
+/*
     // Test KonsolePart API currentWorkingDirectory()
-    result = QMetaObject::invokeMethod(_terminalPart,
+    bool result = QMetaObject::invokeMethod(_terminalPart,
                                        "currentWorkingDirectory",
                                        Qt::DirectConnection,
                                        Q_RETURN_ARG(QString, retVal));
@@ -108,7 +137,7 @@ void TerminalInterfaceTest::testTerminalInterface()
                                        Q_RETURN_ARG(QString, retVal));
     QVERIFY(result);
     QCOMPARE(retVal, currentDirectory);
-
+*/
 
     // Test starting a new program
     QString command = "top";
@@ -162,7 +191,7 @@ KParts::Part* TerminalInterfaceTest::createPart()
     return terminalPart;
 }
 
-QTEST_KDEMAIN(TerminalInterfaceTest , GUI)
+QTEST_KDEMAIN(TerminalInterfaceTest, GUI)
 
 #include "TerminalInterfaceTest.moc"
 

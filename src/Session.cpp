@@ -111,6 +111,7 @@ Session::Session(QObject* parent) :
             this, SIGNAL(selectionChanged(QString)));
     connect(_emulation, SIGNAL(imageResizeRequest(QSize)),
             this, SIGNAL(resizeRequest(QSize)));
+    connect(_emulation, &Konsole::Emulation::sessionAttributeRequest, this, &Konsole::Session::sessionAttributeRequest);
 
     //create new teletype for I/O with shell process
     openTeletype(-1);
@@ -614,6 +615,16 @@ void Session::onPrimaryScreenInUse(bool use)
     emit primaryScreenInUse(use);
 }
 
+void Session::sessionAttributeRequest(int id)
+{
+    switch (id) {
+        case BackgroundColor:
+            // Get 'TerminalDisplay' (_view) background color
+            emit getBackgroundColor();
+            break;
+    }
+}
+
 void Session::activityStateSet(int state)
 {
     // TODO: should this hardcoded interval be user configurable?
@@ -715,6 +726,17 @@ void Session::sendSignal(int signal)
     if (ok) {
         ::kill(pid, signal);
     }
+}
+
+void Session::reportBackgroundColor(const QColor& c)
+{
+    #define to65k(a) (QString("%1").arg((int)(a*0xFFFF), 4, 16, QChar('0')))
+    QString msg = "\033]11;rgb:"
+                + to65k(c.redF())   + "/"
+                + to65k(c.greenF()) + "/"
+                + to65k(c.blueF())  + "\a";
+    _emulation->sendString(msg.toUtf8());
+    #undef to65k
 }
 
 bool Session::kill(int signal)

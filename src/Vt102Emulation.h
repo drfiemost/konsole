@@ -149,6 +149,7 @@ private:
 
     void processToken(int code, int p, int q);
     void processWindowAttributeChange();
+    void processWindowAttributeRequest();
 
     void reportTerminalType();
     void reportSecondaryAttributes();

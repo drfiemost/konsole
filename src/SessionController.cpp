@@ -137,7 +137,7 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
     }
 
     actionCollection()->addAssociatedWidget(view);
-    foreach(QAction * action, actionCollection()->actions()) {
+    for(QAction * action: actionCollection()->actions()) {
         action->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     }
 
@@ -207,6 +207,10 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
     backgroundTimer->setInterval(2000);
     connect(backgroundTimer, SIGNAL(timeout()), this, SLOT(snapshot()));
     backgroundTimer->start();
+
+    // xterm '11;?' request
+    connect(_session.data(), &Konsole::Session::getBackgroundColor,
+            this, &Konsole::SessionController::sendBackgroundColor);
 
     _allControllers.insert(this);
 
@@ -453,6 +457,12 @@ void SessionController::sendSignal(QAction* action)
 {
     const int signal = action->data().value<int>();
     _session->sendSignal(signal);
+}
+
+void SessionController::sendBackgroundColor()
+{
+    const QColor c = _view->getBackgroundColor();
+    _session->reportBackgroundColor(c);
 }
 
 bool SessionController::eventFilter(QObject* watched , QEvent* event)

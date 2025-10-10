@@ -55,21 +55,24 @@ public:
     virtual ~Part();
 
     /** Reimplemented from TerminalInterface. */
-    virtual void startProgram(const QString& program,
-                              const QStringList& arguments);
+    void startProgram(const QString& program,
+                              const QStringList& arguments) override;
     /** Reimplemented from TerminalInterface. */
-    virtual void showShellInDir(const QString& dir);
+    void showShellInDir(const QString& dir) override;
     /** Reimplemented from TerminalInterface. */
-    virtual void sendInput(const QString& text);
+    void sendInput(const QString& text) override;
 
     /** Reimplemented from TerminalInterfaceV2. */
-    virtual int terminalProcessId();
+    int terminalProcessId() override;
 
     /** Reimplemented from TerminalInterfaceV2. */
-    virtual int foregroundProcessId();
+    int foregroundProcessId() override;
 
     /** Reimplemented from TerminalInterfaceV2. */
-    virtual QString foregroundProcessName();
+    QString foregroundProcessName() override;
+
+    /** Reimplemented from TerminalInterface. */
+    //QString currentWorkingDirectory() const override; // FIXME uncomment
 
 public slots:
     /**
