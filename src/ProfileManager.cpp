@@ -89,15 +89,20 @@ ProfileManager::ProfileManager()
     if (defaultProfileFileName.isEmpty()) {
         KSharedConfigPtr konsoleConfig = KSharedConfig::openConfig("konsolerc");
         group = konsoleConfig->group("Desktop Entry");
-        defaultProfileFileName = group.readEntry("DefaultProfile", "Shell.profile");
+        defaultProfileFileName = group.readEntry("DefaultProfile", "");
     }
 
     // load the default profile
-    const QString path = KStandardDirs::locate("data", "konsole/" + defaultProfileFileName);
-    if (!path.isEmpty()) {
-        Profile::Ptr profile = loadProfile(path);
-        if (profile)
-            _defaultProfile = profile;
+    _defaultProfile = _fallbackProfile;
+    if (!defaultProfileFileName.isEmpty()) {
+        // load the default profile
+        const QString path = KStandardDirs::locate("data", QStringLiteral("konsole/") + defaultProfileFileName);
+
+        if (!path.isEmpty()) {
+            Profile::Ptr profile = loadProfile(path);
+            if (profile)
+                _defaultProfile = profile;
+        }
     }
 
     Q_ASSERT(_profiles.count() > 0);
@@ -148,7 +153,7 @@ Profile::Ptr ProfileManager::loadProfile(const QString& shortPath)
     }
 
     // check that we have not already loaded this profile
-    foreach(const Profile::Ptr& profile, _profiles) {
+    for(const Profile::Ptr& profile: _profiles) {
         if (profile->path() == path)
             return profile;
     }
@@ -223,7 +228,7 @@ void ProfileManager::loadAllProfiles()
         return;
 
     const QStringList& paths = availableProfilePaths();
-    foreach(const QString& path, paths) {
+    for(const QString& path: paths) {
         loadProfile(path);
     }
 
@@ -356,7 +361,7 @@ void ProfileManager::changeProfile(Profile::Ptr profile,
         // in the profile manager
         QList<Profile::Ptr> existingProfiles = allProfiles();
         QStringList existingProfileNames;
-        foreach(Profile::Ptr existingProfile, existingProfiles) {
+        for(Profile::Ptr existingProfile: existingProfiles) {
             existingProfileNames.append(existingProfile->name());
         }
 
@@ -384,7 +389,7 @@ void ProfileManager::changeProfile(Profile::Ptr profile,
     // is saved to disk
     ProfileGroup::Ptr group = profile->asGroup();
     if (group) {
-        foreach(const Profile::Ptr & profile, group->profiles()) {
+        for(const Profile::Ptr & profile: group->profiles()) {
             changeProfile(profile, propertyMap, persistent);
         }
         return;
@@ -576,14 +581,10 @@ void ProfileManager::loadFavorites()
     if (favoriteGroup.hasKey("Favorites")) {
         QStringList list = favoriteGroup.readEntry("Favorites", QStringList());
         favoriteSet = QSet<QString>::fromList(list);
-    } else {
-        // if there is no favorites key at all, mark the
-        // supplied 'Shell.profile' as the only favorite
-        favoriteSet << "Shell.profile";
     }
 
     // look for favorites among those already loaded
-    foreach(const Profile::Ptr& profile, _profiles) {
+    for(const Profile::Ptr& profile: _profiles) {
         const QString& path = profile->path();
         if (favoriteSet.contains(path)) {
             _favorites.insert(profile);
@@ -591,7 +592,7 @@ void ProfileManager::loadFavorites()
         }
     }
     // load any remaining favorites
-    foreach(const QString& favorite, favoriteSet) {
+    for(const QString& favorite: favoriteSet) {
         Profile::Ptr profile = loadProfile(favorite);
         if (profile)
             _favorites.insert(profile);
@@ -605,7 +606,7 @@ void ProfileManager::saveFavorites()
     KConfigGroup favoriteGroup = appConfig->group("Favorite Profiles");
 
     QStringList paths;
-    foreach(const Profile::Ptr& profile, _favorites) {
+    for(const Profile::Ptr& profile: _favorites) {
         Q_ASSERT(_profiles.contains(profile) && profile);
 
         QFileInfo fileInfo(profile->path());
