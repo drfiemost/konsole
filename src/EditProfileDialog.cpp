@@ -50,9 +50,7 @@
 #include <KMessageBox>
 
 // Konsole
-#include "ColorScheme.h"
 #include "ColorSchemeManager.h"
-#include "ColorSchemeEditor.h"
 #include "ui_EditProfileDialog.h"
 #include "KeyBindingEditor.h"
 #include "KeyboardTranslator.h"
@@ -60,7 +58,6 @@
 #include "ProfileManager.h"
 #include "ShellCommand.h"
 #include "WindowSystemInfo.h"
-#include "Enumeration.h"
 
 using namespace Konsole;
 

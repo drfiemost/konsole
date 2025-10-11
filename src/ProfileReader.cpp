@@ -47,7 +47,7 @@ QStringList KDE4ProfileReader::findProfiles()
 void KDE4ProfileReader::readProperties(const KConfig& config, Profile::Ptr profile,
                                        const Profile::PropertyInfo* properties)
 {
-    const char* groupName = 0;
+    const char* groupName = nullptr;
     KConfigGroup group;
 
     while (properties->name != 0) {

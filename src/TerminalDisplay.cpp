@@ -64,7 +64,6 @@
 #include "konsole_wcwidth.h"
 #include "TerminalCharacterDecoder.h"
 #include "Screen.h"
-#include "ScreenWindow.h"
 #include "LineFont.h"
 #include "SessionController.h"
 #include "ExtendedCharTable.h"

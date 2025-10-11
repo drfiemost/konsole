@@ -362,7 +362,7 @@ void Application::listAvailableProfiles()
 {
     QStringList paths = ProfileManager::instance()->availableProfilePaths();
 
-    foreach(const QString& path, paths) {
+    for(const QString& path: paths) {
         QFileInfo info(path);
         printf("%s\n", info.completeBaseName().toLocal8Bit().constData());
     }
@@ -375,7 +375,7 @@ void Application::listProfilePropertyInfo()
     Profile::Ptr tempProfile = ProfileManager::instance()->defaultProfile();
     const QStringList names = tempProfile->propertiesInfoList();
 
-    foreach(const QString& name, names) {
+    for(const QString& name: names) {
         printf("%s\n", name.toLocal8Bit().constData());
     }
 
@@ -396,7 +396,7 @@ Profile::Ptr Application::processProfileChangeArgs(KCmdLineArgs* args, Profile::
     }
 
     // temporary changes to profile options specified on the command line
-    foreach(const QString & value , args->getOptionList("p")) {
+    for(const QString & value: args->getOptionList("p")) {
         ProfileCommandParser parser;
 
         QHashIterator<Profile::Property, QVariant> iter(parser.parse(value));

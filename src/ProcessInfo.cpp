@@ -125,12 +125,12 @@ QString ProcessInfo::format(const QString& input) const
     QString output(input);
 
     // search for and replace known marker
-    output.replace("%u", userName());
-    output.replace("%h", localHost());
-    output.replace("%n", name(&ok));
+    output.replace(QLatin1String("%u"), userName());
+    output.replace(QLatin1String("%h"), localHost());
+    output.replace(QLatin1String("%n"), name(&ok));
 
     QString dir = validCurrentDir();
-    if (output.contains("%D")) {
+    if (output.contains(QLatin1String("%D"))) {
         QString homeDir = userHomeDir();
         QString tempDir = dir;
         // Change User's Home Dir w/ ~ only at the beginning
@@ -138,9 +138,9 @@ QString ProcessInfo::format(const QString& input) const
             tempDir.remove(0, homeDir.length());
             tempDir.prepend('~');
         }
-        output.replace("%D", tempDir);
+        output.replace(QLatin1String("%D"), tempDir);
     }
-    output.replace("%d", formatShortDir(dir));
+    output.replace(QLatin1String("%d"), formatShortDir(dir));
 
     return output;
 }
@@ -442,7 +442,7 @@ private:
 
         // For user id read process status file ( /proc/<pid>/status )
         //  Can not use getuid() due to it does not work for 'su'
-        QFile statusInfo(QString("/proc/%1/status").arg(aPid));
+        QFile statusInfo(QStringLiteral("/proc/%1/status").arg(aPid));
         if (statusInfo.open(QIODevice::ReadOnly)) {
             QTextStream stream(&statusInfo);
             QString statusLine;
@@ -478,7 +478,7 @@ private:
         //
         // FIELD FIELD (FIELD WITH SPACES) FIELD FIELD
         //
-        QFile processInfo(QString("/proc/%1/stat").arg(aPid));
+        QFile processInfo(QStringLiteral("/proc/%1/stat").arg(aPid));
         if (processInfo.open(QIODevice::ReadOnly)) {
             QTextStream stream(&processInfo);
             const QString& data = stream.readAll();
@@ -541,7 +541,7 @@ private:
         // the expected format is a list of strings delimited by null characters,
         // and ending in a double null character pair.
 
-        QFile argumentsFile(QString("/proc/%1/cmdline").arg(aPid));
+        QFile argumentsFile(QStringLiteral("/proc/%1/cmdline").arg(aPid));
         if (argumentsFile.open(QIODevice::ReadOnly)) {
             QTextStream stream(&argumentsFile);
             const QString& data = stream.readAll();
@@ -581,7 +581,7 @@ private:
         // the expected format is a list of KEY=VALUE strings delimited by null
         // characters and ending in a double null character pair.
 
-        QFile environmentFile(QString("/proc/%1/environ").arg(aPid));
+        QFile environmentFile(QStringLiteral("/proc/%1/environ").arg(aPid));
         if (environmentFile.open(QIODevice::ReadOnly)) {
             QTextStream stream(&environmentFile);
             const QString& data = stream.readAll();
@@ -1023,7 +1023,7 @@ SSHProcessInfo::SSHProcessInfo(const ProcessInfo& process)
     // check that this is a SSH process
     const QString& name = _process.name(&ok);
 
-    if (!ok || name != "ssh") {
+    if (!ok || name != QLatin1String("ssh")) {
         if (!ok)
             kWarning() << "Could not read process info";
         else
@@ -1039,9 +1039,9 @@ SSHProcessInfo::SSHProcessInfo(const ProcessInfo& process)
     // these are taken from the SSH manual ( accessed via 'man ssh' )
 
     // options which take no arguments
-    static const QString noArgumentOptions("1246AaCfgKkMNnqsTtVvXxYy");
+    static const QString noArgumentOptions(QStringLiteral("1246AaCfgKkMNnqsTtVvXxYy"));
     // options which take one argument
-    static const QString singleArgumentOptions("bcDeFIiLlmOopRSWw");
+    static const QString singleArgumentOptions(QStringLiteral("bcDeFIiLlmOopRSWw"));
 
     if (ok) {
         // find the username, host and command arguments
@@ -1150,15 +1150,15 @@ QString SSHProcessInfo::format(const QString& input) const
         isIpAddress = false;
 
     // search for and replace known markers
-    output.replace("%u", _user);
+    output.replace(QLatin1String("%u"), _user);
 
     if (isIpAddress)
-        output.replace("%h", _host);
+        output.replace(QLatin1String("%h"), _host);
     else
-        output.replace("%h", _host.left(_host.indexOf('.')));
+        output.replace(QLatin1String("%h"), _host.left(_host.indexOf('.')));
 
-    output.replace("%H", _host);
-    output.replace("%c", _command);
+    output.replace(QLatin1String("%H"), _host);
+    output.replace(QLatin1String("%c"), _command);
 
     return output;
 }

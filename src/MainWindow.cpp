@@ -81,7 +81,7 @@ MainWindow::MainWindow()
         // If we are not using the global Konsole save geometry on exit,
         // remove all Height and Width from [MainWindow] from konsolerc
         // Each screen resolution will have entries (Width 1280=619)
-        KSharedConfigPtr konsoleConfig = KSharedConfig::openConfig("konsolerc");
+        KSharedConfigPtr konsoleConfig = KSharedConfig::openConfig(QStringLiteral("konsolerc"));
         KConfigGroup group = konsoleConfig->group("MainWindow");
         QMap<QString, QString> configEntries = group.entryMap();
         QMapIterator<QString, QString> i(configEntries);
@@ -150,7 +150,7 @@ MainWindow::MainWindow()
 
 void MainWindow::rememberMenuAccelerators()
 {
-    foreach(QAction* menuItem, menuBar()->actions()) {
+    for(QAction* menuItem: menuBar()->actions()) {
         QString itemText = menuItem->text();
         menuItem->setData(itemText);
     }
@@ -166,7 +166,7 @@ void MainWindow::rememberMenuAccelerators()
 // can then be redefined there to exclude the standard accelerators
 void MainWindow::removeMenuAccelerators()
 {
-    foreach(QAction* menuItem, menuBar()->actions()) {
+    for(QAction* menuItem: menuBar()->actions()) {
         QString itemText = menuItem->text();
         itemText = KGlobal::locale()->removeAcceleratorMarker(itemText);
         menuItem->setText(itemText);
@@ -175,7 +175,7 @@ void MainWindow::removeMenuAccelerators()
 
 void MainWindow::restoreMenuAccelerators()
 {
-    foreach(QAction* menuItem, menuBar()->actions()) {
+    for(QAction* menuItem: menuBar()->actions()) {
         QString itemText = menuItem->data().toString();
         menuItem->setText(itemText);
     }
@@ -184,7 +184,7 @@ void MainWindow::restoreMenuAccelerators()
 void MainWindow::correctStandardShortcuts()
 {
     // replace F1 shortcut for help contents
-    QAction* helpAction = actionCollection()->action("help_contents");
+    QAction* helpAction = actionCollection()->action(QStringLiteral("help_contents"));
     if (helpAction) {
         helpAction->setShortcut(QKeySequence());
     }
@@ -192,7 +192,7 @@ void MainWindow::correctStandardShortcuts()
     // replace Ctrl+B shortcut for bookmarks only if user hasn't already
     // changed the shortcut; however, if the user changed it to Ctrl+B
     // this will still get changed to Ctrl+Shift+B
-    QAction* bookmarkAction = actionCollection()->action("add_bookmark");
+    QAction* bookmarkAction = actionCollection()->action(QStringLiteral("add_bookmark"));
     if (bookmarkAction && bookmarkAction->shortcut() == QKeySequence(Qt::CTRL + Qt::Key_B)) {
         bookmarkAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_B));
     }
@@ -311,23 +311,23 @@ void MainWindow::setupActions()
     _newTabMenuAction->setShortcutConfigurable(true);
     _newTabMenuAction->setAutoRepeat(false);
     connect(_newTabMenuAction, SIGNAL(triggered()), this, SLOT(newTab()));
-    collection->addAction("new-tab", _newTabMenuAction);
+    collection->addAction(QStringLiteral("new-tab"), _newTabMenuAction);
 
-    menuAction = collection->addAction("clone-tab");
+    menuAction = collection->addAction(QStringLiteral("clone-tab"));
     menuAction->setIcon(KIcon("tab-duplicate"));
     menuAction->setText(i18nc("@action:inmenu", "&Clone Tab"));
     menuAction->setShortcut(QKeySequence());
     menuAction->setAutoRepeat(false);
     connect(menuAction, SIGNAL(triggered()), this, SLOT(cloneTab()));
 
-    menuAction = collection->addAction("new-window");
+    menuAction = collection->addAction(QStringLiteral("new-window"));
     menuAction->setIcon(KIcon("window-new"));
     menuAction->setText(i18nc("@action:inmenu", "New &Window"));
     menuAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_N));
     menuAction->setAutoRepeat(false);
     connect(menuAction, SIGNAL(triggered()), this, SLOT(newWindow()));
 
-    menuAction = collection->addAction("close-window");
+    menuAction = collection->addAction(QStringLiteral("close-window"));
     menuAction->setIcon(KIcon("window-close"));
     menuAction->setText(i18nc("@action:inmenu", "Close Window"));
     menuAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Q));
@@ -336,7 +336,7 @@ void MainWindow::setupActions()
     // Bookmark Menu
     KActionMenu* bookmarkMenu = new KActionMenu(i18nc("@title:menu", "&Bookmarks"), collection);
     _bookmarkHandler = new BookmarkHandler(collection, bookmarkMenu->menu(), true, this);
-    collection->addAction("bookmark", bookmarkMenu);
+    collection->addAction(QStringLiteral("bookmark"), bookmarkMenu);
     connect(_bookmarkHandler, SIGNAL(openUrls(QList<KUrl>)), this, SLOT(openUrls(QList<KUrl>)));
 
     // Settings Menu
@@ -351,13 +351,13 @@ void MainWindow::setupActions()
     KStandardAction::keyBindings(this, SLOT(showShortcutsDialog()), collection);
     KStandardAction::preferences(this, SLOT(showSettingsDialog()), collection);
 
-    menuAction = collection->addAction("manage-profiles");
+    menuAction = collection->addAction(QStringLiteral("manage-profiles"));
     menuAction->setText(i18nc("@action:inmenu", "Manage Profiles..."));
     menuAction->setIcon(KIcon("configure"));
     connect(menuAction, SIGNAL(triggered()), this, SLOT(showManageProfilesDialog()));
 
     // Set up an shortcut-only action for activating menu bar.
-    menuAction = collection->addAction("activate-menu");
+    menuAction = collection->addAction(QStringLiteral("activate-menu"));
     menuAction->setText(i18nc("@item", "Activate Menu"));
     menuAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_F10));
     connect(menuAction, SIGNAL(triggered()), this, SLOT(activateMenuBar()));
@@ -395,13 +395,13 @@ void MainWindow::profileListChanged(const QList<QAction*>& sessionActions)
         // Update the 'New Tab' KActionMenu
         KMenu* newTabMenu = _newTabMenuAction->menu();
         newTabMenu->clear();
-        foreach(QAction* sessionAction, sessionActions) {
+        for(QAction* sessionAction: sessionActions) {
             newTabMenu->addAction(sessionAction);
 
             // NOTE: defaultProfile seems to not work here, sigh.
             Profile::Ptr profile = ProfileManager::instance()->defaultProfile();
             if (profile && profile->name() == sessionAction->text().remove('&')) {
-                sessionAction->setIcon(KIcon(profile->icon(), 0, QStringList("emblem-favorite")));
+                sessionAction->setIcon(KIcon(profile->icon(), 0, QStringList(QStringLiteral("emblem-favorite"))));
                 newTabMenu->setDefaultAction(sessionAction);
                 QFont actionFont = sessionAction->font();
                 actionFont.setBold(true);
@@ -444,7 +444,7 @@ void MainWindow::openUrls(const QList<KUrl>& urls)
         if (url.isLocalFile())
             createSession(defaultProfile, url.path());
 
-        else if (url.protocol() == "ssh")
+        else if (url.protocol() == QLatin1String("ssh"))
             createSSHSession(defaultProfile, url);
     }
 }
@@ -480,7 +480,7 @@ Session* MainWindow::createSession(Profile::Ptr profile, const QString& director
     if (!directory.isEmpty() && profile->startInCurrentSessionDir())
         session->setInitialWorkingDirectory(directory);
 
-    session->addEnvironmentEntry(QString("KONSOLE_DBUS_WINDOW=/Windows/%1").arg(_viewManager->managerId()));
+    session->addEnvironmentEntry(QStringLiteral("KONSOLE_DBUS_WINDOW=/Windows/%1").arg(_viewManager->managerId()));
 
     // create view before starting the session process so that the session
     // doesn't suffer a change in terminal size right after the session
@@ -498,9 +498,9 @@ Session* MainWindow::createSSHSession(Profile::Ptr profile, const KUrl& url)
 
     Session* session = SessionManager::instance()->createSession(profile);
 
-    QString sshCommand = "ssh ";
+    QString sshCommand = QStringLiteral("ssh ");
     if (url.port() > -1) {
-        sshCommand += QString("-p %1 ").arg(url.port());
+        sshCommand += QStringLiteral("-p %1 ").arg(url.port());
     }
     if (url.hasUser()) {
         sshCommand += (url.user() + '@');
@@ -584,10 +584,10 @@ bool MainWindow::queryClose()
                         processesRunning.count()),
                  processesRunning,
                  i18nc("@title", "Confirm Close"),
-                 KGuiItem(i18nc("@action:button", "Close &Window"), "window-close"),
-                 KGuiItem(i18nc("@action:button", "Close Current &Tab"), "tab-close"),
+                 KGuiItem(i18nc("@action:button", "Close &Window"), QStringLiteral("window-close")),
+                 KGuiItem(i18nc("@action:button", "Close Current &Tab"), QStringLiteral("tab-close")),
                  KStandardGuiItem::cancel(),
-                 "CloseAllTabs");
+                 QStringLiteral("CloseAllTabs"));
 
     switch (result) {
     case KMessageBox::Yes:
@@ -627,7 +627,7 @@ void MainWindow::readGlobalProperties(KConfig* config)
 
 void MainWindow::syncActiveShortcuts(KActionCollection* dest, const KActionCollection* source)
 {
-    foreach(QAction * qAction, source->actions()) {
+    for(QAction * qAction: source->actions()) {
         if (KAction* kAction = qobject_cast<KAction*>(qAction)) {
             if (KAction* destKAction = qobject_cast<KAction*>(dest->action(kAction->objectName())))
                 destKAction->setShortcut(kAction->shortcut(KAction::ActiveShortcut), KAction::ActiveShortcut);
@@ -639,13 +639,13 @@ void MainWindow::showShortcutsDialog()
     KShortcutsDialog dialog(KShortcutsEditor::AllActions, KShortcutsEditor::LetterShortcutsDisallowed, this);
 
     // add actions from this window and the current session controller
-    foreach(KXMLGUIClient * client, guiFactory()->clients()) {
+    for(KXMLGUIClient * client: guiFactory()->clients()) {
         dialog.addCollection(client->actionCollection());
     }
 
     if (dialog.configure()) {
         // sync shortcuts for non-session actions (defined in "konsoleui.rc") in other main windows
-        foreach(QWidget* mainWindowWidget, QApplication::topLevelWidgets()) {
+        for(QWidget* mainWindowWidget: QApplication::topLevelWidgets()) {
             MainWindow* mainWindow = qobject_cast<MainWindow*>(mainWindowWidget);
             if (mainWindow && mainWindow != this)
                 syncActiveShortcuts(mainWindow->actionCollection(), actionCollection());
@@ -654,7 +654,7 @@ void MainWindow::showShortcutsDialog()
         // Controllers which are currently plugged in (ie. their actions are part of the current menu)
         // must be updated immediately via syncActiveShortcuts().  Other controllers will be updated
         // when they are plugged into a main window.
-        foreach(SessionController * controller, SessionController::allControllers()) {
+        for(SessionController * controller: SessionController::allControllers()) {
             controller->reloadXML();
             if (controller->factory() && controller != _pluggedController)
                 syncActiveShortcuts(controller->actionCollection(), _pluggedController->actionCollection());
@@ -673,26 +673,26 @@ void MainWindow::showManageProfilesDialog()
 
 void MainWindow::showSettingsDialog(const bool showProfilePage)
 {
-    if (KConfigDialog::showDialog("settings"))
+    if (KConfigDialog::showDialog(QStringLiteral("settings")))
         return;
 
-    KConfigDialog* settingsDialog = new KConfigDialog(this, "settings", KonsoleSettings::self());
+    KConfigDialog* settingsDialog = new KConfigDialog(this, QStringLiteral("settings"), KonsoleSettings::self());
     settingsDialog->setFaceType(KPageDialog::Tabbed);
 
     GeneralSettings* generalSettings = new GeneralSettings(settingsDialog);
     settingsDialog->addPage(generalSettings,
                             i18nc("@title Preferences page name", "General"),
-                            "utilities-terminal");
+                            QStringLiteral("utilities-terminal"));
 
     ProfileSettings* profileSettings = new ProfileSettings(settingsDialog);
     KPageWidgetItem* profilePage = settingsDialog->addPage(profileSettings,
                             i18nc("@title Preferences page name", "Profiles"),
-                            "configure");
+                            QStringLiteral("configure"));
 
     TabBarSettings* tabBarSettings = new TabBarSettings(settingsDialog);
     settingsDialog->addPage(tabBarSettings,
                             i18nc("@title Preferences page name", "TabBar"),
-                            "system-run");
+                            QStringLiteral("system-run"));
 
     if (showProfilePage)
         settingsDialog->setCurrentPage(profilePage);
@@ -722,7 +722,7 @@ void MainWindow::applyKonsoleSettings()
         setNavigationStyleSheet(KonsoleSettings::tabBarStyleSheet());
     }
 
-    setAutoSaveSettings("MainWindow", KonsoleSettings::saveGeometryOnExit());
+    setAutoSaveSettings(QStringLiteral("MainWindow"), KonsoleSettings::saveGeometryOnExit());
 
     updateWindowCaption();
 }
