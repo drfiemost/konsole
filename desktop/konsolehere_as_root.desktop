@@ -11,3 +11,5 @@ Icon=utilities-terminal
 
 Name=Open Terminal Here as Root
 Name[it]=Apri terminale qui come root
+
+Comment=Opens a terminal at the current folder as root

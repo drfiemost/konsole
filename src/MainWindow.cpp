@@ -828,6 +828,8 @@ void MainWindow::showEvent(QShowEvent* aEvent)
         menuBar()->setVisible(_menuBarInitialVisibility);
         _toggleMenuBarAction->setChecked(_menuBarInitialVisibility);
         _menuBarInitialVisibilityApplied = true;
+        if(!KonsoleSettings::saveGeometryOnExit())
+            resize(sizeHint());
     }
 
     // Call parent method

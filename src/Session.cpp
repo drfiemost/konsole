@@ -166,8 +166,8 @@ void Session::openTeletype(int fd)
             this, SLOT(done(int,QProcess::ExitStatus)));
 
     // emulator size
-    connect(_emulation, SIGNAL(imageSizeChanged(int,int)),
-            this, SLOT(updateWindowSize(int,int)));
+    // Use a direct connection to ensure that the window size is set before it runs
+    connect(_emulation, &Konsole::Emulation::imageSizeChanged, this, &Konsole::Session::updateWindowSize, Qt::DirectConnection);
     connect(_emulation, SIGNAL(imageSizeInitialized()),
             this, SLOT(run()));
 }
