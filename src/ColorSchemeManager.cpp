@@ -31,7 +31,6 @@
 #include <KStandardDirs>
 #include <KGlobal>
 #include <KConfig>
-#include <KLocalizedString>
 #include <KDebug>
 
 using namespace Konsole;

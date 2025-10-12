@@ -141,6 +141,11 @@ void HistoryFile::get(unsigned char* buffer, int size, int loc)
     if (!_fileMap && _readWriteBalance < MAP_THRESHOLD)
         map();
 
+    if (loc < 0 || size < 0 || loc + size > _length) {
+        fprintf(stderr, "getHist(...,%d,%d): invalid args.\n", size, loc);
+        return;
+    }
+
     if (_fileMap) {
         for (int i = 0; i < size; i++)
             buffer[i] = _fileMap[loc + i];

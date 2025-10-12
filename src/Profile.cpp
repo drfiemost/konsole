@@ -148,6 +148,7 @@ FallbackProfile::FallbackProfile()
     // non-directory file name
     setProperty(Path, "FALLBACK/");
     setProperty(Command, qgetenv("SHELL"));
+    // See Pty.cpp on why Arguments is populated
     setProperty(Arguments, QStringList() << qgetenv("SHELL"));
     setProperty(Icon, "utilities-terminal");
     setProperty(Environment, QStringList() << QStringLiteral("TERM=xterm") << QStringLiteral("COLORTERM=truecolor"));
@@ -318,8 +319,8 @@ QHash<Profile::Property, QVariant> ProfileCommandParser::parse(const QString& in
     while (regExp.indexIn(input, offset) != -1) {
         if (regExp.capturedTexts().count() == 3) {
             Profile::Property property = Profile::lookupByName(
-                                             regExp.capturedTexts()[1]);
-            const QString value = regExp.capturedTexts()[2];
+                                             regExp.capturedTexts().at(1));
+            const QString value = regExp.capturedTexts().at(2);
             changes.insert(property, value);
         }
 

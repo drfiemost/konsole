@@ -370,22 +370,23 @@ QList<KeyboardTranslatorReader::Token> KeyboardTranslatorReader::tokenize(const 
 
     if (title.exactMatch(text)) {
         Token titleToken = { Token::TitleKeyword , QString() };
-        Token textToken = { Token::TitleText , title.capturedTexts()[1] };
+        Token textToken = { Token::TitleText , title.capturedTexts().at(1) };
 
         list << titleToken << textToken;
     } else if (key.exactMatch(text)) {
         Token keyToken = { Token::KeyKeyword , QString() };
-        Token sequenceToken = { Token::KeySequence , key.capturedTexts()[1].remove(' ') };
+        QString sequenceTokenString = key.capturedTexts().at(1);
+        Token sequenceToken = { Token::KeySequence , sequenceTokenString.remove(QChar(' ')) };
 
         list << keyToken << sequenceToken;
 
-        if (key.capturedTexts()[3].isEmpty()) {
-            // capturedTexts()[2] is a command
-            Token commandToken = { Token::Command , key.capturedTexts()[2] };
+        if (key.capturedTexts().at(3).isEmpty()) {
+            // capturedTexts().at(2) is a command
+            Token commandToken = { Token::Command , key.capturedTexts().at(2) };
             list << commandToken;
         } else {
-            // capturedTexts()[3] is the output string
-            Token outputToken = { Token::OutputText , key.capturedTexts()[3] };
+            // capturedTexts().at(3) is the output string
+            Token outputToken = { Token::OutputText , key.capturedTexts().at(3) };
             list << outputToken;
         }
     } else {
@@ -676,9 +677,12 @@ void KeyboardTranslator::removeEntry(const Entry& entry)
 
 KeyboardTranslator::Entry KeyboardTranslator::findEntry(int keyCode, Qt::KeyboardModifiers modifiers, States state) const
 {
-    foreach(const Entry & entry, _entries.values(keyCode)) {
-        if (entry.matches(keyCode, modifiers, state))
-            return entry;
+    QHash<int, KeyboardTranslator::Entry>::const_iterator i = _entries.find(keyCode);
+    while (i != _entries.constEnd() && i.key() == keyCode) {
+        if (i.value().matches(keyCode, modifiers, state)) {
+            return i.value();
+        }
+        ++i;
     }
 
     return Entry(); // No matching entry
