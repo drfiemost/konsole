@@ -469,6 +469,10 @@ void EditProfileDialog::setupAppearancePage(const Profile::Ptr profile)
     connect(_ui->boldIntenseButton, SIGNAL(toggled(bool)), this,
             SLOT(setBoldIntense(bool)));
     _ui->enableMouseWheelZoomButton->setChecked(profile->mouseWheelZoomEnabled());
+
+    _ui->useFontLineCharactersButton->setChecked(profile->useFontLineCharacters());
+    connect(_ui->useFontLineCharactersButton, &QCheckBox::toggled, this, &Konsole::EditProfileDialog::useFontLineCharacters);
+
     connect(_ui->enableMouseWheelZoomButton, SIGNAL(toggled(bool)), this,
             SLOT(toggleMouseWheelZoom(bool)));
 }
@@ -485,6 +489,11 @@ void EditProfileDialog::setBoldIntense(bool enable)
 {
     preview(Profile::BoldIntense, enable);
     updateTempProfileProperty(Profile::BoldIntense, enable);
+}
+void EditProfileDialog::useFontLineCharacters(bool enable)
+{
+    preview(Profile::UseFontLineCharacters, enable);
+    updateTempProfileProperty(Profile::UseFontLineCharacters, enable);
 }
 void EditProfileDialog::toggleMouseWheelZoom(bool enable)
 {

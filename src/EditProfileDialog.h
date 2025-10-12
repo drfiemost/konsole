@@ -125,6 +125,7 @@ private slots:
     void setFontInputValue(const QFont& font);
     void setAntialiasText(bool enable);
     void setBoldIntense(bool enable);
+    void useFontLineCharacters(bool enable);
     void showFontDialog();
     void newColorScheme();
     void editColorScheme();

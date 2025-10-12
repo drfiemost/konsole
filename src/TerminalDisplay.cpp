@@ -371,6 +371,7 @@ TerminalDisplay::TerminalDisplay(QWidget* parent)
     , _filterUpdateRequired(true)
     , _cursorShape(Enum::BlockCursor)
     , _antialiasText(true)
+    , _useFontLineCharacters(false)
     , _printerFriendly(false)
     , _sessionController(0)
     , _trimTrailingSpaces(false)
@@ -810,6 +811,10 @@ void TerminalDisplay::drawCharacters(QPainter& painter,
     if (_textBlinking && (style->rendition & RE_BLINK))
         return;
 
+    // don't draw concealed characters
+    if (style->rendition & RE_CONCEAL)
+        return;
+
     // setup bold and underline
     bool useBold;
     ColorEntry::FontWeight weight = style->fontWeight(_colorTable);
@@ -819,14 +824,20 @@ void TerminalDisplay::drawCharacters(QPainter& painter,
         useBold = (weight == ColorEntry::Bold) ? true : false;
     const bool useUnderline = style->rendition & RE_UNDERLINE || font().underline();
     const bool useItalic = style->rendition & RE_ITALIC || font().italic();
+    const bool useStrikeOut = style->rendition & RE_STRIKEOUT || font().strikeOut();
+    const bool useOverline = style->rendition & RE_OVERLINE || font().overline();
 
     QFont font = painter.font();
     if (font.bold() != useBold
             || font.underline() != useUnderline
-            || font.italic() != useItalic) {
+            || font.italic() != useItalic
+            || font.strikeOut() != useStrikeOut
+            || font.overline() != useOverline) {
         font.setBold(useBold);
         font.setUnderline(useUnderline);
         font.setItalic(useItalic);
+        font.setStrikeOut(useStrikeOut);
+        font.setOverline(useOverline);
         painter.setFont(font);
     }
 
@@ -840,7 +851,7 @@ void TerminalDisplay::drawCharacters(QPainter& painter,
     }
 
     // draw text
-    if (isLineCharString(text)) {
+    if (isLineCharString(text) && !_useFontLineCharacters) {
         drawLineCharString(painter, rect.x(), rect.y(), text, style);
     } else {
         // Force using LTR as the document layout for the terminal area, because
@@ -1144,7 +1155,7 @@ void TerminalDisplay::updateImage()
                         continue;
                     const bool lineDraw = newLine[x + 0].isLineChar();
                     const bool doubleWidth = (x + 1 == columnsToUpdate) ? false : (newLine[x + 1].character == 0);
-                    const quint8 cr = newLine[x].rendition;
+                    const RenditionFlags cr = newLine[x].rendition;
                     const CharacterColor clipboard = newLine[x].backgroundColor;
                     if (newLine[x].foregroundColor != cf) cf = newLine[x].foregroundColor;
                     const int lln = columnsToUpdate - x;
@@ -1487,7 +1498,7 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
             const bool doubleWidth = (_image[ std::min(loc(x, y) + 1, _imageSize) ].character == 0);
             const CharacterColor currentForeground = _image[loc(x, y)].foregroundColor;
             const CharacterColor currentBackground = _image[loc(x, y)].backgroundColor;
-            const quint8 currentRendition = _image[loc(x, y)].rendition;
+            const RenditionFlags currentRendition = _image[loc(x, y)].rendition;
 
             while (x + len <= rlx &&
                     _image[loc(x + len, y)].foregroundColor == currentForeground &&
@@ -3405,6 +3416,7 @@ void TerminalDisplay::applyProfile(const Profile::Ptr &profile)
 
     // load font
     _antialiasText = profile->antiAliasFonts();
+    _useFontLineCharacters = profile->useFontLineCharacters();
     _boldIntense = profile->boldIntense();
     setVTFont(profile->font());
 

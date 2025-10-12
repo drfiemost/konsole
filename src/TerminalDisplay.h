@@ -760,6 +760,7 @@ private:
     InputMethodData _inputMethodData;
 
     bool _antialiasText;   // do we anti-alias or not
+    bool _useFontLineCharacters;
 
     bool _printerFriendly; // are we currently painting to a printer in black/white mode
 
