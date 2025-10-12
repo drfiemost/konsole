@@ -304,20 +304,19 @@ void SessionController::openUrl(const KUrl& url)
     // Clear shell's command line
     if (!_session->isForegroundProcessActive()
             && _bookmarkValidProgramsToClear.contains(_session->foregroundProcessName())) {
-        _session->emulation()->sendText(QChar(0x03)); // Ctrl+C
-        _session->emulation()->sendText(QChar('\n'));
+        _session->sendTextToTerminal(QChar(0x03), '\n'); // Ctrl+C
     }
 
     // handle local paths
     if (url.isLocalFile()) {
         QString path = url.toLocalFile();
-        _session->emulation()->sendText("cd " + KShell::quoteArg(path) + '\r');
+        _session->sendTextToTerminal("cd " + KShell::quoteArg(path), '\r');
     } else if (url.protocol().isEmpty()) {
         // KUrl couldn't parse what the user entered into the URL field
         // so just dump it to the shell
         QString command = url.prettyUrl();
         if (!command.isEmpty())
-            _session->emulation()->sendText(command + '\r');
+            _session->sendTextToTerminal(command, '\r');
     } else if (url.protocol() == "ssh") {
         QString sshCommand = "ssh ";
 
@@ -331,7 +330,7 @@ void SessionController::openUrl(const KUrl& url)
             sshCommand += url.host();
         }
 
-        _session->sendText(sshCommand + '\r');
+        _session->sendTextToTerminal(sshCommand, '\r');
 
     } else if (url.protocol() == "telnet") {
         QString telnetCommand = "telnet ";
@@ -346,7 +345,7 @@ void SessionController::openUrl(const KUrl& url)
             telnetCommand += QString::number(url.port());
         }
 
-        _session->sendText(telnetCommand + '\r');
+        _session->sendTextToTerminal(telnetCommand, '\r');
 
     } else {
         //TODO Implement handling for other Url types

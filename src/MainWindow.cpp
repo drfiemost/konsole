@@ -509,7 +509,7 @@ Session* MainWindow::createSSHSession(Profile::Ptr profile, const KUrl& url)
         sshCommand += url.host();
     }
 
-    session->sendText(sshCommand + '\r');
+    session->sendTextToTerminal(sshCommand, '\r');
 
     // create view before starting the session process so that the session
     // doesn't suffer a change in terminal size right after the session

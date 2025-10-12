@@ -61,6 +61,7 @@
 using namespace Konsole;
 
 int Session::lastSessionId = 0;
+static bool show_disallow_certain_dbus_methods_message = true;
 
 Session::Session(QObject* parent) :
     QObject(parent)
@@ -805,14 +806,31 @@ bool Session::closeInForceWay()
     }
 }
 
+void Session::sendTextToTerminal(const QString& text, const QChar& eol) const
+{
+    _emulation->sendText(text + eol);
+}
+
+// Only D-Bus calls this function (via SendText or runCommand)
 void Session::sendText(const QString& text) const
 {
+#if not defined(REMOVE_SENDTEXT_RUNCOMMAND_DBUS_METHODS)
+    if (show_disallow_certain_dbus_methods_message) {
+
+        KNotification::event(KNotification::Warning, "Konsole D-Bus Warning",
+            i18n("The D-Bus methods sendText/runCommand were just used.  There are security concerns about allowing these methods to be public.  If desired, these methods can be changed to internal use only by re-compiling Konsole. <p>This warning will only show once for this Konsole instance.</p>"));
+
+        show_disallow_certain_dbus_methods_message = false;
+    }
+#endif
+
     _emulation->sendText(text);
 }
 
+// Only D-Bus calls this function
 void Session::runCommand(const QString& command) const
 {
-    _emulation->sendText(command + '\n');
+    sendText(command + '\n');
 }
 
 void Session::sendMouseEvent(int buttons, int column, int line, int eventType)
@@ -942,7 +960,8 @@ void Session::updateSessionProcessInfo()
     if (!_sessionProcessInfo ||
             (processId() != 0 && processId() != _sessionProcessInfo->pid(&ok))) {
         delete _sessionProcessInfo;
-        _sessionProcessInfo = ProcessInfo::newInstance(processId());
+        _sessionProcessInfo = ProcessInfo::newInstance(processId(),
+                    tabTitleFormat(Session::LocalTabTitle));
         _sessionProcessInfo->setUserHomeDir();
     }
     _sessionProcessInfo->update();
@@ -955,7 +974,8 @@ bool Session::updateForegroundProcessInfo()
     const int foregroundPid = _shellProcess->foregroundProcessGroup();
     if (foregroundPid != _foregroundPid) {
         delete _foregroundProcessInfo;
-        _foregroundProcessInfo = ProcessInfo::newInstance(foregroundPid);
+        _foregroundProcessInfo = ProcessInfo::newInstance(foregroundPid,
+                    tabTitleFormat(Session::LocalTabTitle));
         _foregroundPid = foregroundPid;
     }
 

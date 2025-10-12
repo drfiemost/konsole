@@ -82,6 +82,7 @@ ProcessInfo::ProcessInfo(int aPid , bool enableEnvironmentRead)
     , _lastError(NoError)
     , _userName(QString())
     , _userHomeDir(QString())
+    , _userNameRequired(true)
 {
 }
 
@@ -108,7 +109,8 @@ QString ProcessInfo::validCurrentDir() const
     int currentPid = parentPid(&ok);
     QString dir = currentDir(&ok);
     while (!ok && currentPid != 0) {
-        ProcessInfo* current = ProcessInfo::newInstance(currentPid);
+        QString tmp = QString("");
+        ProcessInfo* current = ProcessInfo::newInstance(currentPid, tmp);
         current->update();
         currentPid = current->parentPid(&ok);
         dir = current->currentDir(&ok);
@@ -298,6 +300,16 @@ void ProcessInfo::setForegroundPid(int aPid)
     _fields |= FOREGROUND_PID;
 }
 
+void ProcessInfo::setUserNameRequired(bool need)
+{
+    _userNameRequired = need;
+}
+
+bool ProcessInfo::userNameRequired() const
+{
+    return _userNameRequired;
+}
+
 QString ProcessInfo::currentDir(bool* ok) const
 {
     if (ok)
@@ -350,7 +362,7 @@ void ProcessInfo::setFileError(QFile::FileError error)
 // implementations of the UnixProcessInfo abstract class.
 //
 
-NullProcessInfo::NullProcessInfo(int aPid, bool enableEnvironmentRead)
+NullProcessInfo::NullProcessInfo(int aPid, const QString& /*titleFormat*/, bool enableEnvironmentRead)
     : ProcessInfo(aPid, enableEnvironmentRead)
 {
 }
@@ -365,9 +377,10 @@ void NullProcessInfo::readUserName()
 }
 
 #if !defined(Q_OS_WIN)
-UnixProcessInfo::UnixProcessInfo(int aPid, bool enableEnvironmentRead)
+UnixProcessInfo::UnixProcessInfo(int aPid, const QString& titleFormat, bool enableEnvironmentRead)
     : ProcessInfo(aPid, enableEnvironmentRead)
 {
+    setUserNameRequired(titleFormat.contains(QLatin1String("%u")));
 }
 
 bool UnixProcessInfo::readProcessInfo(int aPid , bool enableEnvironmentRead)
@@ -421,8 +434,8 @@ void UnixProcessInfo::readUserName()
 class LinuxProcessInfo : public UnixProcessInfo
 {
 public:
-    LinuxProcessInfo(int aPid, bool env) :
-        UnixProcessInfo(aPid, env) {
+    LinuxProcessInfo(int aPid, const QString& titleFormat, bool env) :
+        UnixProcessInfo(aPid, titleFormat, env) {
     }
 
 private:
@@ -464,7 +477,10 @@ private:
             const int uid = uidString.toInt(&ok);
             if (ok)
                 setUserId(uid);
-            readUserName();
+            // This will cause constant opening of /etc/passwd
+            if (userNameRequired()) {
+                readUserName();
+            }
         } else {
             setFileError(statusInfo.error());
             return false;
@@ -613,8 +629,8 @@ private:
 class FreeBSDProcessInfo : public UnixProcessInfo
 {
 public:
-    FreeBSDProcessInfo(int aPid, bool readEnvironment) :
-        UnixProcessInfo(aPid, readEnvironment) {
+    FreeBSDProcessInfo(int aPid, const QString& titleFormat, bool readEnvironment) :
+        UnixProcessInfo(aPid, titleFormat, readEnvironment) {
     }
 
 private:
@@ -733,8 +749,8 @@ private:
 class OpenBSDProcessInfo : public UnixProcessInfo
 {
 public:
-    OpenBSDProcessInfo(int aPid, bool readEnvironment) :
-        UnixProcessInfo(aPid, readEnvironment) {
+    OpenBSDProcessInfo(int aPid, const QString& titleFormat, bool readEnvironment) :
+        UnixProcessInfo(aPid, titleFormat, readEnvironment) {
     }
 
 private:
@@ -867,8 +883,8 @@ private:
 class MacProcessInfo : public UnixProcessInfo
 {
 public:
-    MacProcessInfo(int aPid, bool env) :
-        UnixProcessInfo(aPid, env) {
+    MacProcessInfo(int aPid, const QString& titleFormat, bool env) :
+        UnixProcessInfo(aPid, titleFormat, env) {
     }
 
 private:
@@ -960,8 +976,8 @@ private:
 class SolarisProcessInfo : public UnixProcessInfo
 {
 public:
-    SolarisProcessInfo(int aPid, bool readEnvironment)
-        : UnixProcessInfo(aPid, readEnvironment) {
+    SolarisProcessInfo(int aPid, const QString& titleFormat, bool readEnvironment)
+        : UnixProcessInfo(aPid, titleFormat, readEnvironment) {
     }
 private:
     virtual bool readProcInfo(int aPid) {
@@ -1163,20 +1179,20 @@ QString SSHProcessInfo::format(const QString& input) const
     return output;
 }
 
-ProcessInfo* ProcessInfo::newInstance(int aPid, bool enableEnvironmentRead)
+ProcessInfo* ProcessInfo::newInstance(int aPid, const QString& titleFormat, bool enableEnvironmentRead)
 {
 #if defined(Q_OS_LINUX)
-    return new LinuxProcessInfo(aPid, enableEnvironmentRead);
+    return new LinuxProcessInfo(aPid, titleFormat, enableEnvironmentRead);
 #elif defined(Q_OS_SOLARIS)
-    return new SolarisProcessInfo(aPid, enableEnvironmentRead);
+    return new SolarisProcessInfo(aPid, titleFormat, enableEnvironmentRead);
 #elif defined(Q_OS_MAC)
-    return new MacProcessInfo(aPid, enableEnvironmentRead);
+    return new MacProcessInfo(aPid, titleFormat, enableEnvironmentRead);
 #elif defined(Q_OS_FREEBSD)
-    return new FreeBSDProcessInfo(aPid, enableEnvironmentRead);
+    return new FreeBSDProcessInfo(aPid, titleFormat, enableEnvironmentRead);
 #elif defined(Q_OS_OPENBSD)
-    return new OpenBSDProcessInfo(aPid, enableEnvironmentRead);
+    return new OpenBSDProcessInfo(aPid, titleFormat, enableEnvironmentRead);
 #else
-    return new NullProcessInfo(aPid, enableEnvironmentRead);
+    return new NullProcessInfo(aPid, titleFormat, enableEnvironmentRead);
 #endif
 }
 

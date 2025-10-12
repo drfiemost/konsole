@@ -153,7 +153,7 @@ void Part::showShellInDir(const QString& dir)
 void Part::sendInput(const QString& text)
 {
     Q_ASSERT(activeSession());
-    activeSession()->sendText(text);
+    activeSession()->sendTextToTerminal(text);
 }
 
 int Part::terminalProcessId()

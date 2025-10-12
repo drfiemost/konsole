@@ -25,4 +25,9 @@ add_subdirectory( data )
 add_subdirectory( desktop )
 add_subdirectory( doc/manual )
 
+### -DKONSOLE_BUILD_FONTEMBEDDER=TRUE or -DKONSOLE_GENERATE_LINEFONT=TRUE
+if(KONSOLE_BUILD_FONTEMBEDDER OR KONSOLE_GENERATE_LINEFONT)
+    add_subdirectory( tools )
+endif()
+
 macro_display_feature_log()
