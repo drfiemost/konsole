@@ -1033,6 +1033,10 @@ private:
 
 SSHProcessInfo::SSHProcessInfo(const ProcessInfo& process)
     : _process(process)
+    , _user(QString())
+    , _host(QString())
+    , _port(QString())
+    , _command(QString())
 {
     bool ok = false;
 
@@ -1122,8 +1126,17 @@ SSHProcessInfo::SSHProcessInfo(const ProcessInfo& process)
                     _host = args[i];
                 }
             } else {
-                // host has already been found, this must be the command argument
-                _command = args[i];
+                // host has already been found, this must be part of the
+                // command arguments.
+                // Note this is not 100% correct.  If any of the above
+                // noArgumentOptions or singleArgumentOptions are found, this
+                // will not be correct (example ssh server top -i 50)
+                // Suggest putting ssh command in quotes
+                if (_command.isEmpty()) {
+                    _command = args[i];
+                } else {
+                    _command = _command + QString(' ') + args[i];
+                }
             }
         }
     } else {
@@ -1167,6 +1180,16 @@ QString SSHProcessInfo::format(const QString& input) const
 
     // search for and replace known markers
     output.replace(QLatin1String("%u"), _user);
+
+    // provide 'user@' if user is defined -- this makes nicer
+    // remote tabs possible: "%U%h %c" => User@Host Command
+    //                                 => Host Command
+    // Depending on whether -l was passed to ssh (which is mostly not the
+    // case due to ~/.ssh/config).
+    if (_user.isEmpty())
+        output.replace(QLatin1String("%U"), QString());
+    else
+        output.replace(QLatin1String("%U"), _user + '@');
 
     if (isIpAddress)
         output.replace(QLatin1String("%h"), _host);
