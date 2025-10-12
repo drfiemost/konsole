@@ -330,11 +330,8 @@ public:
      * <li>Screen mode is disabled. TODO Document me</li>
      * <li>New line mode is disabled.  TODO Document me</li>
      * </ul>
-     *
-     * If @p clearScreen is true then the screen contents are erased entirely,
-     * otherwise they are unaltered.
      */
-    void reset(bool clearScreen = true);
+    void reset();
 
     /**
      * Displays a new character at the current cursor position.

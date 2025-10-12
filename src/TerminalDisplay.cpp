@@ -2851,7 +2851,9 @@ void TerminalDisplay::copyToX11Selection()
     if (text.isEmpty())
         return;
 
-    QApplication::clipboard()->setText(text, QClipboard::Selection);
+    if (QApplication::clipboard()->supportsSelection()) {
+        QApplication::clipboard()->setText(text, QClipboard::Selection);
+    }
 
     if (_autoCopySelectedText)
         QApplication::clipboard()->setText(text, QClipboard::Clipboard);
@@ -2877,8 +2879,10 @@ void TerminalDisplay::pasteFromClipboard(bool appendEnter)
 
 void TerminalDisplay::pasteFromX11Selection(bool appendEnter)
 {
-    QString text = QApplication::clipboard()->text(QClipboard::Selection);
-    doPaste(text, appendEnter);
+    if (QApplication::clipboard()->supportsSelection()) {
+        QString text = QApplication::clipboard()->text(QClipboard::Selection);
+        doPaste(text, appendEnter);
+    }
 }
 
 /* ------------------------------------------------------------------------- */
