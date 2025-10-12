@@ -38,9 +38,6 @@ using namespace Konsole;
 // Test with no shell running
 void TerminalInterfaceTest::testTerminalInterfaceNoShell()
 {
-    QString currentDirectory;
-    QString retVal;
-
     // create a Konsole part and attempt to connect to it
     _terminalPart = createPart();
     if (!_terminalPart)
@@ -65,7 +62,6 @@ void TerminalInterfaceTest::testTerminalInterfaceNoShell()
 void TerminalInterfaceTest::testTerminalInterface()
 {
     QString currentDirectory;
-    QString retVal;
 
     // create a Konsole part and attempt to connect to it
     _terminalPart = createPart();

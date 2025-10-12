@@ -96,12 +96,16 @@ bool shouldUseNewProcess()
     // take Qt options into consideration
     const KCmdLineArgs* qtArgs = KCmdLineArgs::parsedArgs("qt");
     QStringList qtProblematicOptions;
-    qtProblematicOptions << "session" << "name" << "reverse"
-                         << "stylesheet" << "graphicssystem";
+    qtProblematicOptions << QStringLiteral("session")
+                         << QStringLiteral("name")
+                         << QStringLiteral("reverse")
+                         << QStringLiteral("stylesheet")
+                         << QStringLiteral("graphicssystem");
 #if defined(Q_WS_X11)
-    qtProblematicOptions << "display" << "visual";
+    qtProblematicOptions << QStringLiteral("display")
+                         << QStringLiteral("visual");
 #endif
-    foreach(const QString& option, qtProblematicOptions) {
+    for(const QString& option: qtProblematicOptions) {
         if ( qtArgs->isSet(option.toLocal8Bit()) ) {
             return true;
         }
@@ -110,11 +114,12 @@ bool shouldUseNewProcess()
     // take KDE options into consideration
     const KCmdLineArgs* kdeArgs = KCmdLineArgs::parsedArgs("kde");
     QStringList kdeProblematicOptions;
-    kdeProblematicOptions << "config" << "style";
+    kdeProblematicOptions << QStringLiteral("config")
+                          << QStringLiteral("style");
 #if defined(Q_WS_X11)
-    kdeProblematicOptions << "waitforwm";
+    kdeProblematicOptions << QStringLiteral("waitforwm");
 #endif
-    foreach(const QString& option, kdeProblematicOptions) {
+    for(const QString& option: kdeProblematicOptions) {
         if ( kdeArgs->isSet(option.toLocal8Bit()) ) {
             return true;
         }
@@ -203,7 +208,7 @@ void fillCommandLineOptions(KCmdLineOptions& options)
 
 void fillAboutData(KAboutData& aboutData)
 {
-    aboutData.setProgramIconName("utilities-terminal");
+    aboutData.setProgramIconName(QStringLiteral("utilities-terminal"));
     aboutData.setHomepage("http://konsole.kde.org");
 
     aboutData.addAuthor(ki18nc("@info:credit", "Kurt Hindenburg"),

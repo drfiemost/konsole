@@ -221,7 +221,7 @@ void Application::processTabsFromFileArgs(KCmdLineArgs* args,
             lineTokens[key] = value;
         }
         // should contain at least one of 'command' and 'profile'
-        if (lineTokens.contains(QLatin1String("command")) || lineTokens.contains(QStringLiteral("profile"))) {
+        if (lineTokens.contains(QStringLiteral("command")) || lineTokens.contains(QStringLiteral("profile"))) {
             createTabFromArgs(args, window, lineTokens);
             sessions++;
         } else {
@@ -240,10 +240,10 @@ void Application::processTabsFromFileArgs(KCmdLineArgs* args,
 void Application::createTabFromArgs(KCmdLineArgs* args, MainWindow* window,
                                     const QHash<QString, QString>& tokens)
 {
-    const QString& title = tokens["title"];
-    const QString& command = tokens["command"];
-    const QString& profile = tokens["profile"];
-    const QString& workdir = tokens["workdir"];
+    const QString& title = tokens[QStringLiteral("title")];
+    const QString& command = tokens[QStringLiteral("command")];
+    const QString& profile = tokens[QStringLiteral("profile")];
+    const QString& workdir = tokens[QStringLiteral("workdir")];
 
     Profile::Ptr baseProfile;
     if (!profile.isEmpty()) {

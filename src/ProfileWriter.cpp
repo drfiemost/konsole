@@ -42,7 +42,9 @@ static const char GENERAL_GROUP[]     = "General";
 // All profiles changes are stored under users' local account
 QString KDE4ProfileWriter::getPath(const Profile::Ptr profile)
 {
-    static const QString localDataLocation = KStandardDirs::locateLocal("data", QString());
+    // If any changes are made to this location, check that programs using
+    // the Konsole part can write/save profiles
+    static const QString localDataLocation = KStandardDirs::locateLocal("data", QStringLiteral("/konsole"));
     return localDataLocation % "/" % profile->untranslatedName() % ".profile";
 }
 void KDE4ProfileWriter::writeProperties(KConfig& config,
