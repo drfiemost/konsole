@@ -265,6 +265,7 @@ void EditProfileDialog::setupGeneralPage(const Profile::Ptr profile)
     KUrlCompletion* dirCompletion = new KUrlCompletion(KUrlCompletion::DirCompletion);
     dirCompletion->setParent(this);
     _ui->initialDirEdit->setCompletionObject(dirCompletion);
+    _ui->initialDirEdit->setText(profile->defaultWorkingDirectory());
     _ui->initialDirEdit->setClearButtonShown(true);
 
     _ui->dirSelectButton->setIcon(KIcon("folder-open"));
