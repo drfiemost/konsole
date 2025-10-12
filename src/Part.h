@@ -72,7 +72,7 @@ public:
     QString foregroundProcessName() override;
 
     /** Reimplemented from TerminalInterface. */
-    //QString currentWorkingDirectory() const override; // FIXME uncomment
+    QString currentWorkingDirectory() const override;
 
 public slots:
     /**
@@ -137,13 +137,6 @@ public slots:
     * @param enabled Whether to enable or disable monitoring for activity.
     * */
     void setMonitorActivityEnabled(bool enabled);
-
-    /**
-    * Returns the current working directory of the active session
-    *
-    * TODO: this should better be moved into TerminalInterfaceV2.
-    */
-    QString currentWorkingDirectory() const;
 
 signals:
     /**
