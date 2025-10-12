@@ -334,7 +334,7 @@ void RegExpFilter::process()
 
     // ignore any regular expressions which match an empty string.
     // otherwise the while loop below will run indefinitely
-    if (_searchText.isEmpty())
+    if (_searchText.isEmpty() || _searchText.pattern().isEmpty())
         return;
 
     while (pos >= 0) {

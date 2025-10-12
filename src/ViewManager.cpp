@@ -893,6 +893,14 @@ void ViewManager::restoreSessions(const KConfigGroup& group)
     int tab = 1;
     for(int id: ids) {
         Session* session = SessionManager::instance()->idToSession(id);
+
+        if (!session) {
+            qWarning() << "Unable to load session with id" << id;
+            // Force a creation of a default session below
+            ids.clear();
+            break;
+        }
+
         createView(session);
         if (!session->isRunning())
             session->run();
