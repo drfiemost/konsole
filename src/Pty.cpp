@@ -200,7 +200,7 @@ void Pty::addEnvironmentVariables(const QStringList& environmentVariables)
 {
     bool isTermEnvAdded = false;
 
-    foreach(const QString& pair, environmentVariables) {
+    for(const QString& pair: environmentVariables) {
         // split on the first '=' character
         const int separator = pair.indexOf('=');
 
@@ -218,7 +218,7 @@ void Pty::addEnvironmentVariables(const QStringList& environmentVariables)
 
     // extra safeguard to make sure $TERM is always set
     if (!isTermEnvAdded) {
-        setEnv("TERM", "xterm");
+        setEnv("TERM", "xterm-256color");
     }
 }
 

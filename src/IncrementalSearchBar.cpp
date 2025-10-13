@@ -33,6 +33,7 @@
 #include <KLineEdit>
 #include <KLocalizedString>
 #include <KIcon>
+#include "KonsoleSettings.h"
 
 using namespace Konsole;
 
@@ -132,17 +133,16 @@ IncrementalSearchBar::IncrementalSearchBar(QWidget* aParent)
     _highlightMatches = optionsMenu->addAction(i18nc("@item:inmenu", "Highlight all matches"));
     _highlightMatches->setCheckable(true);
     _highlightMatches->setToolTip(i18nc("@info:tooltip", "Sets whether matching text should be highlighted"));
-    _highlightMatches->setChecked(true);
     connect(_highlightMatches, SIGNAL(toggled(bool)),
             this, SIGNAL(highlightMatchesToggled(bool)));
 
     _reverseSearch = optionsMenu->addAction(i18n("Search backwards"));
     _reverseSearch->setCheckable(true);
     _reverseSearch->setToolTip(i18n("Sets whether search should start from the bottom"));
-    _reverseSearch->setChecked(true);
     connect(_reverseSearch, SIGNAL(toggled(bool)),
             this, SLOT(updateButtonsAccordingToReverseSearchSetting()));
     updateButtonsAccordingToReverseSearchSetting();
+    setOptions();
 
     barLayout->addStretch();
 
@@ -281,6 +281,30 @@ const QBitArray IncrementalSearchBar::optionsChecked()
     if (_reverseSearch->isChecked()) options.setBit(ReverseSearch);
 
     return options;
+}
+
+void IncrementalSearchBar::setOptions()
+{
+    if (KonsoleSettings::searchCaseSensitive()) {
+        _caseSensitive->setChecked(true);
+    } else {
+        _caseSensitive->setChecked(false);
+    }
+    if (KonsoleSettings::searchRegExpression()) {
+        _regExpression->setChecked(true);
+    } else {
+        _regExpression->setChecked(false);
+    }
+    if (KonsoleSettings::searchHighlightMatches()) {
+        _highlightMatches->setChecked(true);
+    } else {
+        _highlightMatches->setChecked(false);
+    }
+    if (KonsoleSettings::searchReverseSearch()) {
+        _reverseSearch->setChecked(true);
+    } else {
+        _reverseSearch->setChecked(false);
+    }
 }
 
 #include "IncrementalSearchBar.moc"

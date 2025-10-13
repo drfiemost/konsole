@@ -108,6 +108,9 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         WindowSystemInfo.cpp
                         ${CMAKE_CURRENT_BINARY_DIR}/org.kde.konsole.Window.xml
                         ${CMAKE_CURRENT_BINARY_DIR}/org.kde.konsole.Session.xml)
+
+kde4_add_kcfg_files(konsoleprivate_SRCS settings/KonsoleSettings.kcfgc)
+
 set(konsole_LIBS ${KDE4_KPTY_LIBS}
                  ${KDE4_KIO_LIBS}
                  ${KDE4_KNOTIFYCONFIG_LIBS}
