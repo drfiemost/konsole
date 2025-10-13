@@ -399,8 +399,8 @@ void ProfileManager::changeProfile(Profile::Ptr profile,
     // is saved to disk
     ProfileGroup::Ptr group = newProfile->asGroup();
     if (group) {
-        for(const Profile::Ptr & newProfile: group->profiles()) {
-            changeProfile(newProfile, propertyMap, persistent);
+        for(const Profile::Ptr & groupProfile: group->profiles()) {
+            changeProfile(groupProfile, propertyMap, persistent);
         }
         return;
     }
