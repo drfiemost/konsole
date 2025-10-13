@@ -1065,18 +1065,6 @@ QString SSHProcessInfo::format(const QString& input) const
 {
     QString output(input);
 
-    // test whether host is an ip address
-    // in which case 'short host' and 'full host'
-    // markers in the input string are replaced with
-    // the full address
-    bool isIpAddress = false;
-
-    struct in_addr address;
-    if (inet_aton(_host.toLocal8Bit().constData(), &address) != 0)
-        isIpAddress = true;
-    else
-        isIpAddress = false;
-
     // search for and replace known markers
     output.replace(QLatin1String("%u"), _user);
 
@@ -1089,6 +1077,18 @@ QString SSHProcessInfo::format(const QString& input) const
         output.replace(QLatin1String("%U"), QString());
     else
         output.replace(QLatin1String("%U"), _user + '@');
+
+    // test whether host is an ip address
+    // in which case 'short host' and 'full host'
+    // markers in the input string are replaced with
+    // the full address
+    bool isIpAddress = false;
+
+    struct in_addr address;
+    if (inet_aton(_host.toLocal8Bit().constData(), &address) != 0)
+        isIpAddress = true;
+    else
+        isIpAddress = false;
 
     if (isIpAddress)
         output.replace(QLatin1String("%h"), _host);

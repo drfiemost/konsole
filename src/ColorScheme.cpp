@@ -262,7 +262,7 @@ ColorEntry ColorScheme::colorEntry(int index , uint sessionId) const
         valueDifference = dist(randomEngine) - range.value / 2;
     }
 
-    QColor& color = entry.color;
+    QColor& color = entry;
 
     int newHue = std::abs((color.hue() + hueDifference) % MAX_HUE);
     int newValue = std::min(std::abs(color.value() + valueDifference) , 255);
@@ -318,11 +318,11 @@ const ColorEntry* ColorScheme::colorTable() const
 }
 QColor ColorScheme::foregroundColor() const
 {
-    return colorTable()[FGCOLOR_INDEX].color;
+    return colorTable()[FGCOLOR_INDEX];
 }
 QColor ColorScheme::backgroundColor() const
 {
-    return colorTable()[BGCOLOR_INDEX].color;
+    return colorTable()[BGCOLOR_INDEX];
 }
 bool ColorScheme::hasDarkBackground() const
 {
@@ -365,7 +365,7 @@ void ColorScheme::readColorEntry(const KConfig& config , int index)
 
     ColorEntry entry;
 
-    entry.color = configGroup.readEntry("Color", QColor());
+    entry = configGroup.readEntry("Color", QColor());
 
     setColorTableEntry(index , entry);
 
@@ -396,7 +396,7 @@ void ColorScheme::writeColorEntry(KConfig& config , int index) const
 
     const ColorEntry& entry = colorTable()[index];
 
-    configGroup.writeEntry("Color", entry.color);
+    configGroup.writeEntry("Color", entry);
 
     // Remove unused keys
     if (configGroup.hasKey("Transparent")) {

@@ -98,8 +98,8 @@ void CharacterColorTest::testColorEntry()
     // Test ColorEntry()
     ColorEntry defaultColorEntry = ColorEntry();
     QCOMPARE(defaultColorEntry != green, true);
-    QCOMPARE(defaultColorEntry == black, true);
-    QCOMPARE(defaultColorEntry != black, false);
+    QCOMPARE(defaultColorEntry != black, true);
+    QCOMPARE(defaultColorEntry.isValid(), false);
 }
 
 void CharacterColorTest::testDummyConstructor()
@@ -113,8 +113,8 @@ void CharacterColorTest::testColorSpaceDefault_data()
     QTest::addColumn<int>("colorValue");
     QTest::addColumn<QColor>("expected");
 
-    QTest::newRow("color 0") << 0 << DefaultColorTable[0].color;
-    QTest::newRow("color 1") << 1 << DefaultColorTable[1].color;
+    QTest::newRow("color 0") << 0 << DefaultColorTable[0];
+    QTest::newRow("color 1") << 1 << DefaultColorTable[1];
 }
 
 void CharacterColorTest::testColorSpaceDefault()
@@ -133,9 +133,9 @@ void CharacterColorTest::testColorSpaceSystem_data()
     QTest::addColumn<int>("colorValue");
     QTest::addColumn<QColor>("expected");
 
-    QTest::newRow("color 0") << 0 << DefaultColorTable[2 + 0].color;
-    QTest::newRow("color 1") << 1 << DefaultColorTable[2 + 1].color;
-    QTest::newRow("color 7") << 7 << DefaultColorTable[2 + 7].color;
+    QTest::newRow("color 0") << 0 << DefaultColorTable[2 + 0];
+    QTest::newRow("color 1") << 1 << DefaultColorTable[2 + 1];
+    QTest::newRow("color 7") << 7 << DefaultColorTable[2 + 7];
 }
 
 void CharacterColorTest::testColorSpaceSystem()

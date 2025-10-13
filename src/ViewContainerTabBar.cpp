@@ -98,7 +98,7 @@ void ViewContainerTabBar::dropEvent(QDropEvent* event)
     const int index = dropIndex(event->pos());
     bool success = false;
 
-    ViewContainerTabBar* sourceContainerTabBar = static_cast<ViewContainerTabBar*>(event->source());
+    ViewContainerTabBar* sourceContainerTabBar = qobject_cast<ViewContainerTabBar*>(event->source());
 
     // check if the moved tab is the last of source view.
     if (sourceContainerTabBar->count() == 1) {
@@ -197,9 +197,7 @@ bool ViewContainerTabBar::proposedDropIsSameTab(const QDropEvent* event) const
     emit querySourceIndex(event, sourceIndex);
 
     const bool sourceAndDropAreLast = sourceIndex == count() - 1 && index == -1;
-    if (sourceIndex == index || sourceIndex == index - 1 || sourceAndDropAreLast)
-        return true;
-    else
+    return sourceIndex == index || sourceIndex == index - 1 || sourceAndDropAreLast;
         return false;
 }
 

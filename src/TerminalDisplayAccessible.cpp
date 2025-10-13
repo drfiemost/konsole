@@ -212,5 +212,5 @@ QString TerminalDisplayAccessible::textBeforeOffset(int offset, QAccessible2::Bo
 
 TerminalDisplay* TerminalDisplayAccessible::display()
 {
-    return static_cast<TerminalDisplay*>(object());
+    return qobject_cast<TerminalDisplay*>(object());
 }

@@ -152,7 +152,7 @@ void ViewContainer::addView(QWidget* view , ViewProperties* item, int index)
 }
 void ViewContainer::viewDestroyed(QObject* object)
 {
-    QWidget* widget = static_cast<QWidget*>(object);
+    QWidget* widget = qobject_cast<QWidget*>(object);
 
     _views.removeAll(widget);
     _navigation.remove(widget);

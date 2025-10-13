@@ -711,8 +711,8 @@ void Session::updateTerminalSize()
     const int VIEW_COLUMNS_THRESHOLD = 2;
 
     //select largest number of lines and columns that will fit in all visible views
-    foreach(TerminalDisplay* view, _views) {
-        if (view->isHidden() == false &&
+    for(TerminalDisplay* view: _views) {
+        if (!view->isHidden() &&
                 view->lines() >= VIEW_LINES_THRESHOLD &&
                 view->columns() >= VIEW_COLUMNS_THRESHOLD) {
             minLines = (minLines == -1) ? view->lines() : std::min(minLines , view->lines());
@@ -767,7 +767,7 @@ void Session::sendSignal(int signal)
 
 void Session::reportBackgroundColor(const QColor& c)
 {
-    #define to65k(a) (QString("%1").arg((int)(a*0xFFFF), 4, 16, QChar('0')))
+    #define to65k(a) (QString("%1").arg((int)((a)*0xFFFF), 4, 16, QChar('0')))
     QString msg = "\033]11;rgb:"
                 + to65k(c.redF())   + '/'
                 + to65k(c.greenF()) + '/'
@@ -784,10 +784,7 @@ bool Session::kill(int signal)
     int result = ::kill(_shellProcess->pid(), signal);
 
     if (result == 0) {
-        if (_shellProcess->waitForFinished(1000))
-            return true;
-        else
-            return false;
+        return _shellProcess->waitForFinished(1000);
     } else {
         return false;
     }
