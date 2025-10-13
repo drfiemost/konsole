@@ -212,9 +212,6 @@ void DBusTest::testSessions()
     stringReply = iface.call(QStringLiteral("title"), Session::LocalTabTitle);
     QVERIFY(stringReply.isValid());
 
-    //kDebug()<< stringReply.value();
-    QString prevLocalTitle = stringReply.value();
-
     // set title to,  what title should be
     QMap<QString, QString> titleMap;
     titleMap["Shell"] = QStringLiteral("Shell");
