@@ -853,7 +853,7 @@ public:
 
 private slots:
     void sessionFinished();
-    void forwardData(const char* data, int size);
+    void forwardData(const QByteArray& data);
 
 private:
     QList<Session*> masters() const;

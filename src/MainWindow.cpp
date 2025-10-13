@@ -106,22 +106,22 @@ MainWindow::MainWindow()
 
     // create view manager
     _viewManager = new ViewManager(this, actionCollection());
-    connect(_viewManager, SIGNAL(empty()), this, SLOT(close()));
-    connect(_viewManager, SIGNAL(activeViewChanged(SessionController*)), this,
-            SLOT(activeViewChanged(SessionController*)));
-    connect(_viewManager, SIGNAL(unplugController(SessionController*)), this,
-            SLOT(disconnectController(SessionController*)));
-    connect(_viewManager, SIGNAL(viewPropertiesChanged(QList<ViewProperties*>)),
-            bookmarkHandler(), SLOT(setViews(QList<ViewProperties*>)));
+    connect(_viewManager, &Konsole::ViewManager::empty, this, &Konsole::MainWindow::close);
+    connect(_viewManager, &Konsole::ViewManager::activeViewChanged, this,
+            &Konsole::MainWindow::activeViewChanged);
+    connect(_viewManager, &Konsole::ViewManager::unplugController, this,
+            &Konsole::MainWindow::disconnectController);
+    connect(_viewManager, &Konsole::ViewManager::viewPropertiesChanged,
+            bookmarkHandler(), &Konsole::BookmarkHandler::setViews);
 
-    connect(_viewManager, SIGNAL(updateWindowIcon()), this,
-            SLOT(updateWindowIcon()));
-    connect(_viewManager, SIGNAL(newViewRequest(Profile::Ptr)),
-            this, SLOT(newFromProfile(Profile::Ptr)));
-    connect(_viewManager, SIGNAL(newViewRequest()),
-            this, SLOT(newTab()));
-    connect(_viewManager, SIGNAL(viewDetached(Session*)),
-            this, SIGNAL(viewDetached(Session*)));
+    connect(_viewManager, &Konsole::ViewManager::updateWindowIcon, this,
+            &Konsole::MainWindow::updateWindowIcon);
+    connect(_viewManager, static_cast<void(ViewManager::*)(Profile::Ptr)>(&Konsole::ViewManager::newViewRequest),
+            this, &Konsole::MainWindow::newFromProfile);
+    connect(_viewManager, static_cast<void(ViewManager::*)()>(&Konsole::ViewManager::newViewRequest),
+            this, &Konsole::MainWindow::newTab);
+    connect(_viewManager, &Konsole::ViewManager::viewDetached,
+            this, &Konsole::MainWindow::viewDetached);
 
     // create the main widget
     setupMainWidget();
@@ -145,7 +145,7 @@ MainWindow::MainWindow()
 
     // this must come at the end
     applyKonsoleSettings();
-    connect(KonsoleSettings::self(), SIGNAL(configChanged()), this, SLOT(applyKonsoleSettings()));
+    connect(KonsoleSettings::self(), &Konsole::KonsoleSettings::configChanged, this, &Konsole::MainWindow::applyKonsoleSettings);
 }
 
 void MainWindow::rememberMenuAccelerators()
@@ -205,10 +205,10 @@ ViewManager* MainWindow::viewManager() const
 
 void MainWindow::disconnectController(SessionController* controller)
 {
-    disconnect(controller, SIGNAL(titleChanged(ViewProperties*)),
-               this, SLOT(activeViewTitleChanged(ViewProperties*)));
-    disconnect(controller, SIGNAL(rawTitleChanged()),
-               this, SLOT(updateWindowCaption()));
+    disconnect(controller, &Konsole::SessionController::titleChanged,
+               this, &Konsole::MainWindow::activeViewTitleChanged);
+    disconnect(controller, &Konsole::SessionController::rawTitleChanged,
+               this, &Konsole::MainWindow::updateWindowCaption);
     disconnect(controller, &Konsole::SessionController::iconChanged,
                this, &Konsole::MainWindow::updateWindowIcon);
 
@@ -226,9 +226,9 @@ void MainWindow::activeViewChanged(SessionController* controller)
 {
     // associate bookmark menu with current session
     bookmarkHandler()->setActiveView(controller);
-    disconnect(bookmarkHandler(), SIGNAL(openUrl(KUrl)), 0, 0);
-    connect(bookmarkHandler(), SIGNAL(openUrl(KUrl)), controller,
-            SLOT(openUrl(KUrl)));
+    disconnect(bookmarkHandler(), &Konsole::BookmarkHandler::openUrl, 0, 0);
+    connect(bookmarkHandler(), &Konsole::BookmarkHandler::openUrl, controller,
+            &Konsole::SessionController::openUrl);
 
     if (!_pluggedController.isNull())
         disconnectController(_pluggedController);
@@ -237,10 +237,10 @@ void MainWindow::activeViewChanged(SessionController* controller)
     _pluggedController = controller;
 
     // listen for title changes from the current session
-    connect(controller, SIGNAL(titleChanged(ViewProperties*)),
-            this, SLOT(activeViewTitleChanged(ViewProperties*)));
-    connect(controller, SIGNAL(rawTitleChanged()),
-            this, SLOT(updateWindowCaption()));
+    connect(controller, &Konsole::SessionController::titleChanged,
+            this, &Konsole::MainWindow::activeViewTitleChanged);
+    connect(controller, &Konsole::SessionController::rawTitleChanged,
+            this, &Konsole::MainWindow::updateWindowCaption);
     connect(controller, &Konsole::SessionController::iconChanged,
             this, &Konsole::MainWindow::updateWindowIcon);
 
@@ -310,7 +310,7 @@ void MainWindow::setupActions()
     _newTabMenuAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_T));
     _newTabMenuAction->setShortcutConfigurable(true);
     _newTabMenuAction->setAutoRepeat(false);
-    connect(_newTabMenuAction, SIGNAL(triggered()), this, SLOT(newTab()));
+    connect(_newTabMenuAction, &KActionMenu::triggered, this, &Konsole::MainWindow::newTab);
     collection->addAction(QStringLiteral("new-tab"), _newTabMenuAction);
 
     menuAction = collection->addAction(QStringLiteral("clone-tab"));
@@ -318,26 +318,26 @@ void MainWindow::setupActions()
     menuAction->setText(i18nc("@action:inmenu", "&Clone Tab"));
     menuAction->setShortcut(QKeySequence());
     menuAction->setAutoRepeat(false);
-    connect(menuAction, SIGNAL(triggered()), this, SLOT(cloneTab()));
+    connect(menuAction, &QAction::triggered, this, &Konsole::MainWindow::cloneTab);
 
     menuAction = collection->addAction(QStringLiteral("new-window"));
     menuAction->setIcon(KIcon("window-new"));
     menuAction->setText(i18nc("@action:inmenu", "New &Window"));
     menuAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_N));
     menuAction->setAutoRepeat(false);
-    connect(menuAction, SIGNAL(triggered()), this, SLOT(newWindow()));
+    connect(menuAction, &QAction::triggered, this, &Konsole::MainWindow::newWindow);
 
     menuAction = collection->addAction(QStringLiteral("close-window"));
     menuAction->setIcon(KIcon("window-close"));
     menuAction->setText(i18nc("@action:inmenu", "Close Window"));
     menuAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Q));
-    connect(menuAction, SIGNAL(triggered()), this, SLOT(close()));
+    connect(menuAction, &QAction::triggered, this, &Konsole::MainWindow::close);
 
     // Bookmark Menu
     KActionMenu* bookmarkMenu = new KActionMenu(i18nc("@title:menu", "&Bookmarks"), collection);
     _bookmarkHandler = new BookmarkHandler(collection, bookmarkMenu->menu(), true, this);
     collection->addAction(QStringLiteral("bookmark"), bookmarkMenu);
-    connect(_bookmarkHandler, SIGNAL(openUrls(QList<KUrl>)), this, SLOT(openUrls(QList<KUrl>)));
+    connect(_bookmarkHandler, &Konsole::BookmarkHandler::openUrls, this, &Konsole::MainWindow::openUrls);
 
     // Settings Menu
     _toggleMenuBarAction = KStandardAction::showMenubar(menuBar(), SLOT(setVisible(bool)), collection);
@@ -354,13 +354,13 @@ void MainWindow::setupActions()
     menuAction = collection->addAction(QStringLiteral("manage-profiles"));
     menuAction->setText(i18nc("@action:inmenu", "Manage Profiles..."));
     menuAction->setIcon(KIcon("configure"));
-    connect(menuAction, SIGNAL(triggered()), this, SLOT(showManageProfilesDialog()));
+    connect(menuAction, &QAction::triggered, this, &Konsole::MainWindow::showManageProfilesDialog);
 
     // Set up an shortcut-only action for activating menu bar.
     menuAction = collection->addAction(QStringLiteral("activate-menu"));
     menuAction->setText(i18nc("@item", "Activate Menu"));
     menuAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_F10));
-    connect(menuAction, SIGNAL(triggered()), this, SLOT(activateMenuBar()));
+    connect(menuAction, &QAction::triggered, this, &Konsole::MainWindow::activateMenuBar);
 }
 
 void MainWindow::viewFullScreen(bool fullScreen)
@@ -380,11 +380,11 @@ void MainWindow::setProfileList(ProfileList* list)
 {
     profileListChanged(list->actions());
 
-    connect(list, SIGNAL(profileSelected(Profile::Ptr)), this,
-            SLOT(newFromProfile(Profile::Ptr)));
+    connect(list, &Konsole::ProfileList::profileSelected, this,
+            &Konsole::MainWindow::newFromProfile);
 
-    connect(list, SIGNAL(actionsChanged(QList<QAction*>)), this,
-            SLOT(profileListChanged(QList<QAction*>)));
+    connect(list, &Konsole::ProfileList::actionsChanged, this,
+            &Konsole::MainWindow::profileListChanged);
 }
 
 void MainWindow::profileListChanged(const QList<QAction*>& sessionActions)

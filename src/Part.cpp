@@ -61,10 +61,10 @@ Part::Part(QWidget* parentWidget , QObject* parent, const QVariantList&)
     _viewManager = new ViewManager(this, actionCollection());
     _viewManager->setNavigationMethod(ViewManager::NoNavigation);
 
-    connect(_viewManager, SIGNAL(activeViewChanged(SessionController*)), this ,
-            SLOT(activeViewChanged(SessionController*)));
-    connect(_viewManager, SIGNAL(empty()), this, SLOT(terminalExited()));
-    connect(_viewManager, SIGNAL(newViewRequest()), this, SLOT(newTab()));
+    connect(_viewManager, &Konsole::ViewManager::activeViewChanged, this ,
+            &Konsole::Part::activeViewChanged);
+    connect(_viewManager, &Konsole::ViewManager::empty, this, &Konsole::Part::terminalExited);
+    connect(_viewManager, static_cast<void(ViewManager::*)()>(&Konsole::ViewManager::newViewRequest), this, &Konsole::Part::newTab);
 
     _viewManager->widget()->setParent(parentWidget);
 
@@ -223,20 +223,20 @@ void Part::activeViewChanged(SessionController* controller)
     // remove existing controller
     if (_pluggedController) {
         removeChildClient(_pluggedController);
-        disconnect(_pluggedController, SIGNAL(titleChanged(ViewProperties*)), this,
-                   SLOT(activeViewTitleChanged(ViewProperties*)));
-        disconnect(_pluggedController, SIGNAL(currentDirectoryChanged(QString)), this,
-                   SIGNAL(currentDirectoryChanged(QString)));
+        disconnect(_pluggedController, &Konsole::SessionController::titleChanged, this,
+                   &Konsole::Part::activeViewTitleChanged);
+        disconnect(_pluggedController, &Konsole::SessionController::currentDirectoryChanged, this,
+                   &Konsole::Part::currentDirectoryChanged);
     }
 
     // insert new controller
     insertChildClient(controller);
 
-    connect(controller, SIGNAL(titleChanged(ViewProperties*)), this,
-            SLOT(activeViewTitleChanged(ViewProperties*)));
+    connect(controller, &Konsole::SessionController::titleChanged, this,
+            &Konsole::Part::activeViewTitleChanged);
     activeViewTitleChanged(controller);
-    connect(controller, SIGNAL(currentDirectoryChanged(QString)), this,
-            SIGNAL(currentDirectoryChanged(QString)));
+    connect(controller, &Konsole::SessionController::currentDirectoryChanged, this,
+            &Konsole::Part::currentDirectoryChanged);
 
     const char* displaySignal = SIGNAL(overrideShortcutCheck(QKeyEvent*,bool&));
     const char* partSlot = SLOT(overrideTerminalShortcut(QKeyEvent*,bool&));
@@ -322,10 +322,10 @@ void Part::setMonitorSilenceEnabled(bool enabled)
 
     if (enabled) {
         activeSession()->setMonitorSilence(true);
-        connect(activeSession(), SIGNAL(stateChanged(int)), this, SLOT(sessionStateChanged(int)), Qt::UniqueConnection);
+        connect(activeSession(), &Konsole::Session::stateChanged, this, &Konsole::Part::sessionStateChanged, Qt::UniqueConnection);
     } else {
         activeSession()->setMonitorSilence(false);
-        disconnect(activeSession(), SIGNAL(stateChanged(int)), this, SLOT(sessionStateChanged(int)));
+        disconnect(activeSession(), &Konsole::Session::stateChanged, this, &Konsole::Part::sessionStateChanged);
     }
 }
 
@@ -335,10 +335,10 @@ void Part::setMonitorActivityEnabled(bool enabled)
 
     if (enabled) {
         activeSession()->setMonitorActivity(true);
-        connect(activeSession(), SIGNAL(stateChanged(int)), this, SLOT(sessionStateChanged(int)), Qt::UniqueConnection);
+        connect(activeSession(), &Konsole::Session::stateChanged, this, &Konsole::Part::sessionStateChanged, Qt::UniqueConnection);
     } else {
         activeSession()->setMonitorActivity(false);
-        disconnect(activeSession(), SIGNAL(stateChanged(int)), this, SLOT(sessionStateChanged(int)));
+        disconnect(activeSession(), &Konsole::Session::stateChanged, this, &Konsole::Part::sessionStateChanged);
     }
 }
 

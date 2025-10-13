@@ -41,8 +41,8 @@ void SessionListModel::setSessions(const QList<Session*>& sessions)
 {
     _sessions = sessions;
 
-    foreach(Session * session, sessions) {
-        connect(session, SIGNAL(finished()), this, SLOT(sessionFinished()));
+    for(Session * session: sessions) {
+        connect(session, &Konsole::Session::finished, this, &Konsole::SessionListModel::sessionFinished);
     }
 
     reset();

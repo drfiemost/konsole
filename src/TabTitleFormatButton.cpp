@@ -59,7 +59,7 @@ TabTitleFormatButton::TabTitleFormatButton(QWidget* aParent)
 {
     setText(i18n("Insert"));
     setMenu(new QMenu());
-    connect(menu() , SIGNAL(triggered(QAction*)) , this , SLOT(fireElementSelected(QAction*)));
+    connect(menu() , &QMenu::triggered , this , &Konsole::TabTitleFormatButton::fireElementSelected);
 }
 
 TabTitleFormatButton::~TabTitleFormatButton()
@@ -79,7 +79,7 @@ void TabTitleFormatButton::setContext(Session::TabTitleContext titleContext)
     menu()->clear();
 
     int count = 0;
-    const Element* array = 0;
+    const Element* array = nullptr;
 
     if (titleContext == Session::LocalTabTitle) {
         setToolTip(i18nc("@info:tooltip", "Insert title format"));

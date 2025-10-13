@@ -82,18 +82,18 @@ ViewManager::ViewManager(QObject* parent , KActionCollection* collection)
     setupActions();
 
     // emit a signal when all of the views held by this view manager are destroyed
-    connect(_viewSplitter , SIGNAL(allContainersEmpty()) , this , SIGNAL(empty()));
-    connect(_viewSplitter , SIGNAL(empty(ViewSplitter*)) , this , SIGNAL(empty()));
+    connect(_viewSplitter.data() , &Konsole::ViewSplitter::allContainersEmpty , this , &Konsole::ViewManager::empty);
+    connect(_viewSplitter.data() , &Konsole::ViewSplitter::empty , this , &Konsole::ViewManager::empty);
 
     // listen for addition or removal of views from associated containers
-    connect(_containerSignalMapper , SIGNAL(mapped(QObject*)) , this ,
-            SLOT(containerViewsChanged(QObject*)));
+    connect(_containerSignalMapper , static_cast<void(QSignalMapper::*)(QObject*)>(&QSignalMapper::mapped) , this ,
+            &Konsole::ViewManager::containerViewsChanged);
 
     // listen for profile changes
-    connect(ProfileManager::instance() , SIGNAL(profileChanged(Profile::Ptr)) , this,
-            SLOT(profileChanged(Profile::Ptr)));
-    connect(SessionManager::instance() , SIGNAL(sessionUpdated(Session*)) , this,
-            SLOT(updateViewsForSession(Session*)));
+    connect(ProfileManager::instance() , &Konsole::ProfileManager::profileChanged , this,
+            &Konsole::ViewManager::profileChanged);
+    connect(SessionManager::instance() , &Konsole::SessionManager::sessionUpdated , this,
+            &Konsole::ViewManager::updateViewsForSession);
 
     //prepare DBus communication
     new WindowAdaptor(this);
@@ -149,20 +149,20 @@ void ViewManager::setupActions()
                 this);
         splitLeftRightAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_ParenLeft));
         collection->addAction("split-view-left-right", splitLeftRightAction);
-        connect(splitLeftRightAction , SIGNAL(triggered()) , this , SLOT(splitLeftRight()));
+        connect(splitLeftRightAction , &KAction::triggered , this , &Konsole::ViewManager::splitLeftRight);
 
         KAction* splitTopBottomAction = new KAction(KIcon("view-split-top-bottom") ,
                 i18nc("@action:inmenu", "Split View Top/Bottom"), this);
         splitTopBottomAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_ParenRight));
         collection->addAction("split-view-top-bottom", splitTopBottomAction);
-        connect(splitTopBottomAction , SIGNAL(triggered()) , this , SLOT(splitTopBottom()));
+        connect(splitTopBottomAction , &KAction::triggered , this , &Konsole::ViewManager::splitTopBottom);
 
         KAction* closeActiveAction = new KAction(i18nc("@action:inmenu Close Active View", "Close Active") , this);
         closeActiveAction->setIcon(KIcon("view-close"));
         closeActiveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_X));
         closeActiveAction->setEnabled(false);
         collection->addAction("close-active-view", closeActiveAction);
-        connect(closeActiveAction , SIGNAL(triggered()) , this , SLOT(closeActiveContainer()));
+        connect(closeActiveAction , &KAction::triggered , this , &Konsole::ViewManager::closeActiveContainer);
 
         multiViewOnlyActions << closeActiveAction;
 
@@ -170,7 +170,7 @@ void ViewManager::setupActions()
         closeOtherAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O));
         closeOtherAction->setEnabled(false);
         collection->addAction("close-other-views", closeOtherAction);
-        connect(closeOtherAction , SIGNAL(triggered()) , this , SLOT(closeOtherContainers()));
+        connect(closeOtherAction , &KAction::triggered , this , &Konsole::ViewManager::closeOtherContainers);
 
         multiViewOnlyActions << closeOtherAction;
 
@@ -179,7 +179,7 @@ void ViewManager::setupActions()
         expandActiveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_BracketRight));
         expandActiveAction->setEnabled(false);
         collection->addAction("expand-active-view", expandActiveAction);
-        connect(expandActiveAction , SIGNAL(triggered()) , this , SLOT(expandActiveContainer()));
+        connect(expandActiveAction , &KAction::triggered , this , &Konsole::ViewManager::expandActiveContainer);
 
         multiViewOnlyActions << expandActiveAction;
 
@@ -187,7 +187,7 @@ void ViewManager::setupActions()
         shrinkActiveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_BracketLeft));
         shrinkActiveAction->setEnabled(false);
         collection->addAction("shrink-active-view", shrinkActiveAction);
-        connect(shrinkActiveAction , SIGNAL(triggered()) , this , SLOT(shrinkActiveContainer()));
+        connect(shrinkActiveAction , &KAction::triggered , this , &Konsole::ViewManager::shrinkActiveContainer);
 
         multiViewOnlyActions << shrinkActiveAction;
 
@@ -199,8 +199,8 @@ void ViewManager::setupActions()
         // to Ctrl+D - which will terminate the session in many cases
         detachViewAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_H));
 
-        connect(this , SIGNAL(splitViewToggle(bool)) , this , SLOT(updateDetachViewState()));
-        connect(detachViewAction , SIGNAL(triggered()) , this , SLOT(detachActiveView()));
+        connect(this , &Konsole::ViewManager::splitViewToggle , this , &Konsole::ViewManager::updateDetachViewState);
+        connect(detachViewAction , &KAction::triggered , this , &Konsole::ViewManager::detachActiveView);
 #endif
 
         // Next / Previous View , Next Container
@@ -214,42 +214,42 @@ void ViewManager::setupActions()
         // Switch to tab N shortcuts
         const int SWITCH_TO_TAB_COUNT = 19;
         QSignalMapper* switchToTabMapper = new QSignalMapper(this);
-        connect(switchToTabMapper, SIGNAL(mapped(int)), this, SLOT(switchToView(int)));
+        connect(switchToTabMapper, static_cast<void(QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &Konsole::ViewManager::switchToView);
         for (int i = 0; i < SWITCH_TO_TAB_COUNT; i++) {
             KAction* switchToTabAction = new KAction(i18nc("@action Shortcut entry", "Switch to Tab %1", i + 1), this);
             switchToTabMapper->setMapping(switchToTabAction, i);
-            connect(switchToTabAction, SIGNAL(triggered()), switchToTabMapper,
-                    SLOT(map()));
+            connect(switchToTabAction, &KAction::triggered, switchToTabMapper,
+                    static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
             collection->addAction(QString("switch-to-tab-%1").arg(i), switchToTabAction);
         }
     }
 
-    foreach(QAction* action, multiViewOnlyActions) {
-        connect(this , SIGNAL(splitViewToggle(bool)) , action , SLOT(setEnabled(bool)));
+    for(QAction* action: multiViewOnlyActions) {
+        connect(this , &Konsole::ViewManager::splitViewToggle , action , &QAction::setEnabled);
     }
 
     // keyboard shortcut only actions
     nextViewAction->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Right));
-    connect(nextViewAction, SIGNAL(triggered()) , this , SLOT(nextView()));
+    connect(nextViewAction, &QAction::triggered , this , &Konsole::ViewManager::nextView);
     _viewSplitter->addAction(nextViewAction);
 
     previousViewAction->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Left));
-    connect(previousViewAction, SIGNAL(triggered()) , this , SLOT(previousView()));
+    connect(previousViewAction, &QAction::triggered , this , &Konsole::ViewManager::previousView);
     _viewSplitter->addAction(previousViewAction);
 
     nextContainerAction->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Tab));
-    connect(nextContainerAction , SIGNAL(triggered()) , this , SLOT(nextContainer()));
+    connect(nextContainerAction , &QAction::triggered , this , &Konsole::ViewManager::nextContainer);
     _viewSplitter->addAction(nextContainerAction);
 
     moveViewLeftAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Left));
-    connect(moveViewLeftAction , SIGNAL(triggered()) , this , SLOT(moveActiveViewLeft()));
+    connect(moveViewLeftAction , &QAction::triggered , this , &Konsole::ViewManager::moveActiveViewLeft);
     _viewSplitter->addAction(moveViewLeftAction);
 
     moveViewRightAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right));
-    connect(moveViewRightAction , SIGNAL(triggered()) , this , SLOT(moveActiveViewRight()));
+    connect(moveViewRightAction , &QAction::triggered , this , &Konsole::ViewManager::moveActiveViewRight);
     _viewSplitter->addAction(moveViewRightAction);
 
-    connect(lastViewAction, SIGNAL(triggered()) , this , SLOT(lastView()));
+    connect(lastViewAction, &QAction::triggered , this , &Konsole::ViewManager::lastView);
     _viewSplitter->addAction(lastViewAction);
 }
 void ViewManager::switchToView(int index)
@@ -509,13 +509,13 @@ SessionController* ViewManager::createController(Session* session , TerminalDisp
     // create a new controller for the session, and ensure that this view manager
     // is notified when the view gains the focus
     SessionController* controller = new SessionController(session, view, this);
-    connect(controller , SIGNAL(focused(SessionController*)) , this , SLOT(controllerChanged(SessionController*)));
-    connect(session , SIGNAL(destroyed()) , controller , SLOT(deleteLater()));
-    connect(session , SIGNAL(primaryScreenInUse(bool)) ,
-            controller , SLOT(setupPrimaryScreenSpecificActions(bool)));
-    connect(session , SIGNAL(selectionChanged(QString)) ,
-            controller , SLOT(selectionChanged(QString)));
-    connect(view , SIGNAL(destroyed()) , controller , SLOT(deleteLater()));
+    connect(controller , &Konsole::SessionController::focused , this , &Konsole::ViewManager::controllerChanged);
+    connect(session , &Konsole::Session::destroyed , controller , &Konsole::SessionController::deleteLater);
+    connect(session , &Konsole::Session::primaryScreenInUse ,
+            controller , &Konsole::SessionController::setupPrimaryScreenSpecificActions);
+    connect(session , &Konsole::Session::selectionChanged ,
+            controller , &Konsole::SessionController::selectionChanged);
+    connect(view , &Konsole::TerminalDisplay::destroyed , controller , &Konsole::SessionController::deleteLater);
 
     // if this is the first controller created then set it as the active controller
     if (!_pluggedController)
@@ -551,7 +551,7 @@ void ViewManager::createView(Session* session, ViewContainer* container, int ind
     // can be deleted
     //
     // Use Qt::UniqueConnection to avoid duplicate connection
-    connect(session, SIGNAL(finished()), this, SLOT(sessionFinished()), Qt::UniqueConnection);
+    connect(session, &Konsole::Session::finished, this, &Konsole::ViewManager::sessionFinished, Qt::UniqueConnection);
 
     TerminalDisplay* display = createTerminalDisplay();
     ViewProperties* properties = createController(session, display);
@@ -620,17 +620,17 @@ void ViewManager::createView(Session* session)
 
 ViewContainer* ViewManager::createContainer()
 {
-    ViewContainer* container = 0;
+    ViewContainer* container = nullptr;
 
     switch (_navigationMethod) {
     case TabbedNavigation: {
-        container = new TabbedViewContainer(_navigationPosition, this, _viewSplitter);
+        TabbedViewContainer* tabbedContainer = new TabbedViewContainer(_navigationPosition, this, _viewSplitter);
+        container = tabbedContainer;
 
-        connect(container, SIGNAL(detachTab(ViewContainer*,QWidget*)),
-                this, SLOT(detachView(ViewContainer*,QWidget*))
-               );
-        connect(container, SIGNAL(closeTab(ViewContainer*,QWidget*)),
-                this, SLOT(closeTabFromContainer(ViewContainer*,QWidget*)));
+        connect(tabbedContainer, &TabbedViewContainer::detachTab,
+                this, &ViewManager::detachView);
+        connect(tabbedContainer, &TabbedViewContainer::closeTab,
+                this, &ViewManager::closeTabFromContainer);
     }
     break;
     case NoNavigation:
@@ -653,18 +653,18 @@ ViewContainer* ViewManager::createContainer()
     }
 
     // connect signals and slots
-    connect(container , SIGNAL(viewAdded(QWidget*,ViewProperties*)) , _containerSignalMapper ,
-            SLOT(map()));
-    connect(container , SIGNAL(viewRemoved(QWidget*)) , _containerSignalMapper ,
-            SLOT(map()));
+    connect(container , &Konsole::ViewContainer::viewAdded , _containerSignalMapper ,
+            static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
+    connect(container , &Konsole::ViewContainer::viewRemoved , _containerSignalMapper ,
+            static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
     _containerSignalMapper->setMapping(container, container);
 
-    connect(container, SIGNAL(newViewRequest()), this, SIGNAL(newViewRequest()));
-    connect(container, SIGNAL(newViewRequest(Profile::Ptr)), this, SIGNAL(newViewRequest(Profile::Ptr)));
-    connect(container, SIGNAL(moveViewRequest(int,int,bool&,TabbedViewContainer*)),
-            this , SLOT(containerMoveViewRequest(int,int,bool&,TabbedViewContainer*)));
-    connect(container , SIGNAL(viewRemoved(QWidget*)) , this , SLOT(viewDestroyed(QWidget*)));
-    connect(container , SIGNAL(activeViewChanged(QWidget*)) , this , SLOT(viewActivated(QWidget*)));
+    connect(container, static_cast<void(ViewContainer::*)()>(&Konsole::ViewContainer::newViewRequest), this, static_cast<void(ViewManager::*)()>(&Konsole::ViewManager::newViewRequest));
+    connect(container, static_cast<void(ViewContainer::*)(Profile::Ptr)>(&Konsole::ViewContainer::newViewRequest), this, static_cast<void(ViewManager::*)(Profile::Ptr)>(&Konsole::ViewManager::newViewRequest));
+    connect(container, &Konsole::ViewContainer::moveViewRequest,
+            this , &Konsole::ViewManager::containerMoveViewRequest);
+    connect(container , &Konsole::ViewContainer::viewRemoved , this , &Konsole::ViewManager::viewDestroyed);
+    connect(container , &Konsole::ViewContainer::activeViewChanged , this , &Konsole::ViewManager::viewActivated);
 
     return container;
 }
