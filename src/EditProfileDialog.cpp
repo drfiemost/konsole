@@ -886,15 +886,15 @@ void EditProfileDialog::showKeyBindingEditor(bool isNewTranslator)
 
     Q_ASSERT(translator);
 
-    QWeakPointer<KDialog> dialog = new KDialog(this);
+    QPointer<KDialog> dialog = new KDialog(this);
 
     if (isNewTranslator)
-        dialog.data()->setCaption(i18n("New Key Binding List"));
+        dialog->setCaption(i18n("New Key Binding List"));
     else
-        dialog.data()->setCaption(i18n("Edit Key Binding List"));
+        dialog->setCaption(i18n("Edit Key Binding List"));
 
     KeyBindingEditor* editor = new KeyBindingEditor;
-    dialog.data()->setMainWidget(editor);
+    dialog->setMainWidget(editor);
 
     if (translator)
         editor->setup(translator);
@@ -902,7 +902,7 @@ void EditProfileDialog::showKeyBindingEditor(bool isNewTranslator)
     if (isNewTranslator)
         editor->setDescription(i18n("New Key Binding List"));
 
-    if (dialog.data()->exec() == QDialog::Accepted) {
+    if (dialog->exec() == QDialog::Accepted) {
         KeyboardTranslator* newTranslator = new KeyboardTranslator(*editor->translator());
 
         if (isNewTranslator)
@@ -919,7 +919,7 @@ void EditProfileDialog::showKeyBindingEditor(bool isNewTranslator)
             updateTempProfileProperty(Profile::KeyBindings, newTranslator->name());
         }
     }
-    delete dialog.data();
+    delete dialog;
 }
 void EditProfileDialog::newKeyBinding()
 {

@@ -816,12 +816,7 @@ void TerminalDisplay::drawCharacters(QPainter& painter,
         return;
 
     // setup bold and underline
-    bool useBold;
-    ColorEntry::FontWeight weight = style->fontWeight(_colorTable);
-    if (weight == ColorEntry::UseCurrentFormat)
-        useBold = ((style->rendition & RE_BOLD) && _boldIntense) || font().bold();
-    else
-        useBold = (weight == ColorEntry::Bold) ? true : false;
+    bool useBold = ((style->rendition & RE_BOLD) && _boldIntense) || font().bold();
     const bool useUnderline = style->rendition & RE_UNDERLINE || font().underline();
     const bool useItalic = style->rendition & RE_ITALIC || font().italic();
     const bool useStrikeOut = style->rendition & RE_STRIKEOUT || font().strikeOut();
@@ -1869,6 +1864,9 @@ void TerminalDisplay::hideEvent(QHideEvent*)
 
 void TerminalDisplay::setMargin(int margin)
 {
+    if (margin < 0) {
+        margin = 0;
+    }
     _margin = margin;
     updateImageSize();
 }
@@ -3458,9 +3456,9 @@ void TerminalDisplay::applyProfile(const Profile::Ptr &profile)
     else if (middleClickPasteMode == Enum::PasteFromClipboard)
         setMiddleClickPasteMode(Enum::PasteFromClipboard);
 
-    // margin/center - these are hard-fixed ATM
-    setMargin(1);
-    setCenterContents(false);
+    // margin/center
+    setMargin(profile->property<int>(Profile::TerminalMargin));
+    setCenterContents(profile->property<bool>(Profile::TerminalCenter));
 
     // cursor shape
     int cursorShape = profile->property<int>(Profile::CursorShape);

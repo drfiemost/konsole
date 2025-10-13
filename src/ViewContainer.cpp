@@ -517,6 +517,7 @@ void TabbedViewContainer::startTabDrag(int tab)
         if (_tabBar->count() > 1)
             emit detachTab(this, view);
     }
+    delete drag;
 }
 
 void TabbedViewContainer::querySourceIndex(const QDropEvent* event, int& sourceIndex)
