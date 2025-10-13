@@ -545,13 +545,12 @@ bool MainWindow::queryClose()
         return true;
     }
 
-    // Check what processes are running,
-    // if just the default shell is running don't ask for confirmation
-
+    // Check what processes are running, excluding the shell
     QStringList processesRunning;
-    foreach(Session *session, _viewManager->sessions()) {
-        if (!session)
+    for(Session *session: _viewManager->sessions()) {
+        if (!session || !session->isForegroundProcessActive()) {
             continue;
+        }
 
         const QString defaultProc = session->program().split('/').last();
         const QString currentProc = session->foregroundProcessName().split('/').last();
@@ -563,7 +562,12 @@ bool MainWindow::queryClose()
             processesRunning.append(currentProc);
         }
     }
-    if (processesRunning.count() == 0) {
+
+    // Get number of open tabs
+    const int openTabs = _viewManager->viewProperties().count();
+
+    // If no processes running (except the shell) and no extra tabs, just close
+    if (processesRunning.count() == 0 && openTabs < 2) {
         return true;
     }
 
@@ -576,18 +580,35 @@ bool MainWindow::queryClose()
         KWindowSystem::unminimizeWindow(winId(), true);
     }
 
-    int result = KMessageBox::warningYesNoCancelList(this,
-                 i18ncp("@info", "There is a process running in this window. "
-                        "Do you still want to quit?",
-                        "There are %1 processes running in this window. "
-                        "Do you still want to quit?",
-                        processesRunning.count()),
+    int result;
+
+    if (processesRunning.count() > 0) {
+        result = KMessageBox::warningYesNoCancelList(this,
+                     i18ncp("@info", "There is a process running in this window. "
+                                     "Do you still want to quit?",
+                            "There are %1 processes running in this window. "
+                            "Do you still want to quit?",
+                            processesRunning.count()),
                  processesRunning,
                  i18nc("@title", "Confirm Close"),
                  KGuiItem(i18nc("@action:button", "Close &Window"), QStringLiteral("window-close")),
                  KGuiItem(i18nc("@action:button", "Close Current &Tab"), QStringLiteral("tab-close")),
                  KStandardGuiItem::cancel(),
                  QStringLiteral("CloseAllTabs"));
+    } else {
+        result = KMessageBox::warningYesNoCancel(this,
+                    i18nc("@info",
+                           "There are %1 open tabs in this window. "
+                           "Do you still want to quit?",
+                           openTabs),
+                    i18nc("@title", "Confirm Close"),
+                    KGuiItem(i18nc("@action:button", "Close &Window"), QStringLiteral("window-close")),
+                    KGuiItem(i18nc("@action:button", "Close Current &Tab"), QStringLiteral("tab-close")),
+                    KStandardGuiItem::cancel(),
+                    QStringLiteral("CloseAllEmptyTabs"));
+
+    }
+
 
     switch (result) {
     case KMessageBox::Yes:

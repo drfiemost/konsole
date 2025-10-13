@@ -66,15 +66,13 @@
 
 using namespace Konsole;
 
-ProcessInfo::ProcessInfo(int aPid , bool enableEnvironmentRead)
-    : _fields(ARGUMENTS | ENVIRONMENT)   // arguments and environments
+ProcessInfo::ProcessInfo(int aPid)
+    : _fields(ARGUMENTS)   // arguments
     // are currently always valid,
     // they just return an empty
     // vector / map respectively
     // if no arguments
-    // or environment bindings
     // have been explicitly set
-    , _enableEnvironmentRead(enableEnvironmentRead)
     , _pid(aPid)
     , _parentPid(0)
     , _foregroundPid(0)
@@ -97,7 +95,7 @@ void ProcessInfo::setError(Error error)
 
 void ProcessInfo::update()
 {
-    readProcessInfo(_pid, _enableEnvironmentRead);
+    readCurrentDir(_pid);
 }
 
 QString ProcessInfo::validCurrentDir() const
@@ -118,33 +116,6 @@ QString ProcessInfo::validCurrentDir() const
     }
 
     return dir;
-}
-
-QString ProcessInfo::format(const QString& input) const
-{
-    bool ok = false;
-
-    QString output(input);
-
-    // search for and replace known marker
-    output.replace(QLatin1String("%u"), userName());
-    output.replace(QLatin1String("%h"), localHost());
-    output.replace(QLatin1String("%n"), name(&ok));
-
-    QString dir = validCurrentDir();
-    if (output.contains(QLatin1String("%D"))) {
-        QString homeDir = userHomeDir();
-        QString tempDir = dir;
-        // Change User's Home Dir w/ ~ only at the beginning
-        if (tempDir.startsWith(homeDir)) {
-            tempDir.remove(0, homeDir.length());
-            tempDir.prepend('~');
-        }
-        output.replace(QLatin1String("%D"), tempDir);
-    }
-    output.replace(QLatin1String("%d"), formatShortDir(dir));
-
-    return output;
 }
 
 QSet<QString> ProcessInfo::_commonDirNames;
@@ -198,13 +169,6 @@ QVector<QString> ProcessInfo::arguments(bool* ok) const
     *ok = _fields.testFlag(ARGUMENTS);
 
     return _arguments;
-}
-
-QMap<QString, QString> ProcessInfo::environment(bool* ok) const
-{
-    *ok = _fields.testFlag(ENVIRONMENT);
-
-    return _environment;
 }
 
 bool ProcessInfo::isValid() const
@@ -338,11 +302,6 @@ void ProcessInfo::clearArguments()
     _arguments.clear();
 }
 
-void ProcessInfo::addEnvironmentBinding(const QString& name , const QString& value)
-{
-    _environment.insert(name, value);
-}
-
 void ProcessInfo::setFileError(QFile::FileError error)
 {
     switch (error) {
@@ -362,12 +321,12 @@ void ProcessInfo::setFileError(QFile::FileError error)
 // implementations of the UnixProcessInfo abstract class.
 //
 
-NullProcessInfo::NullProcessInfo(int aPid, const QString& /*titleFormat*/, bool enableEnvironmentRead)
-    : ProcessInfo(aPid, enableEnvironmentRead)
+NullProcessInfo::NullProcessInfo(int aPid, const QString& /*titleFormat*/)
+    : ProcessInfo(aPid)
 {
 }
 
-bool NullProcessInfo::readProcessInfo(int /*pid*/ , bool /*enableEnvironmentRead*/)
+bool NullProcessInfo::readProcessInfo(int /*pid*/)
 {
     return false;
 }
@@ -377,13 +336,13 @@ void NullProcessInfo::readUserName()
 }
 
 #if !defined(Q_OS_WIN)
-UnixProcessInfo::UnixProcessInfo(int aPid, const QString& titleFormat, bool enableEnvironmentRead)
-    : ProcessInfo(aPid, enableEnvironmentRead)
+UnixProcessInfo::UnixProcessInfo(int aPid, const QString& titleFormat)
+    : ProcessInfo(aPid)
 {
     setUserNameRequired(titleFormat.contains(QLatin1String("%u")));
 }
 
-bool UnixProcessInfo::readProcessInfo(int aPid , bool enableEnvironmentRead)
+bool UnixProcessInfo::readProcessInfo(int aPid)
 {
     // prevent _arguments from growing longer and longer each time this
     // method is called.
@@ -393,11 +352,13 @@ bool UnixProcessInfo::readProcessInfo(int aPid , bool enableEnvironmentRead)
     if (ok) {
         ok |= readArguments(aPid);
         ok |= readCurrentDir(aPid);
-        if (enableEnvironmentRead) {
-            ok |= readEnvironment(aPid);
-        }
     }
     return ok;
+}
+
+bool NullProcessInfo::readCurrentDir(int /*pid*/)
+{
+    return false;
 }
 
 void UnixProcessInfo::readUserName()
@@ -434,8 +395,26 @@ void UnixProcessInfo::readUserName()
 class LinuxProcessInfo : public UnixProcessInfo
 {
 public:
-    LinuxProcessInfo(int aPid, const QString& titleFormat, bool env) :
-        UnixProcessInfo(aPid, titleFormat, env) {
+    LinuxProcessInfo(int aPid, const QString& titleFormat) :
+        UnixProcessInfo(aPid, titleFormat) {
+    }
+
+protected:
+    virtual bool readCurrentDir(int aPid) {
+        char path_buffer[MAXPATHLEN + 1];
+        path_buffer[MAXPATHLEN] = 0;
+        QByteArray procCwd = QFile::encodeName(QStringLiteral("/proc/%1/cwd").arg(aPid));
+        const int length = readlink(procCwd.constData(), path_buffer, MAXPATHLEN);
+        if (length == -1) {
+            setError(UnknownError);
+            return false;
+        }
+
+        path_buffer[length] = '\0';
+        QString path = QFile::decodeName(path_buffer);
+
+        setCurrentDir(path);
+        return true;
     }
 
 private:
@@ -574,63 +553,56 @@ private:
 
         return true;
     }
-
-    virtual bool readCurrentDir(int aPid) {
-        char path_buffer[MAXPATHLEN + 1];
-        path_buffer[MAXPATHLEN] = 0;
-        QByteArray procCwd = QFile::encodeName(QString("/proc/%1/cwd").arg(aPid));
-        const int length = readlink(procCwd.constData(), path_buffer, MAXPATHLEN);
-        if (length == -1) {
-            setError(UnknownError);
-            return false;
-        }
-
-        path_buffer[length] = '\0';
-        QString path = QFile::decodeName(path_buffer);
-
-        setCurrentDir(path);
-        return true;
-    }
-
-    virtual bool readEnvironment(int aPid) {
-        // read environment bindings file found at /proc/<pid>/environ
-        // the expected format is a list of KEY=VALUE strings delimited by null
-        // characters and ending in a double null character pair.
-
-        QFile environmentFile(QStringLiteral("/proc/%1/environ").arg(aPid));
-        if (environmentFile.open(QIODevice::ReadOnly)) {
-            QTextStream stream(&environmentFile);
-            const QString& data = stream.readAll();
-
-            const QStringList& bindingList = data.split(QChar('\0'));
-
-            foreach(const QString & entry , bindingList) {
-                QString name;
-                QString value;
-
-                const int splitPos = entry.indexOf('=');
-
-                if (splitPos != -1) {
-                    name = entry.mid(0, splitPos);
-                    value = entry.mid(splitPos + 1, -1);
-
-                    addEnvironmentBinding(name, value);
-                }
-            }
-        } else {
-            setFileError(environmentFile.error());
-        }
-
-        return true;
-    }
 };
 
 #elif defined(Q_OS_FREEBSD)
 class FreeBSDProcessInfo : public UnixProcessInfo
 {
 public:
-    FreeBSDProcessInfo(int aPid, const QString& titleFormat, bool readEnvironment) :
-        UnixProcessInfo(aPid, titleFormat, readEnvironment) {
+    FreeBSDProcessInfo(int aPid, const QString& titleFormat) :
+        UnixProcessInfo(aPid, titleFormat) {
+    }
+
+protected:
+    virtual bool readCurrentDir(int aPid) {
+#if defined(HAVE_OS_DRAGONFLYBSD)
+        char buf[PATH_MAX];
+        int managementInfoBase[4];
+        size_t len;
+
+        managementInfoBase[0] = CTL_KERN;
+        managementInfoBase[1] = KERN_PROC;
+        managementInfoBase[2] = KERN_PROC_CWD;
+        managementInfoBase[3] = aPid;
+
+        len = sizeof(buf);
+        if (sysctl(managementInfoBase, 4, buf, &len, NULL, 0) == -1)
+            return false;
+
+        setCurrentDir(buf);
+
+        return true;
+#else
+        int numrecords;
+        struct kinfo_file* info = 0;
+
+        info = kinfo_getfile(aPid, &numrecords);
+
+        if (!info)
+            return false;
+
+        for (int i = 0; i < numrecords; ++i) {
+            if (info[i].kf_fd == KF_FD_TYPE_CWD) {
+                setCurrentDir(info[i].kf_path);
+
+                free(info);
+                return true;
+            }
+        }
+
+        free(info);
+        return false;
+#endif
     }
 
 private:
@@ -696,61 +668,34 @@ private:
 
         return true;
     }
-
-    virtual bool readEnvironment(int aPid) {
-        Q_UNUSED(aPid);
-        // Not supported in FreeBSD?
-        return false;
-    }
-
-    virtual bool readCurrentDir(int aPid) {
-#if defined(HAVE_OS_DRAGONFLYBSD)
-        char buf[PATH_MAX];
-        int managementInfoBase[4];
-        size_t len;
-
-        managementInfoBase[0] = CTL_KERN;
-        managementInfoBase[1] = KERN_PROC;
-        managementInfoBase[2] = KERN_PROC_CWD;
-        managementInfoBase[3] = aPid;
-
-        len = sizeof(buf);
-        if (sysctl(managementInfoBase, 4, buf, &len, NULL, 0) == -1)
-            return false;
-
-        setCurrentDir(buf);
-
-        return true;
-#else
-        int numrecords;
-        struct kinfo_file* info = 0;
-
-        info = kinfo_getfile(aPid, &numrecords);
-
-        if (!info)
-            return false;
-
-        for (int i = 0; i < numrecords; ++i) {
-            if (info[i].kf_fd == KF_FD_TYPE_CWD) {
-                setCurrentDir(info[i].kf_path);
-
-                free(info);
-                return true;
-            }
-        }
-
-        free(info);
-        return false;
-#endif
-    }
 };
 
 #elif defined(Q_OS_OPENBSD)
 class OpenBSDProcessInfo : public UnixProcessInfo
 {
 public:
-    OpenBSDProcessInfo(int aPid, const QString& titleFormat, bool readEnvironment) :
-        UnixProcessInfo(aPid, titleFormat, readEnvironment) {
+    OpenBSDProcessInfo(int aPid, const QString& titleFormat) :
+        UnixProcessInfo(aPid, titleFormat) {
+    }
+
+protected:
+    virtual bool readCurrentDir(int aPid) {
+        char    buf[PATH_MAX];
+        int     managementInfoBase[3];
+        size_t  len;
+
+        managementInfoBase[0] = CTL_KERN;
+        managementInfoBase[1] = KERN_PROC_CWD;
+        managementInfoBase[2] = aPid;
+
+        len = sizeof(buf);
+        if (::sysctl(managementInfoBase, 3, buf, &len, NULL, 0) == -1) {
+            qWarning() << "sysctl() call failed with code" << errno;
+            return false;
+        }
+
+        setCurrentDir(buf);
+        return true;
     }
 
 private:
@@ -836,55 +781,25 @@ private:
         free(argv);
         return true;
     }
-
-    virtual bool readEnvironment(int aPid) {
-        char**  envp;
-        char*   eqsign;
-
-        envp = readProcArgs(aPid, KERN_PROC_ENV);
-        if (envp == NULL) {
-            return false;
-        }
-
-        for (char **p = envp; *p != NULL; p++) {
-            eqsign = strchr(*p, '=');
-            if (eqsign == NULL || eqsign[1] == '\0') {
-                continue;
-            }
-            *eqsign = '\0';
-            addEnvironmentBinding(QString((const char *)p),
-                QString((const char *)eqsign + 1));
-        }
-        free(envp);
-        return true;
-    }
-
-    virtual bool readCurrentDir(int aPid) {
-        char    buf[PATH_MAX];
-        int     managementInfoBase[3];
-        size_t  len;
-
-        managementInfoBase[0] = CTL_KERN;
-        managementInfoBase[1] = KERN_PROC_CWD;
-        managementInfoBase[2] = aPid;
-
-        len = sizeof(buf);
-        if (::sysctl(managementInfoBase, 3, buf, &len, NULL, 0) == -1) {
-            kWarning() << "sysctl() call failed with code" << errno;
-            return false;
-        }
-
-        setCurrentDir(buf);
-        return true;
-    }
 };
 
 #elif defined(Q_OS_MAC)
 class MacProcessInfo : public UnixProcessInfo
 {
 public:
-    MacProcessInfo(int aPid, const QString& titleFormat, bool env) :
-        UnixProcessInfo(aPid, titleFormat, env) {
+    MacProcessInfo(int aPid, const QString& titleFormat) :
+        UnixProcessInfo(aPid, titleFormat) {
+    }
+
+protected:
+    virtual bool readCurrentDir(int aPid) {
+        struct proc_vnodepathinfo vpi;
+        const int nb = proc_pidinfo(aPid, PROC_PIDVNODEPATHINFO, 0, &vpi, sizeof(vpi));
+        if (nb == sizeof(vpi)) {
+            setCurrentDir(QString(vpi.pvi_cdir.vip_path));
+            return true;
+        }
+        return false;
     }
 
 private:
@@ -946,19 +861,6 @@ private:
         Q_UNUSED(aPid);
         return false;
     }
-    virtual bool readCurrentDir(int aPid) {
-        struct proc_vnodepathinfo vpi;
-        const int nb = proc_pidinfo(aPid, PROC_PIDVNODEPATHINFO, 0, &vpi, sizeof(vpi));
-        if (nb == sizeof(vpi)) {
-            setCurrentDir(QString(vpi.pvi_cdir.vip_path));
-            return true;
-        }
-        return false;
-    }
-    virtual bool readEnvironment(int aPid) {
-        Q_UNUSED(aPid);
-        return false;
-    }
 };
 
 #elif defined(Q_OS_SOLARIS)
@@ -976,9 +878,30 @@ private:
 class SolarisProcessInfo : public UnixProcessInfo
 {
 public:
-    SolarisProcessInfo(int aPid, const QString& titleFormat, bool readEnvironment)
-        : UnixProcessInfo(aPid, titleFormat, readEnvironment) {
+    SolarisProcessInfo(int aPid, const QString& titleFormat)
+        : UnixProcessInfo(aPid, titleFormat) {
     }
+
+protected:
+    // FIXME: This will have the same issues as BKO 251351; the Linux
+    // version uses readlink.
+    virtual bool readCurrentDir(int aPid) {
+        QFileInfo info(QString("/proc/%1/path/cwd").arg(aPid));
+        const bool readable = info.isReadable();
+
+        if (readable && info.isSymLink()) {
+            setCurrentDir(info.symLinkTarget());
+            return true;
+        } else {
+            if (!readable)
+                setError(PermissionsError);
+            else
+                setError(UnknownError);
+
+            return false;
+        }
+    }
+
 private:
     virtual bool readProcInfo(int aPid) {
         QFile psinfo(QString("/proc/%1/psinfo").arg(aPid));
@@ -1003,30 +926,6 @@ private:
     virtual bool readArguments(int /*pid*/) {
         // Handled in readProcInfo()
         return false;
-    }
-
-    virtual bool readEnvironment(int /*pid*/) {
-        // Not supported in Solaris
-        return false;
-    }
-
-    // FIXME: This will have the same issues as BKO 251351; the Linux
-    // version uses readlink.
-    virtual bool readCurrentDir(int aPid) {
-        QFileInfo info(QString("/proc/%1/path/cwd").arg(aPid));
-        const bool readable = info.isReadable();
-
-        if (readable && info.isSymLink()) {
-            setCurrentDir(info.symLinkTarget());
-            return true;
-        } else {
-            if (!readable)
-                setError(PermissionsError);
-            else
-                setError(UnknownError);
-
-            return false;
-        }
     }
 };
 #endif
@@ -1202,20 +1101,23 @@ QString SSHProcessInfo::format(const QString& input) const
     return output;
 }
 
-ProcessInfo* ProcessInfo::newInstance(int aPid, const QString& titleFormat, bool enableEnvironmentRead)
+ProcessInfo* ProcessInfo::newInstance(int aPid, const QString& titleFormat)
 {
+    ProcessInfo *info;
 #if defined(Q_OS_LINUX)
-    return new LinuxProcessInfo(aPid, titleFormat, enableEnvironmentRead);
+    info =  new LinuxProcessInfo(aPid, titleFormat);
 #elif defined(Q_OS_SOLARIS)
-    return new SolarisProcessInfo(aPid, titleFormat, enableEnvironmentRead);
+    info =  new SolarisProcessInfo(aPid, titleFormat);
 #elif defined(Q_OS_MAC)
-    return new MacProcessInfo(aPid, titleFormat, enableEnvironmentRead);
+    info =  new MacProcessInfo(aPid, titleFormat);
 #elif defined(Q_OS_FREEBSD)
-    return new FreeBSDProcessInfo(aPid, titleFormat, enableEnvironmentRead);
+    info =  new FreeBSDProcessInfo(aPid, titleFormat);
 #elif defined(Q_OS_OPENBSD)
-    return new OpenBSDProcessInfo(aPid, titleFormat, enableEnvironmentRead);
+    info =  new OpenBSDProcessInfo(aPid, titleFormat);
 #else
-    return new NullProcessInfo(aPid, titleFormat, enableEnvironmentRead);
+    info =  new NullProcessInfo(aPid, titleFormat);
 #endif
+    info->readProcessInfo(aPid);
+    return info;
 }
 

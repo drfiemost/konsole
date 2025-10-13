@@ -128,21 +128,23 @@ int Application::newInstance()
 
         if (args->isSet("tabs-from-file")) {
             // create new session(s) as described in file
-            processTabsFromFileArgs(args, window);
-        } else {
-            // select profile to use
-            Profile::Ptr baseProfile = processProfileSelectArgs(args);
-
-            // process various command-line options which cause a property of the
-            // selected profile to be changed
-            Profile::Ptr newProfile = processProfileChangeArgs(args, baseProfile);
-
-            // create new session
-            Session* session = window->createSession(newProfile, QString());
-
-            if (!args->isSet("close")) {
-                session->setAutoClose(false);
+            if (!processTabsFromFileArgs(args, window)) {
+                return 0;
             }
+        }
+
+        // select profile to use
+        Profile::Ptr baseProfile = processProfileSelectArgs(args);
+
+        // process various command-line options which cause a property of the
+        // selected profile to be changed
+        Profile::Ptr newProfile = processProfileChangeArgs(args, baseProfile);
+
+        // create new session
+        Session* session = window->createSession(newProfile, QString());
+
+        if (!args->isSet("close")) {
+            session->setAutoClose(false);
         }
 
         // if the background-mode argument is supplied, start the background
@@ -194,7 +196,7 @@ title: Top this!;; command: top
 command: ssh  earth
 profile: Zsh
 */
-void Application::processTabsFromFileArgs(KCmdLineArgs* args,
+bool Application::processTabsFromFileArgs(KCmdLineArgs* args,
         MainWindow* window)
 {
     // Open tab configuration file
@@ -203,7 +205,7 @@ void Application::processTabsFromFileArgs(KCmdLineArgs* args,
     if (!tabsFile.open(QFile::ReadOnly)) {
         kWarning() << "ERROR: Cannot open tabs file "
                    << tabsFileName.toLocal8Bit().data();
-        quit();
+        return false;
     }
 
     unsigned int sessions = 0;
@@ -233,8 +235,10 @@ void Application::processTabsFromFileArgs(KCmdLineArgs* args,
     if (sessions < 1) {
         kWarning() << "No valid lines found in "
                    << tabsFileName.toLocal8Bit().data();
-        quit();
+        return false;
     }
+
+    return true;
 }
 
 void Application::createTabFromArgs(KCmdLineArgs* args, MainWindow* window,

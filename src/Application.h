@@ -56,7 +56,7 @@ public:
     virtual ~Application();
 
     /** Creates a new main window and opens a default terminal session */
-    virtual int newInstance();
+    int newInstance() override;
 
     /**
      * Creates a new, empty main window and connects to its newSessionRequest()
@@ -80,7 +80,7 @@ private:
     MainWindow* processWindowArgs(KCmdLineArgs* args, bool &createdNewMainWindow);
     Profile::Ptr processProfileSelectArgs(KCmdLineArgs* args);
     Profile::Ptr processProfileChangeArgs(KCmdLineArgs* args, Profile::Ptr baseProfile);
-    void processTabsFromFileArgs(KCmdLineArgs* args, MainWindow* window);
+    bool processTabsFromFileArgs(KCmdLineArgs* args, MainWindow* window);
     void createTabFromArgs(KCmdLineArgs* args, MainWindow* window,
                            const QHash<QString, QString>&);
     void finalizeNewMainWindow(MainWindow* window);
