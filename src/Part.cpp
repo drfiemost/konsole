@@ -144,6 +144,7 @@ void Part::showShellInDir(const QString& dir)
     if (activeSession()->isRunning())
         return;
 
+    // All other checking is done in setInitialWorkingDirectory()
     if (!dir.isEmpty())
         activeSession()->setInitialWorkingDirectory(dir);
 

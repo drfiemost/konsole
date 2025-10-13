@@ -33,9 +33,6 @@ namespace Konsole
  *
  * A color palette is an array of 16 ColorEntry instances which map
  * system color indexes (from 0 to 15) into actual colors.
- *
- * Each entry can be set as bold, in which case any text
- * drawn using the color should be drawn in bold.
  */
 class ColorEntry
 {
@@ -57,7 +54,7 @@ public:
         : color(rhs.color) {}
 
     /**
-     * Sets the color and boldness of this color to those of @p rhs.
+     * Sets the color of this color to those of @p rhs.
      */
     ColorEntry& operator=(const ColorEntry& rhs) = default;
 

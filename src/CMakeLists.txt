@@ -35,7 +35,7 @@ configure_file(config-konsole.h.cmake
 macro_optional_add_subdirectory(tests)
 
 ### Security concerns about sendText and runCommand dbus methods being public
-option(REMOVE_SENDTEXT_RUNNCOMMAND_METHODS "Konsole: remove sendText and runCommand dbus methods" OFF)
+option(REMOVE_SENDTEXT_RUNCOMMAND_DBUS_METHODS "Konsole: remove sendText and runCommand dbus methods" OFF)
 
 ### Font Embedder and LineFont.h
 option(KONSOLE_BUILD_FONTEMBEDDER "Konsole: build fontembedder executable" OFF)

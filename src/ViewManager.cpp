@@ -159,7 +159,7 @@ void ViewManager::setupActions()
 
         KAction* closeActiveAction = new KAction(i18nc("@action:inmenu Close Active View", "Close Active") , this);
         closeActiveAction->setIcon(KIcon("view-close"));
-        closeActiveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S));
+        closeActiveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_X));
         closeActiveAction->setEnabled(false);
         collection->addAction("close-active-view", closeActiveAction);
         connect(closeActiveAction , SIGNAL(triggered()) , this , SLOT(closeActiveContainer()));
@@ -853,7 +853,7 @@ void ViewManager::saveSessions(KConfigGroup& group)
 {
     // find all unique session restore IDs
     QList<int> ids;
-    QHash<Session*, int> unique;
+    QSet<Session*> unique;
 
     // first: sessions in the active container, preserving the order
     ViewContainer* container = _viewSplitter->activeContainer();
@@ -867,8 +867,10 @@ void ViewManager::saveSessions(KConfigGroup& group)
         Q_ASSERT(view);
         Session* session = _sessionMap[view];
         ids << SessionManager::instance()->getRestoreId(session);
-        if (view == activeview) group.writeEntry("Active", tab);
-        unique.insert(session, 1);
+        unique.insert(session);
+        if (view == activeview) {
+            group.writeEntry("Active", tab);
+        }
         tab++;
     }
 
@@ -877,7 +879,7 @@ void ViewManager::saveSessions(KConfigGroup& group)
     for(Session * session: _sessionMap) {
         if (!unique.contains(session)) {
             ids << SessionManager::instance()->getRestoreId(session);
-            unique.insert(session, 1);
+            unique.insert(session);
         }
     }
 
