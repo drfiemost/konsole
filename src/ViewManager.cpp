@@ -126,6 +126,11 @@ QWidget* ViewManager::widget() const
 
 void ViewManager::setupActions()
 {
+    Q_ASSERT(_actionCollection);
+    if (!_actionCollection) {
+        return;
+    }
+
     KActionCollection* collection = _actionCollection;
 
     KAction* nextViewAction = new KAction(i18nc("@action Shortcut entry", "Next Tab") , this);
@@ -141,85 +146,83 @@ void ViewManager::setupActions()
     QList<QAction*> multiViewOnlyActions;
     multiViewOnlyActions << nextContainerAction;
 
-    if (collection) {
-        KAction* splitLeftRightAction = new KAction(KIcon("view-split-left-right"),
-                i18nc("@action:inmenu", "Split View Left/Right"),
-                this);
-        splitLeftRightAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_ParenLeft));
-        collection->addAction("split-view-left-right", splitLeftRightAction);
-        connect(splitLeftRightAction , &KAction::triggered , this , &Konsole::ViewManager::splitLeftRight);
+    KAction* splitLeftRightAction = new KAction(KIcon("view-split-left-right"),
+            i18nc("@action:inmenu", "Split View Left/Right"),
+            this);
+    splitLeftRightAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_ParenLeft));
+    collection->addAction("split-view-left-right", splitLeftRightAction);
+    connect(splitLeftRightAction , &KAction::triggered , this , &Konsole::ViewManager::splitLeftRight);
 
-        KAction* splitTopBottomAction = new KAction(KIcon("view-split-top-bottom") ,
-                i18nc("@action:inmenu", "Split View Top/Bottom"), this);
-        splitTopBottomAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_ParenRight));
-        collection->addAction("split-view-top-bottom", splitTopBottomAction);
-        connect(splitTopBottomAction , &KAction::triggered , this , &Konsole::ViewManager::splitTopBottom);
+    KAction* splitTopBottomAction = new KAction(KIcon("view-split-top-bottom") ,
+            i18nc("@action:inmenu", "Split View Top/Bottom"), this);
+    splitTopBottomAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_ParenRight));
+    collection->addAction("split-view-top-bottom", splitTopBottomAction);
+    connect(splitTopBottomAction , &KAction::triggered , this , &Konsole::ViewManager::splitTopBottom);
 
-        KAction* closeActiveAction = new KAction(i18nc("@action:inmenu Close Active View", "Close Active") , this);
-        closeActiveAction->setIcon(KIcon("view-close"));
-        closeActiveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_X));
-        closeActiveAction->setEnabled(false);
-        collection->addAction("close-active-view", closeActiveAction);
-        connect(closeActiveAction , &KAction::triggered , this , &Konsole::ViewManager::closeActiveContainer);
+    KAction* closeActiveAction = new KAction(i18nc("@action:inmenu Close Active View", "Close Active") , this);
+    closeActiveAction->setIcon(KIcon("view-close"));
+    closeActiveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_X));
+    closeActiveAction->setEnabled(false);
+    collection->addAction("close-active-view", closeActiveAction);
+    connect(closeActiveAction , &KAction::triggered , this , &Konsole::ViewManager::closeActiveContainer);
 
-        multiViewOnlyActions << closeActiveAction;
+    multiViewOnlyActions << closeActiveAction;
 
-        KAction* closeOtherAction = new KAction(i18nc("@action:inmenu Close Other Views", "Close Others") , this);
-        closeOtherAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O));
-        closeOtherAction->setEnabled(false);
-        collection->addAction("close-other-views", closeOtherAction);
-        connect(closeOtherAction , &KAction::triggered , this , &Konsole::ViewManager::closeOtherContainers);
+    KAction* closeOtherAction = new KAction(i18nc("@action:inmenu Close Other Views", "Close Others") , this);
+    closeOtherAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O));
+    closeOtherAction->setEnabled(false);
+    collection->addAction("close-other-views", closeOtherAction);
+    connect(closeOtherAction , &KAction::triggered , this , &Konsole::ViewManager::closeOtherContainers);
 
-        multiViewOnlyActions << closeOtherAction;
+    multiViewOnlyActions << closeOtherAction;
 
-        // Expand & Shrink Active View
-        KAction* expandActiveAction = new KAction(i18nc("@action:inmenu", "Expand View") , this);
-        expandActiveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_BracketRight));
-        expandActiveAction->setEnabled(false);
-        collection->addAction("expand-active-view", expandActiveAction);
-        connect(expandActiveAction , &KAction::triggered , this , &Konsole::ViewManager::expandActiveContainer);
+    // Expand & Shrink Active View
+    KAction* expandActiveAction = new KAction(i18nc("@action:inmenu", "Expand View") , this);
+    expandActiveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_BracketRight));
+    expandActiveAction->setEnabled(false);
+    collection->addAction("expand-active-view", expandActiveAction);
+    connect(expandActiveAction , &KAction::triggered , this , &Konsole::ViewManager::expandActiveContainer);
 
-        multiViewOnlyActions << expandActiveAction;
+    multiViewOnlyActions << expandActiveAction;
 
-        KAction* shrinkActiveAction = new KAction(i18nc("@action:inmenu", "Shrink View") , this);
-        shrinkActiveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_BracketLeft));
-        shrinkActiveAction->setEnabled(false);
-        collection->addAction("shrink-active-view", shrinkActiveAction);
-        connect(shrinkActiveAction , &KAction::triggered , this , &Konsole::ViewManager::shrinkActiveContainer);
+    KAction* shrinkActiveAction = new KAction(i18nc("@action:inmenu", "Shrink View") , this);
+    shrinkActiveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_BracketLeft));
+    shrinkActiveAction->setEnabled(false);
+    collection->addAction("shrink-active-view", shrinkActiveAction);
+    connect(shrinkActiveAction , &KAction::triggered , this , &Konsole::ViewManager::shrinkActiveContainer);
 
-        multiViewOnlyActions << shrinkActiveAction;
+    multiViewOnlyActions << shrinkActiveAction;
 
 #if defined(ENABLE_DETACHING)
-        KAction* detachViewAction = collection->addAction("detach-view");
-        detachViewAction->setIcon(KIcon("tab-detach"));
-        detachViewAction->setText(i18nc("@action:inmenu", "D&etach Current Tab"));
-        // Ctrl+Shift+D is not used as a shortcut by default because it is too close
-        // to Ctrl+D - which will terminate the session in many cases
-        detachViewAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_H));
+    KAction* detachViewAction = collection->addAction("detach-view");
+    detachViewAction->setIcon(KIcon("tab-detach"));
+    detachViewAction->setText(i18nc("@action:inmenu", "D&etach Current Tab"));
+    // Ctrl+Shift+D is not used as a shortcut by default because it is too close
+    // to Ctrl+D - which will terminate the session in many cases
+    detachViewAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_H));
 
-        connect(this , &Konsole::ViewManager::splitViewToggle , this , &Konsole::ViewManager::updateDetachViewState);
-        connect(detachViewAction , &KAction::triggered , this , &Konsole::ViewManager::detachActiveView);
+    connect(this , &Konsole::ViewManager::splitViewToggle , this , &Konsole::ViewManager::updateDetachViewState);
+    connect(detachViewAction , &KAction::triggered , this , &Konsole::ViewManager::detachActiveView);
 #endif
 
-        // Next / Previous View , Next Container
-        collection->addAction("next-view", nextViewAction);
-        collection->addAction("previous-view", previousViewAction);
-        collection->addAction("last-tab", lastViewAction);
-        collection->addAction("next-container", nextContainerAction);
-        collection->addAction("move-view-left", moveViewLeftAction);
-        collection->addAction("move-view-right", moveViewRightAction);
+    // Next / Previous View , Next Container
+    collection->addAction("next-view", nextViewAction);
+    collection->addAction("previous-view", previousViewAction);
+    collection->addAction("last-tab", lastViewAction);
+    collection->addAction("next-container", nextContainerAction);
+    collection->addAction("move-view-left", moveViewLeftAction);
+    collection->addAction("move-view-right", moveViewRightAction);
 
-        // Switch to tab N shortcuts
-        const int SWITCH_TO_TAB_COUNT = 19;
-        QSignalMapper* switchToTabMapper = new QSignalMapper(this);
-        connect(switchToTabMapper, static_cast<void(QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &Konsole::ViewManager::switchToView);
-        for (int i = 0; i < SWITCH_TO_TAB_COUNT; i++) {
-            KAction* switchToTabAction = new KAction(i18nc("@action Shortcut entry", "Switch to Tab %1", i + 1), this);
-            switchToTabMapper->setMapping(switchToTabAction, i);
-            connect(switchToTabAction, &KAction::triggered, switchToTabMapper,
-                    static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
-            collection->addAction(QString("switch-to-tab-%1").arg(i), switchToTabAction);
-        }
+    // Switch to tab N shortcuts
+    const int SWITCH_TO_TAB_COUNT = 19;
+    QSignalMapper* switchToTabMapper = new QSignalMapper(this);
+    connect(switchToTabMapper, static_cast<void(QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &Konsole::ViewManager::switchToView);
+    for (int i = 0; i < SWITCH_TO_TAB_COUNT; i++) {
+        KAction* switchToTabAction = new KAction(i18nc("@action Shortcut entry", "Switch to Tab %1", i + 1), this);
+        switchToTabMapper->setMapping(switchToTabAction, i);
+        connect(switchToTabAction, &KAction::triggered, switchToTabMapper,
+                static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
+        collection->addAction(QString("switch-to-tab-%1").arg(i), switchToTabAction);
     }
 
     for(QAction* action: multiViewOnlyActions) {
@@ -262,6 +265,7 @@ void ViewManager::switchToView(int index)
 }
 void ViewManager::updateDetachViewState()
 {
+    Q_ASSERT(_actionCollection);
     if (!_actionCollection)
         return;
 
@@ -698,47 +702,49 @@ void ViewManager::containerMoveViewRequest(int index, int id, bool& moved, Tabbe
 
 void ViewManager::setNavigationMethod(NavigationMethod method)
 {
+    Q_ASSERT(_actionCollection);
+    if (!_actionCollection) {
+        return;
+    }
     _navigationMethod = method;
 
     KActionCollection* collection = _actionCollection;
 
-    if (collection) {
-        // FIXME: The following disables certain actions for the KPart that it
-        // doesn't actually have a use for, to avoid polluting the action/shortcut
-        // namespace of an application using the KPart (otherwise, a shortcut may
-        // be in use twice, and the user gets to see an "ambiguous shortcut over-
-        // load" error dialog). However, this approach sucks - it's the inverse of
-        // what it should be. Rather than disabling actions not used by the KPart,
-        // a method should be devised to only enable those that are used, perhaps
-        // by using a separate action collection.
+    // FIXME: The following disables certain actions for the KPart that it
+    // doesn't actually have a use for, to avoid polluting the action/shortcut
+    // namespace of an application using the KPart (otherwise, a shortcut may
+    // be in use twice, and the user gets to see an "ambiguous shortcut over-
+    // load" error dialog). However, this approach sucks - it's the inverse of
+    // what it should be. Rather than disabling actions not used by the KPart,
+    // a method should be devised to only enable those that are used, perhaps
+    // by using a separate action collection.
 
-        const bool enable = (_navigationMethod != NoNavigation);
-        QAction* action;
+    const bool enable = (_navigationMethod != NoNavigation);
+    QAction* action;
 
-        action = collection->action("next-view");
-        if (action) action->setEnabled(enable);
+    action = collection->action("next-view");
+    if (action) action->setEnabled(enable);
 
-        action = collection->action("previous-view");
-        if (action) action->setEnabled(enable);
+    action = collection->action("previous-view");
+    if (action) action->setEnabled(enable);
 
-        action = collection->action("last-tab");
-        if (action) action->setEnabled(enable);
+    action = collection->action("last-tab");
+    if (action) action->setEnabled(enable);
 
-        action = collection->action("split-view-left-right");
-        if (action) action->setEnabled(enable);
+    action = collection->action("split-view-left-right");
+    if (action) action->setEnabled(enable);
 
-        action = collection->action("split-view-top-bottom");
-        if (action) action->setEnabled(enable);
+    action = collection->action("split-view-top-bottom");
+    if (action) action->setEnabled(enable);
 
-        action = collection->action("rename-session");
-        if (action) action->setEnabled(enable);
+    action = collection->action("rename-session");
+    if (action) action->setEnabled(enable);
 
-        action = collection->action("move-view-left");
-        if (action) action->setEnabled(enable);
+    action = collection->action("move-view-left");
+    if (action) action->setEnabled(enable);
 
-        action = collection->action("move-view-right");
-        if (action) action->setEnabled(enable);
-    }
+    action = collection->action("move-view-right");
+    if (action) action->setEnabled(enable);
 }
 
 ViewManager::NavigationMethod ViewManager::navigationMethod() const

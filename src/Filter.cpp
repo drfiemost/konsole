@@ -156,7 +156,7 @@ void TerminalImageFilterChain::setImage(const Character* const image , int lines
         // terminal image to avoid adding this imaginary character for wrapped
         // lines
         if ((lineProperties.value(i, LINE_DEFAULT) & LINE_WRAPPED) == 0)
-            lineStream << QChar('\n');
+            lineStream << QLatin1Char('\n');
     }
     decoder.end();
 }
@@ -438,8 +438,8 @@ const QRegExp UrlFilter::FullUrlRegExp("(www\\.(?!\\.)|[a-z][a-z0-9+.-]*://)[^\\
 const QRegExp UrlFilter::EmailAddressRegExp("\\b(\\w|\\.|-)+@(\\w|\\.|-)+\\.\\w+\\b");
 
 // matches full url or email address
-const QRegExp UrlFilter::CompleteUrlRegExp('(' + FullUrlRegExp.pattern() + '|' +
-        EmailAddressRegExp.pattern() + ')');
+const QRegExp UrlFilter::CompleteUrlRegExp(QLatin1Char('(')  + FullUrlRegExp.pattern() + QLatin1Char('|') +
+        EmailAddressRegExp.pattern() + QLatin1Char(')'));
 
 UrlFilter::UrlFilter()
 {

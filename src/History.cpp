@@ -64,7 +64,7 @@ HistoryFile::HistoryFile()
       _readWriteBalance(0)
 {
     const QString tmpFormat = KStandardDirs::locateLocal("tmp", QString())
-                              + "konsole-XXXXXX.history";
+                              + QLatin1String("konsole-XXXXXX.history");
     _tmpFile.setFileTemplate(tmpFormat);
     if (_tmpFile.open()) {
         _tmpFile.setAutoRemove(true);

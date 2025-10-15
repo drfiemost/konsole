@@ -147,7 +147,7 @@ QString EditProfileDialog::groupProfileNames(const ProfileGroup::Ptr group, int 
     for (int i = 0; i < count; i++) {
         caption += group->profiles()[i]->name();
         if (i < (count - 1)) {
-            caption += ',';
+            caption += QLatin1Char(',');
             // limit caption length to prevent very long window titles
             if (maxLength > 0 && caption.length() > maxLength) {
                 caption += QLatin1String("...");
@@ -317,7 +317,7 @@ void EditProfileDialog::showEnvironmentEditor()
     dialog.data()->setMainWidget(edit);
 
     if (dialog.data()->exec() == QDialog::Accepted) {
-        QStringList newEnvironment = edit->toPlainText().split('\n');
+        QStringList newEnvironment = edit->toPlainText().split(QLatin1Char('\n'));
         updateTempProfileProperty(Profile::Environment, newEnvironment);
     }
 
@@ -1128,10 +1128,10 @@ void EditProfileDialog::setupAdvancedPage(const Profile::Ptr profile)
 }
 void EditProfileDialog::setDefaultCodec(QTextCodec* codec)
 {
-    QString name = QString(codec->name());
+    QString name = QString::fromLocal8Bit(codec->name());
 
     updateTempProfileProperty(Profile::DefaultEncoding, name);
-    _ui->characterEncodingLabel->setText(codec->name());
+    _ui->characterEncodingLabel->setText(name);
 }
 void EditProfileDialog::customCursorColorChanged(const QColor& color)
 {
