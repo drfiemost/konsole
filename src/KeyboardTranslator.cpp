@@ -39,6 +39,7 @@ using namespace Konsole;
 
 KeyboardTranslatorWriter::KeyboardTranslatorWriter(QIODevice* destination)
     : _destination(destination)
+    , _writer(0)
 {
     Q_ASSERT(destination && destination->isWritable());
 
@@ -84,7 +85,9 @@ void KeyboardTranslatorWriter::writeEntry(const KeyboardTranslator::Entry& entry
 
 KeyboardTranslatorReader::KeyboardTranslatorReader(QIODevice* source)
     : _source(source)
-    , _hasNext(false)
+    , _description(QString())
+    , _nextEntry()
+    , _hasNext(0)
 {
     // read input until we find the description
     while (_description.isEmpty() && !source->atEnd()) {
@@ -403,6 +406,7 @@ KeyboardTranslator::Entry::Entry()
     , _state(NoState)
     , _stateMask(NoState)
     , _command(NoCommand)
+    , _text(QByteArray())
 {
 }
 
@@ -615,7 +619,9 @@ QString KeyboardTranslator::Entry::conditionToString() const
 }
 
 KeyboardTranslator::KeyboardTranslator(const QString& aName)
-    : _name(aName)
+    : _entries(QMultiHash<int, Entry>())
+    , _name(aName)
+    , _description(QString())
 {
 }
 

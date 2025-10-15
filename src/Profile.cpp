@@ -141,8 +141,7 @@ void Profile::fillTableWithDefaultNames()
     filledDefaults = true;
 }
 
-FallbackProfile::FallbackProfile()
-    : Profile()
+void Profile::useFallback()
 {
     // Fallback settings
     setProperty(Name, i18nc("Name of the default/builtin profile", "Default"));
@@ -207,7 +206,8 @@ FallbackProfile::FallbackProfile()
     setHidden(true);
 }
 Profile::Profile(Profile::Ptr parent)
-    : _parent(parent)
+    : _propertyValues(QHash<Property, QVariant>())
+    , _parent(parent)
     , _hidden(false)
 {
 }

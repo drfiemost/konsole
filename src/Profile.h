@@ -281,6 +281,13 @@ public:
     void clone(Ptr profile, bool differentOnly = true);
 
     /**
+     * A profile which contains a number of default settings for various
+     * properties.  This can be used as a parent for other profiles or a
+     * fallback in case a profile cannot be loaded from disk.
+     */
+    void useFallback();
+
+    /**
      * Changes the parent profile.  When calling the property() method,
      * if the specified property has not been set for this profile,
      * the parent's value for the property will be returned instead.
@@ -595,17 +602,6 @@ inline QVariant Profile::property(Property aProperty) const
 }
 
 /**
- * A profile which contains a number of default settings for various
- * properties.  This can be used as a parent for other profiles or a
- * fallback in case a profile cannot be loaded from disk.
- */
-class FallbackProfile : public Profile
-{
-public:
-    FallbackProfile();
-};
-
-/**
  * A composite profile which allows a group of profiles to be treated as one.
  * When setting a property, the new value is applied to all profiles in the
  * group.  When reading a property, if all profiles in the group have the same
@@ -669,6 +665,7 @@ private:
 };
 inline ProfileGroup::ProfileGroup(Profile::Ptr profileParent)
     : Profile(profileParent)
+    , _profiles(QList<Profile::Ptr>())
 {
     setHidden(true);
 }

@@ -698,7 +698,12 @@ private:
     {
     public:
         SavedState()
-            : cursorColumn(0), cursorLine(0), rendition(0) {}
+            : cursorColumn(0)
+            , cursorLine(0)
+            , rendition(0)
+            , foreground(CharacterColor())
+            , background(CharacterColor())
+        {}
 
         int cursorColumn;
         int cursorLine;

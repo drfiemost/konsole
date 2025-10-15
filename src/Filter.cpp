@@ -161,9 +161,11 @@ void TerminalImageFilterChain::setImage(const Character* const image , int lines
     decoder.end();
 }
 
-Filter::Filter() :
-    _linePositions(0),
-    _buffer(0)
+Filter::Filter()
+    : _hotspots(QMultiHash<int, HotSpot*>())
+    , _hotspotList(QList<HotSpot*>())
+    , _linePositions(0)
+    , _buffer(0)
 {
 }
 
@@ -290,6 +292,7 @@ void Filter::HotSpot::setType(Type type)
 }
 
 RegExpFilter::RegExpFilter()
+    : _searchText(QRegExp())
 {
 }
 
