@@ -67,9 +67,7 @@ void Pty::init()
     connect(pty(), &KPtyDevice::readyRead , this , &Konsole::Pty::dataReceived);
 }
 
-Pty::~Pty()
-{
-}
+Pty::~Pty() = default;
 
 void Pty::sendData(const QByteArray& data)
 {
@@ -127,8 +125,8 @@ bool Pty::flowControlEnabled() const
     if (pty()->masterFd() >= 0) {
         struct ::termios ttmode;
         pty()->tcGetAttr(&ttmode);
-        return ttmode.c_iflag & IXOFF &&
-               ttmode.c_iflag & IXON;
+        return ((ttmode.c_iflag & IXOFF) != 0u) &&
+               ((ttmode.c_iflag & IXON) != 0u);
     } else {
         kWarning() << "Unable to get flow control status, terminal not connected.";
         return _xonXoff;

@@ -207,9 +207,7 @@ HistoryScrollFile::HistoryScrollFile(const QString& logFileName)
 {
 }
 
-HistoryScrollFile::~HistoryScrollFile()
-{
-}
+HistoryScrollFile::~HistoryScrollFile() = default;
 
 int HistoryScrollFile::getLines()
 {
@@ -273,9 +271,7 @@ HistoryScrollNone::HistoryScrollNone()
 {
 }
 
-HistoryScrollNone::~HistoryScrollNone()
-{
-}
+HistoryScrollNone::~HistoryScrollNone() = default;
 
 bool HistoryScrollNone::hasScroll()
 {
@@ -557,19 +553,13 @@ bool CompactHistoryScroll::isWrappedLine(int lineNumber)
 // History Types
 //////////////////////////////////////////////////////////////////////
 
-HistoryType::HistoryType()
-{
-}
+HistoryType::HistoryType() = default;
 
-HistoryType::~HistoryType()
-{
-}
+HistoryType::~HistoryType() = default;
 
 //////////////////////////////
 
-HistoryTypeNone::HistoryTypeNone()
-{
-}
+HistoryTypeNone::HistoryTypeNone() = default;
 
 bool HistoryTypeNone::isEnabled() const
 {

@@ -114,9 +114,7 @@ ProfileManager::ProfileManager()
     loadShortcuts();
 }
 
-ProfileManager::~ProfileManager()
-{
-}
+ProfileManager::~ProfileManager() = default;
 
 K_GLOBAL_STATIC(ProfileManager , theProfileManager)
 ProfileManager* ProfileManager::instance()
@@ -240,15 +238,15 @@ void ProfileManager::sortProfiles(QList<Profile::Ptr>& list)
     QList<Profile::Ptr> lackingIndices;
     QList<Profile::Ptr> havingIndices;
 
-    for (int i = 0; i < list.size(); ++i) {
+    for (const auto & i : list) {
         // dis-regard the fallback profile
-        if (list.at(i)->path() == _fallbackProfile->path())
+        if (i->path() == _fallbackProfile->path())
             continue;
 
-        if (list.at(i)->menuIndexAsInt() == 0)
-            lackingIndices.append(list.at(i));
+        if (i->menuIndexAsInt() == 0)
+            lackingIndices.append(i);
         else
-            havingIndices.append(list.at(i));
+            havingIndices.append(i);
     }
 
     // sort by index

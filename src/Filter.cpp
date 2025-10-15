@@ -155,7 +155,7 @@ void TerminalImageFilterChain::setImage(const Character* const image , int lines
         // TODO - Use the "line wrapped" attribute associated with lines in a
         // terminal image to avoid adding this imaginary character for wrapped
         // lines
-        if (!(lineProperties.value(i, LINE_DEFAULT) & LINE_WRAPPED))
+        if ((lineProperties.value(i, LINE_DEFAULT) & LINE_WRAPPED) == 0)
             lineStream << QChar('\n');
     }
     decoder.end();
@@ -217,9 +217,8 @@ const QString* Filter::buffer()
 {
     return _buffer;
 }
-Filter::HotSpot::~HotSpot()
-{
-}
+Filter::HotSpot::~HotSpot() = default;
+
 void Filter::addHotSpot(HotSpot* spot)
 {
     _hotspotList << spot;

@@ -374,8 +374,8 @@ void TabbedViewContainer::closeCurrentTab()
 void TabbedViewContainer::updateVisibilityOfQuickButtons()
 {
     const bool tabBarHidden = _tabBar->isHidden();
-    _newTabButton->setVisible(!tabBarHidden && (features() & QuickNewView));
-    _closeTabButton->setVisible(!tabBarHidden && (features() & QuickCloseView));
+    _newTabButton->setVisible(!tabBarHidden && ((features() & QuickNewView) != 0));
+    _closeTabButton->setVisible(!tabBarHidden && ((features() & QuickCloseView) != 0));
 }
 
 void TabbedViewContainer::setTabBarVisible(bool visible)

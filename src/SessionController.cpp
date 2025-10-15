@@ -237,7 +237,7 @@ void SessionController::trackOutput(QKeyEvent* event)
 
     // Only jump to the bottom if the user actually typed something in,
     // not if the user e. g. just pressed a modifier.
-    if (event->text().isEmpty() && event->modifiers()) {
+    if (event->text().isEmpty() && (event->modifiers() != 0u)) {
         return;
     }
 
@@ -824,7 +824,7 @@ void SessionController::renameSession()
     if (guard.isNull())
         return;
 
-    if (result) {
+    if (result != 0) {
         QString tabTitle = dialog->tabTitleText();
         QString remoteTabTitle = dialog->remoteTabTitleText();
 
@@ -857,7 +857,7 @@ bool SessionController::confirmClose() const
                             "  Are you sure you want to close it?", title);
 
         int result = KMessageBox::warningYesNo(_view->window(), question, i18n("Confirm Close"));
-        return (result == KMessageBox::Yes) ? true : false;
+        return result == KMessageBox::Yes;
     }
     return true;
 }
@@ -882,7 +882,7 @@ bool SessionController::confirmForceClose() const
                             "  Are you sure you want to kill it by force?", title);
 
         int result = KMessageBox::warningYesNo(_view->window(), question, i18n("Confirm Close"));
-        return (result == KMessageBox::Yes) ? true : false;
+        return result == KMessageBox::Yes;
     }
     return true;
 }
@@ -996,9 +996,7 @@ void SessionController::copyInputToAllTabs()
 
     QSet<Session*> group =
         QSet<Session*>::fromList(SessionManager::instance()->sessions());
-    for (QSet<Session*>::iterator iterator = group.begin();
-            iterator != group.end(); ++iterator) {
-        Session* session = *iterator;
+    for (auto session : group) {
 
         // First, ensure that the session is removed
         // (necessary to avoid duplicates on addSession()!)
@@ -1062,12 +1060,11 @@ void SessionController::copyInputToNone()
 
     QSet<Session*> group =
         QSet<Session*>::fromList(SessionManager::instance()->sessions());
-    for (QSet<Session*>::iterator iterator = group.begin();
-            iterator != group.end(); ++iterator) {
-        Session* session = *iterator;
+    for (auto iterator : group) {
+        Session* session = iterator;
 
         if (session != _session) {
-            _copyToGroup->removeSession(*iterator);
+            _copyToGroup->removeSession(iterator);
         }
     }
     delete _copyToGroup;
@@ -1345,7 +1342,7 @@ void SessionController::showHistoryOptions()
     if (guard.isNull())
         return;
 
-    if (result) {
+    if (result != 0) {
         scrollBackOptionsChanged(dialog->mode(), dialog->lineCount());
     }
 }
@@ -1624,10 +1621,7 @@ void SessionController::zmodemUpload()
 bool SessionController::isKonsolePart() const
 {
     // Check to see if we are being called from Konsole or a KPart
-    if (QString(qApp->metaObject()->className()) == "Konsole::Application")
-        return false;
-    else
-        return true;
+    return !(QString(qApp->metaObject()->className()) == "Konsole::Application");
 }
 
 SessionTask::SessionTask(QObject* parent)
@@ -1656,9 +1650,7 @@ SaveHistoryTask::SaveHistoryTask(QObject* parent)
     : SessionTask(parent)
 {
 }
-SaveHistoryTask::~SaveHistoryTask()
-{
-}
+SaveHistoryTask::~SaveHistoryTask() = default;
 
 void SaveHistoryTask::execute()
 {
@@ -1770,7 +1762,7 @@ void SaveHistoryTask::jobDataRequested(KIO::Job* job , QByteArray& data)
 }
 void SaveHistoryTask::jobResult(KJob* job)
 {
-    if (job->error()) {
+    if (job->error() != 0) {
         KMessageBox::sorry(0 , i18n("A problem occurred when saving the output.\n%1", job->errorString()));
     }
 
