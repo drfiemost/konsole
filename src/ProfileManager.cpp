@@ -23,10 +23,10 @@
 #include "ProfileManager.h"
 
 // Qt
-#include <QtCore/QDir>
-#include <QtCore/QFileInfo>
-#include <QtCore/QList>
-#include <QtCore/QString>
+#include <QDir>
+#include <QFileInfo>
+#include <QList>
+#include <QString>
 
 // KDE
 #include <KConfig>
@@ -35,6 +35,7 @@
 #include <KConfigGroup>
 #include <KLocalizedString>
 #include <KStandardDirs>
+#include <KMessageBox>
 
 // Konsole
 #include "ProfileReader.h"
@@ -330,7 +331,10 @@ QString ProfileManager::saveProfile(Profile::Ptr profile)
 
     QString newPath = writer->getPath(profile);
 
-    writer->writeProfile(newPath, profile);
+    if (!writer->writeProfile(newPath, profile)) {
+        KMessageBox::sorry(0,
+                           i18n("Konsole does not have permission to save this profile to %1", newPath));
+    }
 
     delete writer;
 

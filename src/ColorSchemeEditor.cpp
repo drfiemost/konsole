@@ -21,8 +21,8 @@
 #include "ColorSchemeEditor.h"
 
 // Qt
-#include <QtGui/QFontMetrics>
-#include <QtCore/QFileInfo>
+#include <QFontMetrics>
+#include <QFileInfo>
 
 // KDE
 #include <KColorDialog>
@@ -210,8 +210,8 @@ void ColorSchemeEditor::setup(const ColorScheme* scheme, bool isNewScheme)
     _colors = new ColorScheme(*scheme);
 
     if (_isNewScheme) {
-        setCaption(i18n("New Color Scheme"));
-        setDescription(i18n("New Color Scheme"));
+        setCaption(i18nc("@title:window", "New Color Scheme"));
+        setDescription(i18nc("@title:window", "Edit Color Scheme"));
     } else {
         setCaption(i18n("Edit Color Scheme"));
     }

@@ -31,11 +31,10 @@
 
 // Qt
 #include <QApplication>
-#include <QtGui/QColor>
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QStringList>
-#include <QtDBus/QtDBus>
+#include <QColor>
+#include <QDir>
+#include <QFile>
+#include <QStringList>
 #include <QKeyEvent>
 
 // KDE

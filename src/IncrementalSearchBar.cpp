@@ -23,8 +23,8 @@
 // Qt
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QtGui/QKeyEvent>
-#include <QtCore/QTimer>
+#include <QKeyEvent>
+#include <QTimer>
 #include <QToolButton>
 #include <QMenu>
 
@@ -136,9 +136,9 @@ IncrementalSearchBar::IncrementalSearchBar(QWidget* aParent)
     connect(_highlightMatches, &QAction::toggled,
             this, &Konsole::IncrementalSearchBar::highlightMatchesToggled);
 
-    _reverseSearch = optionsMenu->addAction(i18n("Search backwards"));
+    _reverseSearch = optionsMenu->addAction(i18nc("@item:inmenu", "Search backwards"));
     _reverseSearch->setCheckable(true);
-    _reverseSearch->setToolTip(i18n("Sets whether search should start from the bottom"));
+    _reverseSearch->setToolTip(i18nc("@info:tooltip", "Sets whether search should start from the bottom"));
     connect(_reverseSearch, &QAction::toggled,
             this, &Konsole::IncrementalSearchBar::updateButtonsAccordingToReverseSearchSetting);
     updateButtonsAccordingToReverseSearchSetting();
@@ -161,12 +161,12 @@ void IncrementalSearchBar::updateButtonsAccordingToReverseSearchSetting()
     Q_ASSERT(_reverseSearch);
     if (_reverseSearch->isChecked()) {
         _searchFromButton->setText(i18nc("@action:button Search from bottom", "From bottom"));
-        _searchFromButton->setToolTip(i18n("Search for the current search phrase from the bottom"));
+        _searchFromButton->setToolTip(i18nc("@info:tooltip", "Search for the current search phrase from the bottom"));
         _findNextButton->setIcon(KIcon("go-up-search"));
         _findPreviousButton->setIcon(KIcon("go-down-search"));
     } else {
         _searchFromButton->setText(i18nc("@action:button Search from top", "From top"));
-        _searchFromButton->setToolTip(i18n("Search for the current search phrase from the top"));
+        _searchFromButton->setToolTip(i18nc("@info:tooltip", "Search for the current search phrase from the top"));
         _findNextButton->setIcon(KIcon("go-down-search"));
         _findPreviousButton->setIcon(KIcon("go-up-search"));
     }

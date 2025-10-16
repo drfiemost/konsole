@@ -24,7 +24,7 @@
 
 // Qt
 #include <QApplication>
-#include <QtGui/QPainter>
+#include <QPainter>
 
 // KDE
 #include <KConfig>
@@ -346,7 +346,7 @@ void ColorScheme::read(const KConfig& config)
 {
     KConfigGroup configGroup = config.group("General");
 
-    const QString schemeDescription = configGroup.readEntry("Description", I18N_NOOP("Un-named Color Scheme"));
+    const QString schemeDescription = configGroup.readEntry("Description", i18nc("@item", "Un-named Color Scheme"));
 
     _description = i18n(schemeDescription.toUtf8().constData());
     _opacity = configGroup.readEntry("Opacity", qreal(1.0));

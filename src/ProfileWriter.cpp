@@ -23,7 +23,7 @@
 #include "ProfileWriter.h"
 
 // Qt
-#include <QtCore/QFileInfo>
+#include <QFileInfo>
 
 // KDE
 #include <KConfig>
@@ -72,6 +72,10 @@ void KDE4ProfileWriter::writeProperties(KConfig& config,
 bool KDE4ProfileWriter::writeProfile(const QString& path , const Profile::Ptr profile)
 {
     KConfig config(path, KConfig::NoGlobals);
+
+    if (!config.isConfigWritable(false)) {
+        return false;
+    }
 
     KConfigGroup general = config.group(GENERAL_GROUP);
 
