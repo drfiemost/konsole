@@ -21,10 +21,10 @@
 #define DBUSTEST_H
 
 #include <QTest>
-#include <QtDBus/QtDBus>
-#include <QtDBus/QDBusInterface>
-#include <QtDBus/QDBusReply>
-#include <QtCore/QTextCodec>
+#include <QDBusInterface>
+#include <QDBusConnectionInterface>
+#include <QDBusReply>
+#include <QTextCodec>
 #include <KDebug>
 #include <KProcess>
 
