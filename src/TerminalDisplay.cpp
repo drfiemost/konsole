@@ -3227,15 +3227,21 @@ void TerminalDisplay::dragEnterEvent(QDragEnterEvent* event)
     // text/uri-list is for supporting some non-KDE apps, such as thunar
     //   and pcmanfm
     // That also applies in dropEvent()
-    if (event->mimeData()->hasFormat(QStringLiteral("text/plain")) ||
-            event->mimeData()->hasFormat(QStringLiteral("text/uri-list"))) {
+    const auto mimeData = event->mimeData();
+    if (mimeData
+            && (mimeData->hasFormat(QStringLiteral("text/plain"))
+                || mimeData->hasFormat(QStringLiteral("text/uri-list")))) {
         event->acceptProposedAction();
     }
 }
 
 void TerminalDisplay::dropEvent(QDropEvent* event)
 {
-    KUrl::List urls = KUrl::List::fromMimeData(event->mimeData());
+    const auto mimeData = event->mimeData();
+    if (!mimeData) {
+        return;
+    }
+    KUrl::List urls = KUrl::List::fromMimeData(mimeData);
 
     QString dropText;
     if (!urls.isEmpty()) {
@@ -3297,11 +3303,11 @@ void TerminalDisplay::dropEvent(QDropEvent* event)
 #endif
 
     } else {
-        dropText = event->mimeData()->text();
+        dropText = mimeData->text();
     }
 
-    if (event->mimeData()->hasFormat(QStringLiteral("text/plain")) ||
-            event->mimeData()->hasFormat(QStringLiteral("text/uri-list"))) {
+    if (mimeData->hasFormat(QStringLiteral("text/plain")) ||
+            mimeData->hasFormat(QStringLiteral("text/uri-list"))) {
         emit sendStringToEmu(qPrintable(dropText));
     }
 }

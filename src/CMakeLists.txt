@@ -160,7 +160,9 @@ install(TARGETS kdeinit_konsole konsole konsoleprivate
 
 ### Embedded Konsole KPart
 
-set(konsolepart_PART_SRCS Part.cpp)
+set(konsolepart_PART_SRCS Part.cpp
+   settings/ProfileSettings.cpp)
+kde4_add_kcfg_files(konsolepart_PART_SRCS settings/KonsoleSettings.kcfgc)
 
 kde4_add_plugin(konsolepart WITH_PREFIX ${konsolepart_PART_SRCS})
 set_target_properties(konsolepart PROPERTIES DEFINE_SYMBOL KONSOLE_PART)

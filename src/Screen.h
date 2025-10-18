@@ -24,11 +24,11 @@
 #define SCREEN_H
 
 // Qt
-#include <QtCore/QRect>
-#include <QtCore/QSet>
-#include <QtCore/QVector>
-#include <QtCore/QBitArray>
-#include <QtCore/QVarLengthArray>
+#include <QRect>
+#include <QSet>
+#include <QVector>
+#include <QBitArray>
+#include <QVarLengthArray>
 
 // Konsole
 #include "Character.h"
@@ -309,15 +309,6 @@ public:
     /** Returns the line which the cursor is positioned on. */
     int  getCursorY() const;
 
-    /** Clear the entire screen and move the cursor to the home position.
-     * Equivalent to calling clearEntireScreen() followed by home().
-     */
-    void clear();
-    /**
-     * Sets the position of the cursor to the 'home' position at the top-left
-     * corner of the screen (0,0)
-     */
-    void home();
     /**
      * Resets the state of the screen.  This resets the various screen modes
      * back to their default states.  The cursor style and colors are reset
