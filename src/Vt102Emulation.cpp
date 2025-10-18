@@ -413,7 +413,7 @@ void Vt102Emulation::processWindowAttributeRequest()
   for (int j = 0; j < tokenBufferPos-i-2; j++)
         value[j] = tokenBuffer[i+1+j];
 
-  if (value == "?") {
+  if (value == QLatin1String("?")) {
       emit sessionAttributeRequest(attribute);
       return;
   }
@@ -1348,7 +1348,7 @@ static QString hexdump2(int* s, int len)
             snprintf(dump, sizeof(dump), "%c", s[i]);
         else
             snprintf(dump, sizeof(dump), "\\%04x(hex)", s[i]);
-        returnDump.append(QString(dump));
+        returnDump.append(QLatin1String(dump));
     }
     return returnDump;
 }
@@ -1362,7 +1362,7 @@ void Vt102Emulation::reportDecodingError()
 //    hexdump(tokenBuffer, tokenBufferPos);
 //    printf("\n");
 
-    QString outputError = QString("Undecodable sequence: ");
+    QString outputError = QLatin1String("Undecodable sequence: ");
     outputError.append(hexdump2(tokenBuffer, tokenBufferPos));
     kDebug() << outputError;
 }

@@ -21,7 +21,7 @@
 #include "ProfileSettings.h"
 
 // Qt
-#include <QtCore/QFileInfo>
+#include <QFileInfo>
 #include <QStandardItem>
 
 // KDE
@@ -238,7 +238,7 @@ void ProfileSettings::updateDefaultItem()
         bool isDefault = (defaultProfile == item->data().value<Profile::Ptr>());
 
         if (isDefault && !itemFont.bold()) {
-            item->setIcon(KIcon(defaultProfile->icon(), 0, QStringList("emblem-favorite")));
+            item->setIcon(KIcon(defaultProfile->icon(), 0, QStringList(QStringLiteral("emblem-favorite"))));
             itemFont.setBold(true);
             item->setFont(itemFont);
         } else if (!isDefault && itemFont.bold()) {
@@ -318,8 +318,8 @@ void ProfileSettings::createProfile()
     Profile::Ptr newProfile = Profile::Ptr(new Profile(ProfileManager::instance()->fallbackProfile()));
     newProfile->clone(sourceProfile, true);
     newProfile->setProperty(Profile::Name, i18nc("@item This will be used as part of the file name", "New Profile"));
-    newProfile->setProperty(Profile::UntranslatedName, "New Profile");
-    newProfile->setProperty(Profile::MenuIndex, QString("0"));
+    newProfile->setProperty(Profile::UntranslatedName, QStringLiteral("New Profile"));
+    newProfile->setProperty(Profile::MenuIndex, QStringLiteral("0"));
 
     QWeakPointer<EditProfileDialog> dialog = new EditProfileDialog(this);
     dialog.data()->setProfile(newProfile);
