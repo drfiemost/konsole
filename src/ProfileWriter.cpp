@@ -45,13 +45,13 @@ QString KDE4ProfileWriter::getPath(const Profile::Ptr profile)
     // If any changes are made to this location, check that programs using
     // the Konsole part can write/save profiles
     static const QString localDataLocation = KStandardDirs::locateLocal("data", QStringLiteral("/konsole"));
-    return localDataLocation % "/" % profile->untranslatedName() % ".profile";
+    return localDataLocation % QLatin1String("/") % profile->untranslatedName() % QLatin1String(".profile");
 }
 void KDE4ProfileWriter::writeProperties(KConfig& config,
                                         const Profile::Ptr profile,
                                         const Profile::PropertyInfo* properties)
 {
-    const char* groupName = 0;
+    const char* groupName = nullptr;
     KConfigGroup group;
 
     while (properties->name != 0) {
@@ -62,7 +62,7 @@ void KDE4ProfileWriter::writeProperties(KConfig& config,
             }
 
             if (profile->isPropertySet(properties->property))
-                group.writeEntry(QString(properties->name),
+                group.writeEntry(QLatin1String(properties->name),
                                  profile->property<QVariant>(properties->property));
         }
 

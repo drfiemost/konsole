@@ -22,7 +22,7 @@
 #include "ShellCommandTest.h"
 
 // Qt
-#include <QtCore/QStringList>
+#include <QStringList>
 #include <QtGlobal>
 
 // KDE
@@ -42,7 +42,7 @@ void ShellCommandTest::testConstructorWithOneArguemnt()
 {
     const QString fullCommand(QStringLiteral("sudo apt-get update"));
     ShellCommand shellCommand(fullCommand);
-    QCOMPARE(shellCommand.command(), QString("sudo"));
+    QCOMPARE(shellCommand.command(), QStringLiteral("sudo"));
     QCOMPARE(shellCommand.fullCommand(), fullCommand);
 
 }
@@ -56,7 +56,7 @@ void ShellCommandTest::testConstructorWithTwoArguments()
     ShellCommand shellCommand(command, arguments);
     QCOMPARE(shellCommand.command(), command);
     QCOMPARE(shellCommand.arguments(), arguments);
-    QCOMPARE(shellCommand.fullCommand(), arguments.join(" "));
+    QCOMPARE(shellCommand.fullCommand(), arguments.join(QLatin1String(" ")));
 }
 
 void ShellCommandTest::testExpandEnvironmentVariable()
@@ -66,13 +66,13 @@ void ShellCommandTest::testExpandEnvironmentVariable()
     const QString value = QStringLiteral("/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin");
     qputenv(qPrintable(env), qPrintable(value));
     QString result = ShellCommand::expand(text);
-    QString expected = text.replace('$' + env, value);
+    QString expected = text.replace(QLatin1Char('$') + env, value);
     QCOMPARE(result, expected);
 
     text = QStringLiteral("PATH=$PATH:\\$ESCAPED:~/bin");
     qputenv(qPrintable(env), qPrintable(value));
     result = ShellCommand::expand(text);
-    expected = text.replace('$' + env, value);
+    expected = text.replace(QLatin1Char('$') + env, value);
     QCOMPARE(result, expected);
 
     text = QStringLiteral("$ABC \"$ABC\" '$ABC'");
@@ -85,14 +85,14 @@ void ShellCommandTest::testExpandEnvironmentVariable()
 
 void ShellCommandTest::testValidEnvCharacter()
 {
-    QChar validChar('A');
+    QChar validChar(QLatin1Char('A'));
     const bool result = ShellCommand::isValidEnvCharacter(validChar);
     QCOMPARE(result, true);
 }
 
 void ShellCommandTest::testValidLeadingEnvCharacter()
 {
-    QChar invalidChar('9');
+    QChar invalidChar(QLatin1Char('9'));
     const bool result = ShellCommand::isValidLeadingEnvCharacter(invalidChar);
     QCOMPARE(result, false);
 }

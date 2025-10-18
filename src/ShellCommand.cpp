@@ -46,9 +46,9 @@ QString ShellCommand::fullCommand() const
             if (arg[j].isSpace())
                 hasSpace = true;
         if (hasSpace)
-            quotedArgs[i] = '\"' + arg + '\"';
+            quotedArgs[i] = QLatin1Char('\"') + arg + QLatin1Char('\"');
     }
-    return quotedArgs.join(QChar(' '));
+    return quotedArgs.join(QLatin1Char(' '));
 }
 QString ShellCommand::command() const
 {

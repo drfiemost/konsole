@@ -51,7 +51,7 @@ void DBusTest::initTestCase()
     int pid = KProcess::startDetached(QStringLiteral("konsole"),
             QStringList(QStringLiteral("--separate")));
     if (pid == 0) {
-        QFAIL(QString("Unable to exec a new Konsole").toLatin1().data());
+        QFAIL(QStringLiteral("Unable to exec a new Konsole").toLatin1().data());
     }
 
     // Wait for above Konsole to finish starting
@@ -95,11 +95,7 @@ void DBusTest::cleanupTestCase()
 
     QDBusInterface iface(_interfaceName,
                          QLatin1String("/konsole/MainWindow_1"),
-#if QT_VERSION < 0x040800
-                         QLatin1String("com.trolltech.Qt.QWidget"));
-#else
                          QLatin1String("org.qtproject.Qt.QWidget"));
-#endif
     if (!iface.isValid())
         kFatal() << "Unable to get a dbus interface to Konsole!";
 

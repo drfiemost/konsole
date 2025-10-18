@@ -210,16 +210,16 @@ bool Application::processTabsFromFileArgs(KCmdLineArgs* args,
 
     unsigned int sessions = 0;
     while (!tabsFile.atEnd()) {
-        QString lineString(tabsFile.readLine().trimmed());
-        if ((lineString.isEmpty()) || (lineString[0] == '#'))
+        QString lineString(QString::fromUtf8(tabsFile.readLine()).trimmed());
+        if ((lineString.isEmpty()) || (lineString[0] == QLatin1Char('#')))
             continue;
 
         QHash<QString, QString> lineTokens;
         QStringList lineParts = lineString.split(QStringLiteral(";;"), QString::SkipEmptyParts);
 
         for (int i = 0; i < lineParts.size(); ++i) {
-            QString key = lineParts.at(i).section(':', 0, 0).trimmed().toLower();
-            QString value = lineParts.at(i).section(':', 1, -1).trimmed();
+            QString key = lineParts.at(i).section(QLatin1Char(':'), 0, 0).trimmed().toLower();
+            QString value = lineParts.at(i).section(QLatin1Char(':'), 1, -1).trimmed();
             lineTokens[key] = value;
         }
         // should contain at least one of 'command' and 'profile'
@@ -267,7 +267,7 @@ void Application::createTabFromArgs(KCmdLineArgs* args, MainWindow* window,
 
     if (!command.isEmpty()) {
         newProfile->setProperty(Profile::Command,   command);
-        newProfile->setProperty(Profile::Arguments, command.split(' '));
+        newProfile->setProperty(Profile::Arguments, command.split(QLatin1Char(' ')));
         shouldUseNewProfile = true;
     }
 

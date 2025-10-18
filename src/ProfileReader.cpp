@@ -41,7 +41,7 @@ static const char GENERAL_GROUP[]     = "General";
 
 QStringList KDE4ProfileReader::findProfiles()
 {
-    return KGlobal::dirs()->findAllResources("data", "konsole/*.profile",
+    return KGlobal::dirs()->findAllResources("data", QStringLiteral("konsole/*.profile"),
             KStandardDirs::NoDuplicates);
 }
 void KDE4ProfileReader::readProperties(const KConfig& config, Profile::Ptr profile,
@@ -57,7 +57,7 @@ void KDE4ProfileReader::readProperties(const KConfig& config, Profile::Ptr profi
                 groupName = properties->group;
             }
 
-            QString name(properties->name);
+            QString name(QLatin1String(properties->name));
 
             if (group.hasKey(name))
                 profile->setProperty(properties->property,

@@ -400,7 +400,7 @@ void MainWindow::profileListChanged(const QList<QAction*>& sessionActions)
 
             // NOTE: defaultProfile seems to not work here, sigh.
             Profile::Ptr profile = ProfileManager::instance()->defaultProfile();
-            if (profile && profile->name() == sessionAction->text().remove('&')) {
+            if (profile && profile->name() == sessionAction->text().remove(QLatin1Char('&'))) {
                 sessionAction->setIcon(KIcon(profile->icon(), 0, QStringList(QStringLiteral("emblem-favorite"))));
                 newTabMenu->setDefaultAction(sessionAction);
                 QFont actionFont = sessionAction->font();
@@ -414,7 +414,7 @@ void MainWindow::profileListChanged(const QList<QAction*>& sessionActions)
         Profile::Ptr profile = ProfileManager::instance()->defaultProfile();
 
         // NOTE: Compare names w/o any '&'
-        if (sessionActions.size() == 2 &&  sessionActions[1]->text().remove('&') != profile->name()) {
+        if (sessionActions.size() == 2 &&  sessionActions[1]->text().remove(QLatin1Char('&')) != profile->name()) {
             newTabMenu->addAction(sessionActions[1]);
         } else {
             delete newTabMenu;
@@ -503,13 +503,13 @@ Session* MainWindow::createSSHSession(Profile::Ptr profile, const KUrl& url)
         sshCommand += QStringLiteral("-p %1 ").arg(url.port());
     }
     if (url.hasUser()) {
-        sshCommand += (url.user() + '@');
+        sshCommand += (url.user() + QLatin1Char('@'));
     }
     if (url.hasHost()) {
         sshCommand += url.host();
     }
 
-    session->sendTextToTerminal(sshCommand, '\r');
+    session->sendTextToTerminal(sshCommand, QLatin1Char('\r'));
 
     // create view before starting the session process so that the session
     // doesn't suffer a change in terminal size right after the session
@@ -552,8 +552,8 @@ bool MainWindow::queryClose()
             continue;
         }
 
-        const QString defaultProc = session->program().split('/').last();
-        const QString currentProc = session->foregroundProcessName().split('/').last();
+        const QString defaultProc = session->program().split(QLatin1Char('/')).last();
+        const QString currentProc = session->foregroundProcessName().split(QLatin1Char('/')).last();
 
         if (currentProc.isEmpty())
             continue;

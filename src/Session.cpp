@@ -393,7 +393,7 @@ void Session::terminalWarning(const QString& message)
 QString Session::shellSessionId() const
 {
     QString friendlyUuid(_uniqueIdentifier.toString());
-    friendlyUuid.remove('-').remove('{').remove('}');
+    friendlyUuid.remove(QLatin1Char('-')).remove(QLatin1Char('{')).remove(QLatin1Char('}'));
 
     return friendlyUuid;
 }
@@ -420,12 +420,7 @@ void Session::run()
     const int CHOICE_COUNT = 3;
     // if '_program' is empty , fall back to default shell. If that is not set
     // then fall back to /bin/sh
-#ifndef _WIN32
-    QString programs[CHOICE_COUNT] = {_program, qgetenv("SHELL"), "/bin/sh"};
-#else
-    // on windows, fall back to %COMSPEC% or to cmd.exe
-    QString programs[CHOICE_COUNT] = {_program, qgetenv("COMSPEC"), "cmd.exe"};
-#endif
+    QString programs[CHOICE_COUNT] = {_program, QString::fromUtf8(qgetenv("SHELL")), QStringLiteral("/bin/sh")};
     QString exec;
     int choice = 0;
     while (choice < CHOICE_COUNT) {
@@ -447,7 +442,7 @@ void Session::run()
     }
 
     // if no arguments are specified, fall back to program name
-    QStringList arguments = _arguments.join(QChar(' ')).isEmpty() ?
+    QStringList arguments = _arguments.join(QLatin1Char(' ')).isEmpty() ?
                             QStringList() << exec :
                             _arguments;
 
@@ -465,18 +460,18 @@ void Session::run()
     // tell the terminal exactly which colors are being used, but instead approximates
     // the color scheme as "black on white" or "white on black" depending on whether
     // the background color is deemed dark or not
-    const QString backgroundColorHint = _hasDarkBackground ? "COLORFGBG=15;0" : "COLORFGBG=0;15";
+    const QString backgroundColorHint = _hasDarkBackground ? QStringLiteral("COLORFGBG=15;0") : QStringLiteral("COLORFGBG=0;15");
     addEnvironmentEntry(backgroundColorHint);
 
-    addEnvironmentEntry(QString("SHELL_SESSION_ID=%1").arg(shellSessionId()));
+    addEnvironmentEntry(QStringLiteral("SHELL_SESSION_ID=%1").arg(shellSessionId()));
 
-    addEnvironmentEntry(QString("WINDOWID=%1").arg(QString::number(windowId())));
+    addEnvironmentEntry(QStringLiteral("WINDOWID=%1").arg(QString::number(windowId())));
 
     const QString dbusService = QDBusConnection::sessionBus().baseService();
-    addEnvironmentEntry(QString("KONSOLE_DBUS_SERVICE=%1").arg(dbusService));
+    addEnvironmentEntry(QStringLiteral("KONSOLE_DBUS_SERVICE=%1").arg(dbusService));
 
-    const QString dbusObject = QString("/Sessions/%1").arg(QString::number(_sessionId));
-    addEnvironmentEntry(QString("KONSOLE_DBUS_SESSION=%1").arg(dbusObject));
+    const QString dbusObject = QStringLiteral("/Sessions/%1").arg(QString::number(_sessionId));
+    addEnvironmentEntry(QStringLiteral("KONSOLE_DBUS_SESSION=%1").arg(dbusObject));
 
     int result = _shellProcess->start(exec, arguments, _environment);
     if (result < 0) {
@@ -510,7 +505,7 @@ void Session::setUserTitle(int what, const QString& caption)
     }
 
     if (what == TextColor || what == BackgroundColor) {
-        QString colorString = caption.section(';', 0, 0);
+        QString colorString = caption.section(QLatin1Char(';'), 0, 0);
         QColor color = QColor(colorString);
         if (color.isValid()) {
             if (what == TextColor)
@@ -608,7 +603,7 @@ void Session::silenceTimerDone()
         }
     }
 
-    KNotification::event(hasFocus ? "Silence" : "SilenceHidden",
+    KNotification::event(hasFocus ? QStringLiteral("Silence") : QStringLiteral("SilenceHidden"),
             i18n("Silence in session '%1'", _nameTitle), QPixmap(),
             QApplication::activeWindow(),
             KNotification::CloseWhenWidgetActivated);
@@ -669,7 +664,7 @@ void Session::activityStateSet(int state)
         }
 
         if (_monitorActivity  && !_notifiedActivity) {
-            KNotification::event(hasFocus ? "Activity" : "ActivityHidden",
+            KNotification::event(hasFocus ? QStringLiteral("Activity") : QStringLiteral("ActivityHidden"),
                                  i18n("Activity in session '%1'", _nameTitle), QPixmap(),
                                  QApplication::activeWindow(),
                                  KNotification::CloseWhenWidgetActivated);
@@ -767,11 +762,11 @@ void Session::sendSignal(int signal)
 
 void Session::reportBackgroundColor(const QColor& c)
 {
-    #define to65k(a) (QString("%1").arg((int)((a)*0xFFFF), 4, 16, QChar('0')))
-    QString msg = "\033]11;rgb:"
-                + to65k(c.redF())   + '/'
-                + to65k(c.greenF()) + '/'
-                + to65k(c.blueF())  + '\a';
+    #define to65k(a) (QStringLiteral("%1").arg((int)((a)*0xFFFF), 4, 16, QLatin1Char('0')))
+    QString msg = QStringLiteral("\033]11;rgb:")
+                + to65k(c.redF())   + QLatin1Char('/')
+                + to65k(c.greenF()) + QLatin1Char('/')
+                + to65k(c.blueF())  + QLatin1Char('\a');
     _emulation->sendString(msg.toUtf8());
     #undef to65k
 }
@@ -817,7 +812,7 @@ bool Session::closeInNormalWay()
         return true;
     }
 
-    static QSet<QString> knownShells = QSet<QString>::fromList({"ash", "bash", "csh", "dash", "fish", "hush", "ksh", "mksh", "pdksh", "tcsh", "zsh"});
+    static QSet<QString> knownShells = QSet<QString>::fromList({QStringLiteral("ash"), QStringLiteral("bash"), QStringLiteral("csh"), QStringLiteral("dash"), QStringLiteral("fish"), QStringLiteral("hush"), QStringLiteral("ksh"), QStringLiteral("mksh"), QStringLiteral("pdksh"), QStringLiteral("tcsh"), QStringLiteral("zsh")});
 
     // If only the session's shell is running, try sending an EOF for a clean exit
     if (!isForegroundProcessActive() && knownShells.contains(QFileInfo(_program).fileName())) {
@@ -863,7 +858,7 @@ void Session::sendText(const QString& text) const
 #if not defined(REMOVE_SENDTEXT_RUNCOMMAND_DBUS_METHODS)
     if (show_disallow_certain_dbus_methods_message) {
 
-        KNotification::event(KNotification::Warning, "Konsole D-Bus Warning",
+        KNotification::event(KNotification::Warning, QStringLiteral("Konsole D-Bus Warning"),
             i18n("The D-Bus methods sendText/runCommand were just used.  There are security concerns about allowing these methods to be public.  If desired, these methods can be changed to internal use only by re-compiling Konsole. <p>This warning will only show once for this Konsole instance.</p>"));
 
         show_disallow_certain_dbus_methods_message = false;
@@ -876,7 +871,7 @@ void Session::sendText(const QString& text) const
 // Only D-Bus calls this function
 void Session::runCommand(const QString& command) const
 {
-    sendText(command + '\n');
+    sendText(command + QLatin1Char('\n'));
 }
 
 void Session::sendMouseEvent(int buttons, int column, int line, int eventType)
@@ -910,7 +905,7 @@ void Session::done(int exitCode, QProcess::ExitStatus exitStatus)
             message = i18n("Program '%1' exited with status %2.", _program, exitCode);
 
         //FIXME: See comments in Session::silenceTimerDone()
-        KNotification::event("Finished", message , QPixmap(),
+        KNotification::event(QStringLiteral("Finished"), message , QPixmap(),
                              QApplication::activeWindow(),
                              KNotification::CloseWhenWidgetActivated);
     }
@@ -1038,7 +1033,7 @@ bool Session::isRemote()
     ProcessInfo* process = getProcessInfo();
 
     bool ok = false;
-    return (process->name(&ok) == "ssh" && ok);
+    return (process->name(&ok) == QLatin1String("ssh") && ok);
 }
 
 QString Session::getDynamicTitle()
@@ -1047,7 +1042,7 @@ QString Session::getDynamicTitle()
 
     // format tab titles using process info
     bool ok = false;
-    if (process->name(&ok) == "ssh" && ok) {
+    if (process->name(&ok) == QLatin1String("ssh") && ok) {
         SSHProcessInfo sshInfo(*process);
         return sshInfo.format(tabTitleFormat(Session::RemoteTabTitle));
     }
@@ -1089,7 +1084,7 @@ QString Session::getDynamicTitle()
         // Change User's Home Dir w/ ~ only at the beginning
         if (tempDir.startsWith(homeDir)) {
             tempDir.remove(0, homeDir.length());
-            tempDir.prepend('~');
+            tempDir.prepend(QLatin1Char('~'));
         }
         title.replace(QLatin1String("%D"), tempDir);
     }
@@ -1114,14 +1109,14 @@ KUrl Session::getUrl()
         if (isForegroundProcessActive() && _foregroundProcessInfo->isValid()) {
             // for remote connections, save the user and host
             // bright ideas to get the directory at the other end are welcome :)
-            if (_foregroundProcessInfo->name(&ok) == "ssh" && ok) {
+            if (_foregroundProcessInfo->name(&ok) == QLatin1String("ssh") && ok) {
                 SSHProcessInfo sshInfo(*_foregroundProcessInfo);
 
-                path = "ssh://" + sshInfo.userName() + '@' + sshInfo.host();
+                path = QLatin1String("ssh://") + sshInfo.userName() + QLatin1Char('@') + sshInfo.host();
 
                 QString port = sshInfo.port();
-                if (!port.isEmpty() && port != "22") {
-                    path.append(':' + port);
+                if (!port.isEmpty() && port != QLatin1String("22")) {
+                    path.append(QLatin1Char(':') + port);
                 }
             } else {
                 path = _foregroundProcessInfo->currentDir(&ok);
@@ -1283,7 +1278,7 @@ void Session::startZModem(const QString& zmodem, const QString& dir, const QStri
     _zmodemProc = new KProcess();
     _zmodemProc->setOutputChannelMode(KProcess::SeparateChannels);
 
-    *_zmodemProc << zmodem << "-v" << list;
+    *_zmodemProc << zmodem << QStringLiteral("-v") << list;
 
     if (!dir.isEmpty())
         _zmodemProc->setWorkingDirectory(dir);
@@ -1525,7 +1520,7 @@ void Session::saveSession(KConfigGroup& group)
     group.writeEntry("LocalTab",       tabTitleFormat(LocalTabTitle));
     group.writeEntry("RemoteTab",      tabTitleFormat(RemoteTabTitle));
     group.writeEntry("SessionGuid",    _uniqueIdentifier.toString());
-    group.writeEntry("Encoding",       QString(codec()));
+    group.writeEntry("Encoding",       QString::fromUtf8(codec()));
 }
 
 void Session::restoreSession(KConfigGroup& group)

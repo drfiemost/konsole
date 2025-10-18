@@ -24,7 +24,7 @@
 // Qt
 #include <QApplication>
 #include <QMenu>
-#include <QtGui/QKeyEvent>
+#include <QKeyEvent>
 #include <QPrinter>
 #include <QPrintDialog>
 #include <QPainter>
@@ -90,9 +90,9 @@ using namespace Konsole;
 
 // TODO - Replace the icon choices below when suitable icons for silence and
 // activity are available
-const KIcon SessionController::_activityIcon("dialog-information");
-const KIcon SessionController::_silenceIcon("dialog-information");
-const KIcon SessionController::_broadcastIcon("emblem-important");
+const KIcon SessionController::_activityIcon(QLatin1String("dialog-information"));
+const KIcon SessionController::_silenceIcon(QLatin1String("dialog-information"));
+const KIcon SessionController::_broadcastIcon(QLatin1String("emblem-important"));
 
 QSet<SessionController*> SessionController::_allControllers;
 int SessionController::_lastControllerId;
@@ -128,10 +128,10 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
 
     // handle user interface related to session (menus etc.)
     if (isKonsolePart()) {
-        setXMLFile("konsole/partui.rc");
+        setXMLFile(QStringLiteral("konsole/partui.rc"));
         setupCommonActions();
     } else {
-        setXMLFile("konsole/sessionui.rc");
+        setXMLFile(QStringLiteral("konsole/sessionui.rc"));
         setupCommonActions();
         setupExtraActions();
     }
@@ -216,8 +216,8 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
 
     // A list of programs that accept Ctrl+C to clear command line used
     // before outputting bookmark.
-    _bookmarkValidProgramsToClear << "bash" << "fish" << "sh";
-    _bookmarkValidProgramsToClear << "tcsh" << "zsh";
+    _bookmarkValidProgramsToClear << QStringLiteral("bash") << QStringLiteral("fish") << QStringLiteral("sh");
+    _bookmarkValidProgramsToClear << QStringLiteral("tcsh") << QStringLiteral("zsh");
 }
 
 SessionController::~SessionController()
@@ -269,7 +269,7 @@ void SessionController::snapshot()
 
     // Visualize that the session is broadcasting to others
     if (_copyToGroup && _copyToGroup->sessions().count() > 1) {
-        title.append('*');
+        title.append(QLatin1Char('*'));
     }
 
     // use the fallback title if needed
@@ -304,48 +304,48 @@ void SessionController::openUrl(const KUrl& url)
     // Clear shell's command line
     if (!_session->isForegroundProcessActive()
             && _bookmarkValidProgramsToClear.contains(_session->foregroundProcessName())) {
-        _session->sendTextToTerminal(QChar(0x03), '\n'); // Ctrl+C
+        _session->sendTextToTerminal(QChar(0x03), QLatin1Char('\n')); // Ctrl+C
     }
 
     // handle local paths
     if (url.isLocalFile()) {
         QString path = url.toLocalFile();
-        _session->sendTextToTerminal("cd " + KShell::quoteArg(path), '\r');
+        _session->sendTextToTerminal(QStringLiteral("cd ") + KShell::quoteArg(path), QLatin1Char('\r'));
     } else if (url.protocol().isEmpty()) {
         // KUrl couldn't parse what the user entered into the URL field
         // so just dump it to the shell
         QString command = url.prettyUrl();
         if (!command.isEmpty())
-            _session->sendTextToTerminal(command, '\r');
-    } else if (url.protocol() == "ssh") {
-        QString sshCommand = "ssh ";
+            _session->sendTextToTerminal(command, QLatin1Char('\r'));
+    } else if (url.protocol() == QLatin1String("ssh")) {
+        QString sshCommand = QStringLiteral("ssh ");
 
         if (url.port() > -1) {
-            sshCommand += QString("-p %1 ").arg(url.port());
+            sshCommand += QStringLiteral("-p %1 ").arg(url.port());
         }
         if (url.hasUser()) {
-            sshCommand += (url.user() + '@');
+            sshCommand += (url.user() + QLatin1Char('@'));
         }
         if (url.hasHost()) {
             sshCommand += url.host();
         }
 
-        _session->sendTextToTerminal(sshCommand, '\r');
+        _session->sendTextToTerminal(sshCommand, QLatin1Char('\r'));
 
-    } else if (url.protocol() == "telnet") {
-        QString telnetCommand = "telnet ";
+    } else if (url.protocol() == QLatin1String("telnet")) {
+        QString telnetCommand = QStringLiteral("telnet ");
 
         if (url.hasUser()) {
-            telnetCommand += QString("-l %1 ").arg(url.user());
+            telnetCommand += QStringLiteral("-l %1 ").arg(url.user());
         }
         if (url.hasHost()) {
-            telnetCommand += (url.host() + ' ');
+            telnetCommand += (url.host() + QLatin1Char(' '));
         }
         if (url.port() > -1) {
             telnetCommand += QString::number(url.port());
         }
 
-        _session->sendTextToTerminal(telnetCommand, '\r');
+        _session->sendTextToTerminal(telnetCommand, QLatin1Char('\r'));
 
     } else {
         //TODO Implement handling for other Url types
@@ -362,10 +362,10 @@ void SessionController::openUrl(const KUrl& url)
 void SessionController::setupPrimaryScreenSpecificActions(bool use)
 {
     KActionCollection* collection = actionCollection();
-    QAction* clearAction = collection->action("clear-history");
-    QAction* resetAction = collection->action("clear-history-and-reset");
-    QAction* selectAllAction = collection->action("select-all");
-    QAction* selectLineAction = collection->action("select-line");
+    QAction* clearAction = collection->action(QStringLiteral("clear-history"));
+    QAction* resetAction = collection->action(QStringLiteral("clear-history-and-reset"));
+    QAction* selectAllAction = collection->action(QStringLiteral("select-all"));
+    QAction* selectLineAction = collection->action(QStringLiteral("select-line"));
 
     // these actions are meaningful only when primary screen is used.
     clearAction->setEnabled(use);
@@ -382,7 +382,7 @@ void SessionController::selectionChanged(const QString& selectedText)
 
 void SessionController::updateCopyAction(const QString& selectedText)
 {
-    QAction* copyAction = actionCollection()->action("edit_copy");
+    QAction* copyAction = actionCollection()->action(QStringLiteral("edit_copy"));
 
     // copy action is meaningful only when some text is selected.
     copyAction->setEnabled(!selectedText.isEmpty());
@@ -398,7 +398,7 @@ void SessionController::updateWebSearchMenu()
         return;
 
     QString searchText = _selectedText;
-    searchText = searchText.replace('\n', ' ').replace('\r', ' ').simplified();
+    searchText = searchText.replace(QLatin1Char('\n'), QLatin1Char(' ')).replace(QLatin1Char('\r'), QLatin1Char(' ')).simplified();
 
     if (searchText.isEmpty())
         return;
@@ -441,7 +441,7 @@ void SessionController::handleWebShortcutAction()
 
     KUriFilterData filterData(action->data().toString());
 
-    if (KUriFilter::self()->filterUri(filterData, QStringList() << "kurisearchfilter")) {
+    if (KUriFilter::self()->filterUri(filterData, QStringList() << QStringLiteral("kurisearchfilter"))) {
         const KUrl& url = filterData.uri();
         new KRun(url, QApplication::activeWindow());
     }
@@ -449,7 +449,7 @@ void SessionController::handleWebShortcutAction()
 
 void SessionController::configureWebShortcuts()
 {
-    KToolInvocation::kdeinitExec("kcmshell4", QStringList() << "ebrowsing");
+    KToolInvocation::kdeinitExec(QStringLiteral("kcmshell4"), QStringList() << QStringLiteral("ebrowsing"));
 }
 
 void SessionController::sendSignal(QAction* action)
@@ -541,7 +541,7 @@ void SessionController::setupCommonActions()
     KActionCollection* collection = actionCollection();
 
     // Close Session
-    action = collection->addAction("close-session", this, SLOT(closeSession()));
+    action = collection->addAction(QStringLiteral("close-session"), this, SLOT(closeSession()));
     if (isKonsolePart())
         action->setText(i18n("&Close Session"));
     else
@@ -551,7 +551,7 @@ void SessionController::setupCommonActions()
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_W));
 
     // Open Browser
-    action = collection->addAction("open-browser", this, SLOT(openBrowser()));
+    action = collection->addAction(QStringLiteral("open-browser"), this, SLOT(openBrowser()));
     action->setText(i18n("Open File Manager"));
     action->setIcon(KIcon("system-file-manager"));
 
@@ -567,21 +567,21 @@ void SessionController::setupCommonActions()
     pasteShortcut.setAlternate(QKeySequence(Qt::SHIFT + Qt::Key_Insert));
     action->setShortcut(pasteShortcut);
 
-    action = collection->addAction("paste-selection", this, SLOT(pasteFromX11Selection()));
+    action = collection->addAction(QStringLiteral("paste-selection"), this, SLOT(pasteFromX11Selection()));
     action->setText(i18n("Paste Selection"));
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Insert));
 
     _webSearchMenu = new KActionMenu(i18n("Web Search"), this);
     _webSearchMenu->setIcon(KIcon("preferences-web-browser-shortcuts"));
     _webSearchMenu->setVisible(false);
-    collection->addAction("web-search", _webSearchMenu);
+    collection->addAction(QStringLiteral("web-search"), _webSearchMenu);
 
 
-    action = collection->addAction("select-all", this, SLOT(selectAll()));
+    action = collection->addAction(QStringLiteral("select-all"), this, SLOT(selectAll()));
     action->setText(i18n("&Select All"));
     action->setIcon(KIcon("edit-select-all"));
 
-    action = collection->addAction("select-line", this, SLOT(selectLine()));
+    action = collection->addAction(QStringLiteral("select-line"), this, SLOT(selectLine()));
     action->setText(i18n("Select &Line"));
 
     action = KStandardAction::saveAs(this, SLOT(saveHistory()), collection);
@@ -591,26 +591,26 @@ void SessionController::setupCommonActions()
     action->setText(i18n("&Print Screen..."));
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_P));
 
-    action = collection->addAction("adjust-history", this, SLOT(showHistoryOptions()));
+    action = collection->addAction(QStringLiteral("adjust-history"), this, SLOT(showHistoryOptions()));
     action->setText(i18n("Adjust Scrollback..."));
     action->setIcon(KIcon("configure"));
 
-    action = collection->addAction("clear-history", this, SLOT(clearHistory()));
+    action = collection->addAction(QStringLiteral("clear-history"), this, SLOT(clearHistory()));
     action->setText(i18n("Clear Scrollback"));
     action->setIcon(KIcon("edit-clear-history"));
 
-    action = collection->addAction("clear-history-and-reset", this, SLOT(clearHistoryAndReset()));
+    action = collection->addAction(QStringLiteral("clear-history-and-reset"), this, SLOT(clearHistoryAndReset()));
     action->setText(i18n("Clear Scrollback and Reset"));
     action->setIcon(KIcon("edit-clear-history"));
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_K));
 
     // Profile Options
-    action = collection->addAction("edit-current-profile", this, SLOT(editCurrentProfile()));
+    action = collection->addAction(QStringLiteral("edit-current-profile"), this, SLOT(editCurrentProfile()));
     action->setText(i18n("Edit Current Profile..."));
     action->setIcon(KIcon("document-properties"));
 
     _switchProfileMenu = new KActionMenu(i18n("Switch Profile"), this);
-    collection->addAction("switch-profile", _switchProfileMenu);
+    collection->addAction(QStringLiteral("switch-profile"), _switchProfileMenu);
     connect(_switchProfileMenu->menu(), &QMenu::aboutToShow, this, &Konsole::SessionController::prepareSwitchProfileMenu);
 
     // History
@@ -628,7 +628,7 @@ void SessionController::setupCommonActions()
     // Character Encoding
     _codecAction = new KCodecAction(i18n("Set &Encoding"), this);
     _codecAction->setIcon(KIcon("character-set"));
-    collection->addAction("set-encoding", _codecAction);
+    collection->addAction(QStringLiteral("set-encoding"), _codecAction);
     connect(_codecAction->menu(), &QMenu::aboutToShow, this, &Konsole::SessionController::updateCodecAction);
     connect(_codecAction, static_cast<void(KCodecAction::*)(QTextCodec*)>(&KCodecAction::triggered), this, &Konsole::SessionController::changeCodec);
 }
@@ -640,7 +640,7 @@ void SessionController::setupExtraActions()
     KActionCollection* collection = actionCollection();
 
     // Rename Session
-    action = collection->addAction("rename-session", this, SLOT(renameSession()));
+    action = collection->addAction(QStringLiteral("rename-session"), this, SLOT(renameSession()));
     action->setText(i18n("&Rename Tab..."));
     action->setIcon(KIcon("edit-rename"));
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::ALT + Qt::Key_S));
@@ -674,7 +674,7 @@ void SessionController::setupExtraActions()
     copyInputActions->addAction(copyInputToNoneAction);
     connect(copyInputActions, static_cast<void(KSelectAction::*)(QAction*)>(&KSelectAction::triggered), this, &Konsole::SessionController::copyInputActionsTriggered);
 
-    action = collection->addAction("zmodem-upload", this, SLOT(zmodemUpload()));
+    action = collection->addAction(QStringLiteral("zmodem-upload"), this, SLOT(zmodemUpload()));
     action->setText(i18n("&ZModem Upload..."));
     action->setIcon(KIcon("document-open"));
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::ALT + Qt::Key_U));
@@ -682,16 +682,16 @@ void SessionController::setupExtraActions()
     // Monitor
     toggleAction = new KToggleAction(i18n("Monitor for &Activity"), this);
     toggleAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_A));
-    action = collection->addAction("monitor-activity", toggleAction);
+    action = collection->addAction(QStringLiteral("monitor-activity"), toggleAction);
     connect(action, &QAction::toggled, this, &Konsole::SessionController::monitorActivity);
 
     toggleAction = new KToggleAction(i18n("Monitor for &Silence"), this);
     toggleAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_I));
-    action = collection->addAction("monitor-silence", toggleAction);
+    action = collection->addAction(QStringLiteral("monitor-silence"), toggleAction);
     connect(action, &QAction::toggled, this, &Konsole::SessionController::monitorSilence);
 
     // Text Size
-    action = collection->addAction("enlarge-font", this, SLOT(increaseFontSize()));
+    action = collection->addAction(QStringLiteral("enlarge-font"), this, SLOT(increaseFontSize()));
     action->setText(i18n("Enlarge Font"));
     action->setIcon(KIcon("format-font-size-more"));
     KShortcut enlargeFontShortcut = action->shortcut();
@@ -699,53 +699,53 @@ void SessionController::setupExtraActions()
     enlargeFontShortcut.setAlternate(QKeySequence(Qt::CTRL + Qt::Key_Equal));
     action->setShortcut(enlargeFontShortcut);
 
-    action = collection->addAction("shrink-font", this, SLOT(decreaseFontSize()));
+    action = collection->addAction(QStringLiteral("shrink-font"), this, SLOT(decreaseFontSize()));
     action->setText(i18n("Shrink Font"));
     action->setIcon(KIcon("format-font-size-less"));
     action->setShortcut(KShortcut(Qt::CTRL | Qt::Key_Minus));
 
     // Send signal
-    KSelectAction* sendSignalActions = collection->add<KSelectAction>("send-signal");
+    KSelectAction* sendSignalActions = collection->add<KSelectAction>(QStringLiteral("send-signal"));
     sendSignalActions->setText(i18n("Send Signal"));
     connect(sendSignalActions, static_cast<void(KSelectAction::*)(QAction*)>(&KSelectAction::triggered), this, &Konsole::SessionController::sendSignal);
 
-    action = collection->addAction("sigstop-signal");
-    action->setText(i18n("&Suspend Task")   + " (STOP)");
+    action = collection->addAction(QStringLiteral("sigstop-signal"));
+    action->setText(i18n("&Suspend Task")   + QStringLiteral(" (STOP)"));
     action->setData(SIGSTOP);
     sendSignalActions->addAction(action);
 
-    action = collection->addAction("sigcont-signal");
-    action->setText(i18n("&Continue Task")  + " (CONT)");
+    action = collection->addAction(QStringLiteral("sigcont-signal"));
+    action->setText(i18n("&Continue Task")  + QStringLiteral(" (CONT)"));
     action->setData(SIGCONT);
     sendSignalActions->addAction(action);
 
-    action = collection->addAction("sighup-signal");
-    action->setText(i18n("&Hangup")         + " (HUP)");
+    action = collection->addAction(QStringLiteral("sighup-signal"));
+    action->setText(i18n("&Hangup")         + QStringLiteral(" (HUP)"));
     action->setData(SIGHUP);
     sendSignalActions->addAction(action);
 
-    action = collection->addAction("sigint-signal");
-    action->setText(i18n("&Interrupt Task") + " (INT)");
+    action = collection->addAction(QStringLiteral("sigint-signal"));
+    action->setText(i18n("&Interrupt Task") + QStringLiteral(" (INT)"));
     action->setData(SIGINT);
     sendSignalActions->addAction(action);
 
-    action = collection->addAction("sigterm-signal");
-    action->setText(i18n("&Terminate Task") + " (TERM)");
+    action = collection->addAction(QStringLiteral("sigterm-signal"));
+    action->setText(i18n("&Terminate Task") + QStringLiteral(" (TERM)"));
     action->setData(SIGTERM);
     sendSignalActions->addAction(action);
 
-    action = collection->addAction("sigkill-signal");
-    action->setText(i18n("&Kill Task")      + " (KILL)");
+    action = collection->addAction(QStringLiteral("sigkill-signal"));
+    action->setText(i18n("&Kill Task")      + QStringLiteral(" (KILL)"));
     action->setData(SIGKILL);
     sendSignalActions->addAction(action);
 
-    action = collection->addAction("sigusr1-signal");
-    action->setText(i18n("User Signal &1")   + " (USR1)");
+    action = collection->addAction(QStringLiteral("sigusr1-signal"));
+    action->setText(i18n("User Signal &1")   + QStringLiteral(" (USR1)"));
     action->setData(SIGUSR1);
     sendSignalActions->addAction(action);
 
-    action = collection->addAction("sigusr2-signal");
-    action->setText(i18n("User Signal &2")   + " (USR2)");
+    action = collection->addAction(QStringLiteral("sigusr2-signal"));
+    action->setText(i18n("User Signal &2")   + QStringLiteral(" (USR2)"));
     action->setData(SIGUSR2);
     sendSignalActions->addAction(action);
 
@@ -771,7 +771,7 @@ void SessionController::prepareSwitchProfileMenu()
 }
 void SessionController::updateCodecAction()
 {
-    _codecAction->setCurrentCodec(QString(_session->codec()));
+    _codecAction->setCurrentCodec(QString::fromUtf8(_session->codec()));
 }
 
 void SessionController::changeCodec(QTextCodec* codec)
@@ -844,7 +844,7 @@ bool SessionController::confirmClose() const
         // hard coded for now.  In future make it possible for the user to specify which programs
         // are ignored when considering whether to display a confirmation
         QStringList ignoreList;
-        ignoreList << QString(qgetenv("SHELL")).section('/', -1);
+        ignoreList << QString::fromUtf8(qgetenv("SHELL")).section(QLatin1Char('/'), -1);
         if (ignoreList.contains(title))
             return true;
 
@@ -869,7 +869,7 @@ bool SessionController::confirmForceClose() const
         // hard coded for now.  In future make it possible for the user to specify which programs
         // are ignored when considering whether to display a confirmation
         QStringList ignoreList;
-        ignoreList << QString(qgetenv("SHELL")).section('/', -1);
+        ignoreList << QString::fromUtf8(qgetenv("SHELL")).section(QLatin1Char('/'), -1);
         if (ignoreList.contains(title))
             return true;
 
@@ -1462,10 +1462,10 @@ void SessionController::sessionTitleChanged()
 
     // special handling for the "%w" marker which is replaced with the
     // window title set by the shell
-    title.replace("%w", _session->userTitle());
+    title.replace(QLatin1String("%w"), _session->userTitle());
     // special handling for the "%#" marker which is replaced with the
     // number of the shell
-    title.replace("%#", QString::number(_session->sessionId()));
+    title.replace(QLatin1String("%#"), QString::number(_session->sessionId()));
 
     if (title.isEmpty())
         title = _session->title(Session::NameRole);
@@ -1488,7 +1488,7 @@ void SessionController::showDisplayContextMenu(const QPoint& position)
         //kDebug() << "Created xmlgui factory" << factory;
     }
 
-    QPointer<QMenu> popup = qobject_cast<QMenu*>(factory()->container("session-popup-menu", this));
+    QPointer<QMenu> popup = qobject_cast<QMenu*>(factory()->container(QStringLiteral("session-popup-menu"), this));
     if (popup) {
         // prepend content-specific actions such as "Open Link", "Copy Email Address" etc.
         QList<QAction*> contentActions = _view->filterActions(position);
@@ -1530,7 +1530,7 @@ void SessionController::showDisplayContextMenu(const QPoint& position)
 
         _preventClose = false;
 
-        if (chosen && chosen->objectName() == "close-session")
+        if (chosen && chosen->objectName() == QLatin1String("close-session"))
             chosen->trigger();
     } else {
         kWarning() << "Unable to display popup menu for session"
@@ -1570,9 +1570,9 @@ void SessionController::sessionStateChanged(int state)
 
 void SessionController::zmodemDownload()
 {
-    QString zmodem = KStandardDirs::findExe("rz");
+    QString zmodem = KStandardDirs::findExe(QStringLiteral("rz"));
     if (zmodem.isEmpty()) {
-        zmodem = KStandardDirs::findExe("lrz");
+        zmodem = KStandardDirs::findExe(QStringLiteral("lrz"));
     }
     if (!zmodem.isEmpty()) {
         const QString path = KFileDialog::getExistingDirectory(
@@ -1600,9 +1600,9 @@ void SessionController::zmodemUpload()
                            i18n("<p>The current session already has a ZModem file transfer in progress.</p>"));
         return;
     }
-    QString zmodem = KStandardDirs::findExe("sz");
+    QString zmodem = KStandardDirs::findExe(QStringLiteral("sz"));
     if (zmodem.isEmpty()) {
-        zmodem = KStandardDirs::findExe("lsz");
+        zmodem = KStandardDirs::findExe(QStringLiteral("lsz"));
     }
     if (zmodem.isEmpty()) {
         KMessageBox::sorry(_view,
@@ -1621,7 +1621,7 @@ void SessionController::zmodemUpload()
 bool SessionController::isKonsolePart() const
 {
     // Check to see if we are being called from Konsole or a KPart
-    return !(QString(qApp->metaObject()->className()) == "Konsole::Application");
+    return !(QString(qApp->metaObject()->className()) == QLatin1String("Konsole::Application"));
 }
 
 SessionTask::SessionTask(QObject* parent)
@@ -1666,9 +1666,9 @@ void SaveHistoryTask::execute()
     dialog->setConfirmOverwrite(true);
 
     QStringList mimeTypes;
-    mimeTypes << "text/plain";
-    mimeTypes << "text/html";
-    dialog->setMimeFilter(mimeTypes, "text/plain");
+    mimeTypes << QStringLiteral("text/plain");
+    mimeTypes << QStringLiteral("text/html");
+    dialog->setMimeFilter(mimeTypes, QStringLiteral("text/plain"));
 
     // iterate over each session in the task and display a dialog to allow the user to choose where
     // to save that session's history.
@@ -1711,7 +1711,7 @@ void SaveHistoryTask::execute()
         // from.
         // this is set to -1 to indicate the job has just been started
 
-        if (dialog->currentMimeFilter() == "text/html")
+        if (dialog->currentMimeFilter() == QStringLiteral("text/html"))
             jobInfo.decoder = new HTMLDecoder();
         else
             jobInfo.decoder = new PlainTextDecoder();
@@ -1872,7 +1872,7 @@ void SearchHistoryTask::executeOnScreenWindow(SessionPtr session , ScreenWindowP
             decoder.end();
 
             // line number search below assumes that the buffer ends with a new-line
-            string.append('\n');
+            string.append(QLatin1Char('\n'));
 
             if (forwards)
                 pos = string.indexOf(_regExp);

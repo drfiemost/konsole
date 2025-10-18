@@ -189,13 +189,13 @@ void TerminalDisplay::fontChange(const QFont&)
     // "Base character width on widest ASCII character. This prevents too wide
     //  characters in the presence of double wide (e.g. Japanese) characters."
     // Get the width from representative normal width characters
-    _fontWidth = qRound((static_cast<double>(fm.width(REPCHAR)) / static_cast<double>(qstrlen(REPCHAR))));
+    _fontWidth = qRound((static_cast<double>(fm.width(QStringLiteral(REPCHAR))) / static_cast<double>(qstrlen(REPCHAR))));
 
     _fixedFont = true;
 
-    const int fw = fm.width(REPCHAR[0]);
+    const int fw = fm.width(QLatin1Char(REPCHAR[0]));
     for (unsigned int i = 1; i < qstrlen(REPCHAR); i++) {
-        if (fw != fm.width(REPCHAR[i])) {
+        if (fw != fm.width(QLatin1Char(REPCHAR[i]))) {
             _fixedFont = false;
             break;
         }
@@ -349,7 +349,7 @@ TerminalDisplay::TerminalDisplay(QWidget* parent)
     , _middleClickPasteMode(Enum::PasteFromX11Selection)
     , _scrollbarLocation(Enum::ScrollBarRight)
     , _scrollFullPage(false)
-    , _wordCharacters(":@-./_~?=&%+#")
+    , _wordCharacters(QStringLiteral(":@-./_~"))
     , _bellMode(Enum::NotifyBell)
     , _allowBlinkingText(true)
     , _allowBlinkingCursor(false)
@@ -1260,7 +1260,7 @@ void TerminalDisplay::showResizeNotification()
             _resizeWidget->setMinimumHeight(_resizeWidget->sizeHint().height());
             _resizeWidget->setAlignment(Qt::AlignCenter);
 
-            _resizeWidget->setStyleSheet("background-color:palette(window);border-style:solid;border-width:1px;border-color:palette(dark)");
+            _resizeWidget->setStyleSheet(QStringLiteral("background-color:palette(window);border-style:solid;border-width:1px;border-color:palette(dark)"));
 
             _resizeTimer = new QTimer(this);
             _resizeTimer->setInterval(SIZE_HINT_DURATION);
@@ -2016,7 +2016,7 @@ void TerminalDisplay::mousePressEvent(QMouseEvent* ev)
                 Filter::HotSpot* spot = _filterChain->hotSpotAt(charLine, charColumn);
                 if (spot && spot->type() == Filter::HotSpot::Link) {
                     QObject action;
-                    action.setObjectName("open-action");
+                    action.setObjectName(QStringLiteral("open-action"));
                     spot->activate(&action);
                 }
             }
@@ -2680,7 +2680,7 @@ out:
     y -= curLine;
     // In word selection mode don't select @ (64) if at end of word.
     if (((image[j].rendition & RE_EXTENDED_CHAR) == 0) &&
-        (QChar(image[j].character) == '@') &&
+        (QChar(image[j].character) == QLatin1Char('@')) &&
         (y > pnt.y() || x > pnt.x())) {
         if (x > 0) {
             x--;
@@ -2758,20 +2758,20 @@ QChar TerminalDisplay::charClass(const Character& ch) const
         if (chars && extendedCharLength > 0) {
             const QString s = QString::fromUtf16(chars, extendedCharLength);
             if (_wordCharacters.contains(s, Qt::CaseInsensitive))
-                return 'a';
+                return QLatin1Char('a');
             bool letterOrNumber = false;
             for (int i = 0; !letterOrNumber && i < s.size(); ++i) {
                 letterOrNumber = s.at(i).isLetterOrNumber();
             }
-            return letterOrNumber ? 'a' : s.at(0);
+            return letterOrNumber ? QLatin1Char('a') : s.at(0);
         }
         return 0;
     } else {
         const QChar qch(ch.character);
-        if (qch.isSpace()) return ' ';
+        if (qch.isSpace()) return QLatin1Char(' ');
 
         if (qch.isLetterOrNumber() || _wordCharacters.contains(qch, Qt::CaseInsensitive))
-            return 'a';
+            return QLatin1Char('a');
 
         return qch;
     }
@@ -2816,7 +2816,7 @@ void TerminalDisplay::doPaste(QString text, bool appendReturn)
         return;
 
     if (appendReturn)
-        text.append("\r");
+        text.append(QLatin1String("\r"));
 
     if (text.length() > 8000) {
         if (KMessageBox::warningContinueCancel(window(),
@@ -2826,15 +2826,15 @@ void TerminalDisplay::doPaste(QString text, bool appendReturn)
                         i18n("Confirm Paste"),
                         KStandardGuiItem::cont(),
                         KStandardGuiItem::cancel(),
-                        "ShowPasteHugeTextWarning") == KMessageBox::Cancel)
+                        QStringLiteral("ShowPasteHugeTextWarning")) == KMessageBox::Cancel)
             return;
     }
 
     if (!text.isEmpty()) {
-        text.replace('\n', '\r');
+        text.replace(QLatin1Char('\n'), QLatin1Char('\r'));
         if (bracketedPasteMode()) {
-            text.prepend("\033[200~");
-            text.append("\033[201~");
+            text.prepend(QLatin1String("\033[200~"));
+            text.append(QLatin1String("\033[201~"));
         }
         // perform paste by simulating keypress events
         QKeyEvent e(QEvent::KeyPress, 0, Qt::NoModifier, text);
@@ -3068,10 +3068,8 @@ void TerminalDisplay::keyPressEvent(QKeyEvent* event)
 
     emit keyPressedSignal(event);
 
-#if QT_VERSION >= 0x040800 // added in Qt 4.8.0
 #ifndef QT_NO_ACCESSIBILITY
     QAccessible::updateAccessibility(this, 0, QAccessible::TextCaretMoved);
-#endif
 #endif
 
     event->accept();
@@ -3184,7 +3182,7 @@ void TerminalDisplay::bell(const QString& message)
         //     Please note that these event names, "BellVisible" and "BellInvisible",
         //     should not change and should be kept stable, because other applications
         //     that use this code via KPart rely on these names for notifications.
-        KNotification::event(hasFocus() ? "BellVisible" : "BellInvisible",
+        KNotification::event(hasFocus() ? QStringLiteral("BellVisible") : QStringLiteral("BellInvisible"),
                              message, QPixmap(), this);
         break;
     case Enum::VisualBell:
@@ -3229,8 +3227,8 @@ void TerminalDisplay::dragEnterEvent(QDragEnterEvent* event)
     // text/uri-list is for supporting some non-KDE apps, such as thunar
     //   and pcmanfm
     // That also applies in dropEvent()
-    if (event->mimeData()->hasFormat("text/plain") ||
-            event->mimeData()->hasFormat("text/uri-list")) {
+    if (event->mimeData()->hasFormat(QStringLiteral("text/plain")) ||
+            event->mimeData()->hasFormat(QStringLiteral("text/uri-list"))) {
         event->acceptProposedAction();
     }
 }
@@ -3257,7 +3255,7 @@ void TerminalDisplay::dropEvent(QDropEvent* event)
             dropText += urlText;
 
             // Each filename(including the last) should be followed by one space.
-            dropText += ' ';
+            dropText += QLatin1Char(' ');
         }
 
 #if defined(HAVE_LIBKONQ)
@@ -3282,7 +3280,7 @@ void TerminalDisplay::dropEvent(QDropEvent* event)
 
                     if (fileInfo.isDir()) {
                         QAction* cdAction = new QAction(i18n("Change &Directory To"), this);
-                        dropText = QLatin1String(" cd ") + dropText + QChar('\n');
+                        dropText = QLatin1String(" cd ") + dropText + QLatin1Char('\n');
                         cdAction->setData(dropText);
                         connect(cdAction, SIGNAL(triggered()), this, SLOT(dropMenuCdActionTriggered()));
                         additionalActions.append(cdAction);
@@ -3302,8 +3300,8 @@ void TerminalDisplay::dropEvent(QDropEvent* event)
         dropText = event->mimeData()->text();
     }
 
-    if (event->mimeData()->hasFormat("text/plain") ||
-            event->mimeData()->hasFormat("text/uri-list")) {
+    if (event->mimeData()->hasFormat(QStringLiteral("text/plain")) ||
+            event->mimeData()->hasFormat(QStringLiteral("text/uri-list"))) {
         emit sendStringToEmu(qPrintable(dropText));
     }
 }
