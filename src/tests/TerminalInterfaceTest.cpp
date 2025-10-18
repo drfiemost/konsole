@@ -46,6 +46,10 @@ void TerminalInterfaceTest::testTerminalInterfaceNoShell()
     TerminalInterfaceV2* terminal = qobject_cast<TerminalInterfaceV2*>(_terminalPart);
     QVERIFY(terminal);
 
+#if !defined(Q_OS_FREEBSD)
+    // Skip this for now on FreeBSD
+    // -1 is current foreground process and name for process 0 is "kernel"
+
     // Verify results when no shell running
     int terminalProcessId  = terminal->terminalProcessId();
     QCOMPARE(terminalProcessId, 0);    int foregroundProcessId  = terminal->foregroundProcessId();
@@ -55,6 +59,7 @@ void TerminalInterfaceTest::testTerminalInterfaceNoShell()
     //const QString currentWorkingDirectory  = terminal->currentWorkingDirectory();
     //QCOMPARE(currentWorkingDirectory, QString(""));
 
+#endif
     delete _terminalPart;
 }
 

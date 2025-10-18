@@ -133,6 +133,7 @@ kde4_add_ui_files(konsoleprivate_SRCS ColorSchemeEditor.ui
                                       HistorySizeWidget.ui
                                       PrintOptions.ui
                                       settings/GeneralSettings.ui
+                                      settings/PartInfo.ui
                                       settings/ProfileSettings.ui
                                       settings/TabBarSettings.ui)
 
@@ -161,7 +162,8 @@ install(TARGETS kdeinit_konsole konsole konsoleprivate
 ### Embedded Konsole KPart
 
 set(konsolepart_PART_SRCS Part.cpp
-   settings/ProfileSettings.cpp)
+    settings/PartInfo.cpp
+    settings/ProfileSettings.cpp)
 kde4_add_kcfg_files(konsolepart_PART_SRCS settings/KonsoleSettings.kcfgc)
 
 kde4_add_plugin(konsolepart WITH_PREFIX ${konsolepart_PART_SRCS})

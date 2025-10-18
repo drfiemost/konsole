@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/param.h>
+#include <errno.h>
 
 // Qt
 #include <QDir>
@@ -37,7 +38,7 @@
 #include <QFlags>
 #include <QTextStream>
 #include <QStringList>
-#include <QtNetwork/QHostInfo>
+#include <QHostInfo>
 
 // KDE
 #include <KConfigGroup>
@@ -542,7 +543,7 @@ private:
 
             const QStringList& argList = data.split(QLatin1Char('\0'));
 
-            foreach(const QString & entry , argList) {
+            for(const QString & entry: argList) {
                 if (!entry.isEmpty())
                     addArgument(entry);
             }
@@ -578,7 +579,7 @@ protected:
         if (sysctl(managementInfoBase, 4, buf, &len, NULL, 0) == -1)
             return false;
 
-        setCurrentDir(buf);
+        setCurrentDir(QString::fromUtf8(buf));
 
         return true;
 #else
@@ -592,7 +593,7 @@ protected:
 
         for (int i = 0; i < numrecords; ++i) {
             if (info[i].kf_fd == KF_FD_TYPE_CWD) {
-                setCurrentDir(info[i].kf_path);
+                setCurrentDir(QString::fromUtf8(info[i].kf_path));
 
                 free(info);
                 return true;
@@ -626,13 +627,13 @@ private:
         }
 
 #if defined(HAVE_OS_DRAGONFLYBSD)
-        setName(kInfoProc->kp_comm);
+        setName(QString::fromUtf8(kInfoProc->kp_comm));
         setPid(kInfoProc->kp_pid);
         setParentPid(kInfoProc->kp_ppid);
         setForegroundPid(kInfoProc->kp_pgid);
         setUserId(kInfoProc->kp_uid);
 #else
-        setName(kInfoProc->ki_comm);
+        setName(QString::fromUtf8(kInfoProc->ki_comm));
         setPid(kInfoProc->ki_pid);
         setParentPid(kInfoProc->ki_ppid);
         setForegroundPid(kInfoProc->ki_pgid);
@@ -693,7 +694,7 @@ protected:
             return false;
         }
 
-        setCurrentDir(buf);
+        setCurrentDir(QString::fromUtf8(buf));
         return true;
     }
 

@@ -66,9 +66,6 @@ public:
      */
     void setShortcutEditorVisible(bool visible);
 
-protected:
-    virtual void showEvent(QShowEvent* event);
-
 private slots:
     void deleteSelected();
     void setSelectedAsDefault();
