@@ -78,7 +78,7 @@ HistorySizeWidget::~HistorySizeWidget()
     delete _ui;
 }
 
-void HistorySizeWidget::buttonClicked(QAbstractButton*) const
+void HistorySizeWidget::buttonClicked(QAbstractButton*)
 {
     Enum::HistoryModeEnum selectedMode = mode();
     _ui->fixedSizeWarningWidget->setVisible(Enum::FixedSizeHistory == selectedMode);
