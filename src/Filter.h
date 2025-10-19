@@ -289,6 +289,8 @@ public:
 public slots:
     void activated();
 private:
+    Q_DISABLE_COPY(FilterObject)
+
     Filter::HotSpot* _filter;
 };
 

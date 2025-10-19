@@ -21,10 +21,10 @@
 #define VIEWPROPERTIES_H
 
 // Qt
-#include <QtGui/QIcon>
-#include <QtCore/QObject>
-#include <QtCore/QHash>
-#include <QtCore/QMimeData>
+#include <QIcon>
+#include <QObject>
+#include <QHash>
+#include <QMimeData>
 
 // KDE
 #include <KUrl>
@@ -145,6 +145,8 @@ protected:
     /** Subclasses may call this method to change the identifier. */
     void setIdentifier(int id);
 private:
+    Q_DISABLE_COPY(ViewProperties)
+
     QIcon _icon;
     QString _title;
     int _identifier;

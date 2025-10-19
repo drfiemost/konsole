@@ -90,6 +90,8 @@ private slots:
     void shortcutChanged(Profile::Ptr profile, const QKeySequence& sequence);
 
 private:
+    Q_DISABLE_COPY(ProfileList)
+
     QAction* actionForProfile(Profile::Ptr profile) const;
     void updateAction(QAction* action , Profile::Ptr profile);
     void updateEmptyAction();

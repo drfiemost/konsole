@@ -72,6 +72,8 @@ private slots:
     void toggleBackgroundInstance();
 
 private:
+    Q_DISABLE_COPY(Application)
+
     void init();
     void listAvailableProfiles();
     void listProfilePropertyInfo();

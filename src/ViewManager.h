@@ -346,6 +346,8 @@ private slots:
     void closeTabFromContainer(ViewContainer* container, QWidget* view);
 
 private:
+    Q_DISABLE_COPY(ViewManager)
+
     void createView(Session* session, ViewContainer* container, int index);
 
     void setupActions();

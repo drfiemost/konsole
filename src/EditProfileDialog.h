@@ -161,6 +161,7 @@ private slots:
     void toggleOpenLinksByDirectClick(bool);
     void toggleCtrlRequiredForDrag(bool);
     void toggleCopyTextToClipboard(bool);
+    void toggleTrimLeadingSpacesInSelectedText(bool);
     void toggleTrimTrailingSpacesInSelectedText(bool);
     void pasteFromX11Selection();
     void pasteFromClipboard();

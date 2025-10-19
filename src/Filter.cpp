@@ -124,6 +124,7 @@ void TerminalImageFilterChain::setImage(const Character* const image , int lines
     reset();
 
     PlainTextDecoder decoder;
+    decoder.setLeadingWhitespace(false);
     decoder.setTrailingWhitespace(false);
 
     // setup new shared buffers for the filters to process on

@@ -111,6 +111,8 @@ private slots:
     void openBookmark(const KBookmark& bm, Qt::MouseButtons, Qt::KeyboardModifiers);
 
 private:
+    Q_DISABLE_COPY(BookmarkHandler)
+
     QString titleForView(ViewProperties* view) const;
     QString urlForView(ViewProperties* view) const;
 

@@ -27,10 +27,10 @@
 
 // Konsole
 #include "Character.h"
+#include "Screen.h"
 
 namespace Konsole
 {
-class Screen;
 
 /**
  * Provides a window onto a section of a terminal screen.  A terminal widget can then render
@@ -231,8 +231,9 @@ public:
      *
      * @param preserveLineBreaks See Screen::selectedText()
      * @param trimTrailingSpaces See Screen::selectedText()
+     * @param trimLeadingSpaces See Screen::selectedText()
      */
-    QString selectedText(bool preserveLineBreaks, bool trimTrailingSpaces = false) const;
+    QString selectedText(const Konsole::Screen::DecodingOptions options) const;
 
 public slots:
     /**
@@ -261,6 +262,8 @@ signals:
     void selectionChanged();
 
 private:
+    Q_DISABLE_COPY(ScreenWindow)
+
     int endWindowLine() const;
     void fillUnusedArea();
 

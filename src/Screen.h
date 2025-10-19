@@ -75,6 +75,15 @@ class HistoryScroll;
 class Screen
 {
 public:
+    enum DecodingOption {
+        PlainText = 0x0,
+        ConvertToHtml = 0x1,
+        PreserveLineBreaks = 0x2,
+        TrimLeadingWhitespace = 0x4,
+        TrimTrailingWhitespace = 0x8
+    };
+    Q_DECLARE_FLAGS(DecodingOptions, DecodingOption)
+
     /** Construct a new screen image of size @p lines by @p columns. */
     Screen(int lines, int columns);
     ~Screen();
@@ -438,8 +447,10 @@ public:
      * be inserted into the returned text at the end of each terminal line.
      * @param trimTrailingSpaces Specifies whether trailing spaces should be
      * trimmed in the returned text.
+     * @param trimLeadingSpaces Specifies whether leading spaces should be
+     * trimmed in the returned text.
      */
-    QString selectedText(bool preserveLineBreaks, bool trimTrailingSpaces = false) const;
+    QString selectedText(const DecodingOptions options) const;
 
     /**
      * Convenience method.  Returns the text between two indices.
@@ -449,8 +460,10 @@ public:
      * be inserted into the returned text at the end of each terminal line.
      * @param trimTrailingSpaces Specifies whether trailing spaces should be
      * trimmed in the returned text.
+     * @param trimLeadingSpaces Specifies whether leading spaces should be
+     * trimmed in the returned text.
      */
-    QString text(int startIndex, int endIndex, bool preserveLineBreaks, bool trimTrailingSpaces = false) const;
+    QString text(int startIndex, int endIndex, const DecodingOptions options) const;
 
     /**
      * Copies part of the output to a stream.
@@ -472,10 +485,11 @@ public:
      * be inserted into the returned text at the end of each terminal line.
      * @param trimTrailingSpaces Specifies whether trailing spaces should be
      * trimmed in the returned text.
+     * @param trimLeadingSpaces Specifies whether leading spaces should be
+     * trimmed in the returned text.
      */
-    void writeSelectionToStream(TerminalCharacterDecoder* decoder , bool
-                                preserveLineBreaks = true,
-                                bool trimTrailingSpaces = false) const;
+    void writeSelectionToStream(TerminalCharacterDecoder* decoder ,
+                                const Konsole::Screen::DecodingOptions options) const;
 
     /**
      * Checks if the text between from and to is inside the current
@@ -594,8 +608,7 @@ private:
                           int count,
                           TerminalCharacterDecoder* decoder,
                           bool appendNewLine,
-                          bool preserveLineBreaks,
-                          bool trimTrailingSpaces) const;
+                          const Konsole::Screen::DecodingOptions options) const;
 
     //fills a section of the screen image with the character 'c'
     //the parameters are specified as offsets from the start of the screen image.
@@ -627,7 +640,7 @@ private:
     // copies text from 'startIndex' to 'endIndex' to a stream
     // startIndex and endIndex are positions generated using the loc(x,y) macro
     void writeToStream(TerminalCharacterDecoder* decoder, int startIndex,
-                       int endIndex, bool preserveLineBreaks = true, bool trimTrailingSpaces = false) const;
+                       int endIndex, const Konsole::Screen::DecodingOptions options) const;
     // copies 'count' lines from the screen buffer into 'dest',
     // starting from 'startLine', where 0 is the first line in the screen buffer
     void copyFromScreen(Character* dest, int startLine, int count) const;
@@ -707,6 +720,9 @@ private:
     // last position where we added a character
     int _lastPos;
 };
+
 }
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(Konsole::Screen::DecodingOptions)
 
 #endif // SCREEN_H

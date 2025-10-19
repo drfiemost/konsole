@@ -483,6 +483,8 @@ private slots:
     void bracketedPasteModeChanged(bool bracketedPasteMode);
 
 private:
+    Q_DISABLE_COPY(Emulation)
+
     bool _usesMouse;
     bool _bracketedPasteMode;
     QTimer _bulkTimer1;

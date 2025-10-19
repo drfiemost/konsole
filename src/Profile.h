@@ -205,6 +205,8 @@ public:
         CtrlRequiredForDrag,
         /** (bool) If true, automatically copy selected text into the clipboard */
         AutoCopySelectedText,
+        /** (bool) If true, leading spaces are trimmed in selected text */
+        TrimLeadingSpacesInSelectedText,
         /** (bool) If true, trailing spaces are trimmed in selected text */
         TrimTrailingSpacesInSelectedText,
         /** (bool) If true, middle mouse button pastes from X Selection */
@@ -313,14 +315,14 @@ public:
      * the parent's value for @p property will be returned.
      */
     template <class T>
-    T property(Property property) const;
+    T property(Property p) const;
 
     /** Sets the value of the specified @p property to @p value. */
-    virtual void setProperty(Property property, const QVariant& value);
+    virtual void setProperty(Property p, const QVariant& value);
     /** Returns true if the specified property has been set in this Profile
      * instance.
      */
-    virtual bool isPropertySet(Property property) const;
+    virtual bool isPropertySet(Property p) const;
 
     /** Returns a map of the properties set in this Profile instance. */
     virtual QHash<Property, QVariant> setProperties() const;
@@ -558,7 +560,7 @@ private:
     static void fillTableWithDefaultNames();
 
     // returns true if the property can be inherited
-    static bool canInheritProperty(Property property);
+    static bool canInheritProperty(Property p);
 
     QHash<Property, QVariant> _propertyValues;
     Ptr _parent;
@@ -579,23 +581,23 @@ private:
     static const PropertyInfo DefaultPropertyNames[];
 };
 
-inline bool Profile::canInheritProperty(Property aProperty)
+inline bool Profile::canInheritProperty(Property p)
 {
-    return aProperty != Name && aProperty != Path;
+    return p != Name && p != Path;
 }
 
 template <class T>
-inline T Profile::property(Property aProperty) const
+inline T Profile::property(Property p) const
 {
-    return property<QVariant>(aProperty).value<T>();
+    return property<QVariant>(p).value<T>();
 }
 template <>
-inline QVariant Profile::property(Property aProperty) const
+inline QVariant Profile::property(Property p) const
 {
-    if (_propertyValues.contains(aProperty)) {
-        return _propertyValues[aProperty];
-    } else if (_parent && canInheritProperty(aProperty)) {
-        return _parent->property<QVariant>(aProperty);
+    if (_propertyValues.contains(p)) {
+        return _propertyValues[p];
+    } else if (_parent && canInheritProperty(p)) {
+        return _parent->property<QVariant>(p);
     } else {
         return QVariant();
     }
@@ -658,7 +660,7 @@ public:
     /** Sets the value of @p property in each of the group's profiles to
      * @p value.
      */
-    void setProperty(Property property, const QVariant& value);
+    void setProperty(Property p, const QVariant& value);
 
 private:
     QList<Profile::Ptr> _profiles;

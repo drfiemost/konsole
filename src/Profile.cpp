@@ -110,6 +110,7 @@ const Profile::PropertyInfo Profile::DefaultPropertyNames[] = {
     , { OpenLinksByDirectClickEnabled , "OpenLinksByDirectClickEnabled" , INTERACTION_GROUP , QVariant::Bool }
     , { CtrlRequiredForDrag, "CtrlRequiredForDrag" , INTERACTION_GROUP , QVariant::Bool }
     , { AutoCopySelectedText , "AutoCopySelectedText" , INTERACTION_GROUP , QVariant::Bool }
+    , { TrimLeadingSpacesInSelectedText , "TrimLeadingSpacesInSelectedText" , INTERACTION_GROUP , QVariant::Bool }
     , { TrimTrailingSpacesInSelectedText , "TrimTrailingSpacesInSelectedText" , INTERACTION_GROUP , QVariant::Bool }
     , { PasteFromSelectionEnabled , "PasteFromSelectionEnabled" , INTERACTION_GROUP , QVariant::Bool }
     , { PasteFromClipboardEnabled , "PasteFromClipboardEnabled" , INTERACTION_GROUP , QVariant::Bool }
@@ -119,7 +120,7 @@ const Profile::PropertyInfo Profile::DefaultPropertyNames[] = {
     // Encoding
     , { DefaultEncoding , "DefaultEncoding" , ENCODING_GROUP , QVariant::String }
 
-    , { (Property)0 , nullptr , nullptr, QVariant::Invalid }
+    , { static_cast<Profile::Property>(0) , nullptr , nullptr, QVariant::Invalid }
 };
 
 QHash<QString, Profile::PropertyInfo> Profile::PropertyInfoByName;
@@ -181,6 +182,7 @@ void Profile::useFallback()
     setProperty(OpenLinksByDirectClickEnabled, false);
     setProperty(CtrlRequiredForDrag, true);
     setProperty(AutoCopySelectedText, false);
+    setProperty(TrimLeadingSpacesInSelectedText, false);
     setProperty(TrimTrailingSpacesInSelectedText, false);
     setProperty(PasteFromSelectionEnabled, true);
     setProperty(PasteFromClipboardEnabled, false);
@@ -258,13 +260,13 @@ QHash<Profile::Property, QVariant> Profile::setProperties() const
 {
     return _propertyValues;
 }
-void Profile::setProperty(Property property , const QVariant& value)
+void Profile::setProperty(Property p, const QVariant& value)
 {
-    _propertyValues.insert(property, value);
+    _propertyValues.insert(p, value);
 }
-bool Profile::isPropertySet(Property property) const
+bool Profile::isPropertySet(Property p) const
 {
-    return _propertyValues.contains(property);
+    return _propertyValues.contains(p);
 }
 
 Profile::Property Profile::lookupByName(const QString& name)
@@ -367,14 +369,14 @@ void ProfileGroup::updateValues()
         properties++;
     }
 }
-void ProfileGroup::setProperty(Property property, const QVariant& value)
+void ProfileGroup::setProperty(Property p, const QVariant& value)
 {
-    if (_profiles.count() > 1 && !canInheritProperty(property))
+    if (_profiles.count() > 1 && !canInheritProperty(p))
         return;
 
-    Profile::setProperty(property, value);
+    Profile::setProperty(p, value);
     foreach(Profile::Ptr profile, _profiles) {
-        profile->setProperty(property, value);
+        profile->setProperty(p, value);
     }
 }
 

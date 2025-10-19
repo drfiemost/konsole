@@ -486,7 +486,7 @@ QVector<LineProperty> Screen::getLineProperties(int startLine , int endLine) con
     for (int line = startLine; line < startLine + linesInHistory; line++) {
         //TODO Support for line properties other than wrapped _lines
         if (_history->isWrappedLine(line)) {
-            result[index] = (LineProperty)(result[index] | LINE_WRAPPED);
+            result[index] = static_cast<LineProperty>(result[index] | LINE_WRAPPED);
         }
         index++;
     }
@@ -667,7 +667,7 @@ void Screen::displayCharacter(unsigned short c)
 
     if (_cuX + w > _columns) {
         if (getMode(MODE_Wrap)) {
-            _lineProperties[_cuY] = (LineProperty)(_lineProperties[_cuY] | LINE_WRAPPED);
+            _lineProperties[_cuY] = static_cast<LineProperty>(_lineProperties[_cuY] | LINE_WRAPPED);
             nextLine();
         } else {
             _cuX = _columns - w;
@@ -1086,22 +1086,22 @@ bool Screen::isSelected(const int x, const int y) const
     return pos >= _selTopLeft && pos <= _selBottomRight && columnInSelection;
 }
 
-QString Screen::selectedText(bool preserveLineBreaks, bool trimTrailingSpaces) const
+QString Screen::selectedText(const DecodingOptions options) const
 {
     if (!isSelectionValid())
         return QString();
 
-    return text(_selTopLeft, _selBottomRight, preserveLineBreaks, trimTrailingSpaces);
+    return text(_selTopLeft, _selBottomRight, options);
 }
 
-QString Screen::text(int startIndex, int endIndex, bool preserveLineBreaks, bool trimTrailingSpaces) const
+QString Screen::text(int startIndex, int endIndex, const DecodingOptions options) const
 {
     QString result;
     QTextStream stream(&result, QIODevice::ReadWrite);
 
     PlainTextDecoder decoder;
     decoder.begin(&stream);
-    writeToStream(&decoder, startIndex, endIndex, preserveLineBreaks, trimTrailingSpaces);
+    writeToStream(&decoder, startIndex, endIndex, options);
     decoder.end();
 
     return result;
@@ -1113,18 +1113,16 @@ bool Screen::isSelectionValid() const
 }
 
 void Screen::writeSelectionToStream(TerminalCharacterDecoder* decoder ,
-                                    bool preserveLineBreaks,
-                                    bool trimTrailingSpaces) const
+                                    const DecodingOptions options) const
 {
     if (!isSelectionValid())
         return;
-    writeToStream(decoder, _selTopLeft, _selBottomRight, preserveLineBreaks, trimTrailingSpaces);
+    writeToStream(decoder, _selTopLeft, _selBottomRight, options);
 }
 
 void Screen::writeToStream(TerminalCharacterDecoder* decoder,
                            int startIndex, int endIndex,
-                           bool preserveLineBreaks,
-                           bool trimTrailingSpaces) const
+                           const DecodingOptions options) const
 {
     const int top = startIndex / _columns;
     const int left = startIndex % _columns;
@@ -1147,8 +1145,7 @@ void Screen::writeToStream(TerminalCharacterDecoder* decoder,
                                       count,
                                       decoder,
                                       appendNewLine,
-                                      preserveLineBreaks,
-                                      trimTrailingSpaces);
+                                      options);
 
         // if the selection goes beyond the end of the last line then
         // append a new line character.
@@ -1157,7 +1154,7 @@ void Screen::writeToStream(TerminalCharacterDecoder* decoder,
         // the text on a line.
         if (y == bottom &&
                 copied < count &&
-                !trimTrailingSpaces) {
+                !options.testFlag(TrimTrailingWhitespace)) {
             Character newLineChar('\n');
             decoder->decodeLine(&newLineChar, 1, 0);
         }
@@ -1169,8 +1166,7 @@ int Screen::copyLineToStream(int line ,
                              int count,
                              TerminalCharacterDecoder* decoder,
                              bool appendNewLine,
-                             bool preserveLineBreaks,
-                             bool trimTrailingSpaces) const
+                             const DecodingOptions options) const
 {
     //buffer to hold characters for decoding
     //the buffer is static to avoid initializing every
@@ -1226,7 +1222,7 @@ int Screen::copyLineToStream(int line ,
         int length = _screenLines[screenLine].count();
 
         // Don't remove end spaces in lines that wrap
-        if (trimTrailingSpaces && ((_lineProperties[screenLine] & LINE_WRAPPED) == 0))
+        if (options.testFlag(TrimTrailingWhitespace) && ((_lineProperties[screenLine] & LINE_WRAPPED) == 0))
         {
             // ignore trailing white space at the end of the line
             for (int i = length-1; i >= 0; i--)
@@ -1257,13 +1253,32 @@ int Screen::copyLineToStream(int line ,
             // When users ask not to preserve the linebreaks, they usually mean:
             // `treat LINEBREAK as SPACE, thus joining multiple _lines into
             // single line in the same way as 'J' does in VIM.`
-            characterBuffer[count] = preserveLineBreaks ? Character('\n') : Character(' ');
+            characterBuffer[count] = options.testFlag(PreserveLineBreaks)  ? Character('\n') : Character(' ');
             count++;
         }
     }
 
+    if (options & TrimLeadingWhitespace) {
+        int spacesCount = 0;
+        for (spacesCount = 0; spacesCount < count; spacesCount++) {
+            if (!QChar(characterBuffer[spacesCount].character).isSpace()) {
+                break;
+            }
+        }
+
+        if (spacesCount >= count) {
+            return 0;
+        }
+
+        for (int i=0; i < count - spacesCount; i++) {
+            characterBuffer[i] = characterBuffer[i + spacesCount];
+        }
+
+        count -= spacesCount;
+    }
+
     //decode line and write to text stream
-    decoder->decodeLine((Character*) characterBuffer ,
+    decoder->decodeLine(characterBuffer ,
                         count, currentLineProperties);
 
     return count;
@@ -1271,7 +1286,7 @@ int Screen::copyLineToStream(int line ,
 
 void Screen::writeLinesToStream(TerminalCharacterDecoder* decoder, int fromLine, int toLine) const
 {
-    writeToStream(decoder, loc(0, fromLine), loc(_columns - 1, toLine));
+    writeToStream(decoder, loc(0, fromLine), loc(_columns - 1, toLine), PreserveLineBreaks);
 }
 
 void Screen::addHistLine()
@@ -1358,9 +1373,9 @@ const HistoryType& Screen::getScroll() const
 void Screen::setLineProperty(LineProperty property , bool enable)
 {
     if (enable)
-        _lineProperties[_cuY] = (LineProperty)(_lineProperties[_cuY] | property);
+        _lineProperties[_cuY] = static_cast<LineProperty>(_lineProperties[_cuY] | property);
     else
-        _lineProperties[_cuY] = (LineProperty)(_lineProperties[_cuY] & ~property);
+        _lineProperties[_cuY] = static_cast<LineProperty>(_lineProperties[_cuY] & ~property);
 }
 void Screen::fillWithDefaultChar(Character* dest, int count)
 {

@@ -21,25 +21,17 @@
 
 #include "TerminalDisplayAccessible.h"
 
-#if QT_VERSION >= 0x040800 // added in Qt 4.8.0
 QString Q_GUI_EXPORT qTextBeforeOffsetFromString(int offset, QAccessible2::BoundaryType boundaryType,
         int* startOffset, int* endOffset, const QString& text);
 QString Q_GUI_EXPORT qTextAtOffsetFromString(int offset, QAccessible2::BoundaryType boundaryType,
         int* startOffset, int* endOffset, const QString& text);
 QString Q_GUI_EXPORT qTextAfterOffsetFromString(int offset, QAccessible2::BoundaryType boundaryType,
         int* startOffset, int* endOffset, const QString& text);
-#endif
 
 using namespace Konsole;
 
 TerminalDisplayAccessible::TerminalDisplayAccessible(TerminalDisplay* display)
-    : QAccessibleWidgetEx(display,
-#if QT_VERSION > 0x040800 // added in Qt 4.8.1
-                          QAccessible::Terminal
-#else
-                          QAccessible::EditableText
-#endif
-                         )
+    : QAccessibleWidgetEx(display, QAccessible::Terminal)
     , QAccessibleSimpleEditableTextInterface(this)
 {}
 
@@ -97,7 +89,7 @@ QString TerminalDisplayAccessible::visibleText() const
     if (!display->screenWindow())
         return QString();
 
-    return display->screenWindow()->screen()->text(0, display->_usedColumns * display->_usedLines, true);
+    return display->screenWindow()->screen()->text(0, display->_usedColumns * display->_usedLines, Screen::PreserveLineBreaks);
 }
 
 void TerminalDisplayAccessible::addSelection(int startOffset, int endOffset)
@@ -177,7 +169,7 @@ QString TerminalDisplayAccessible::text(int startOffset, int endOffset)
     if (!display()->screenWindow())
         return QString();
 
-    return display()->screenWindow()->screen()->text(startOffset, endOffset, true);
+    return display()->screenWindow()->screen()->text(startOffset, endOffset, Screen::PreserveLineBreaks);
 }
 
 QString TerminalDisplayAccessible::textAfterOffset(int offset, QAccessible2::BoundaryType boundaryType, int* startOffset, int* endOffset)

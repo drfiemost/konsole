@@ -23,10 +23,10 @@
 #define VIEWCONTAINER_H
 
 // Qt
-#include <QtCore/QObject>
-#include <QtCore/QPointer>
-#include <QtCore/QHash>
-#include <QtCore/QList>
+#include <QObject>
+#include <QPointer>
+#include <QHash>
+#include <QList>
 
 // Konsole
 #include "Profile.h"
@@ -342,6 +342,8 @@ private slots:
     void searchBarDestroyed();
 
 private:
+    Q_DISABLE_COPY(ViewContainer)
+
     NavigationVisibility _navigationVisibility;
     NavigationPosition _navigationPosition;
     QList<QWidget*> _views;
