@@ -66,7 +66,7 @@ EditProfileDialog::EditProfileDialog(QWidget* aParent)
     // disable the apply button , since no modification has been made
     enableButtonApply(false);
 
-    connect(this, &Konsole::EditProfileDialog::applyClicked, this, &Konsole::EditProfileDialog::save);
+    connect(this, &Konsole::EditProfileDialog::applyClicked, this, &Konsole::EditProfileDialog::apply);
 
     connect(_delayedPreviewTimer, &QTimer::timeout, this, &Konsole::EditProfileDialog::delayedPreviewActivate);
 
@@ -119,8 +119,51 @@ void EditProfileDialog::reject()
 }
 void EditProfileDialog::accept()
 {
+    if (isButtonEnabled(KDialog::Apply)) {
+        if (!isValidProfileName()) {
+            return;
+        }
+        save();
+    }
+    unpreviewAll();
+    QDialog::accept();
+}
+
+void EditProfileDialog::apply()
+{
+    if (!isValidProfileName()) {
+        return;
+    }
+    save();
+}
+
+bool EditProfileDialog::isValidProfileName()
+{
     Q_ASSERT(_profile);
     Q_ASSERT(_tempProfile);
+
+    // check whether the user has enough permissions to save the profile
+    QFileInfo fileInfo(_profile->path());
+    if (fileInfo.exists() && !fileInfo.isWritable()) {
+        if (!_tempProfile->isPropertySet(Profile::Name)
+            || (_tempProfile->isPropertySet(Profile::Name) && _tempProfile->name() == _profile->name())) {
+                KMessageBox::sorry(this,
+                                   i18n("<p>Konsole does not have permission to save this profile to:<br /> \"%1\"</p>"
+                                        "<p>To be able to save settings you can either change the permissions "
+                                        "of the profile configuration file or change the profile name to save "
+                                        "the settings to a new profile.</p>", _profile->path()));
+                return false;
+        }
+    }
+
+    const QList<Profile::Ptr> existingProfiles = ProfileManager::instance()->allProfiles();
+    QStringList otherExistingProfileNames;
+
+    for(auto existingProfile: existingProfiles) {
+        if (existingProfile->name() != _profile->name()) {
+            otherExistingProfileNames.append(existingProfile->name());
+        }
+    }
 
     if ((_tempProfile->isPropertySet(Profile::Name) &&
             _tempProfile->name().isEmpty())
@@ -128,12 +171,22 @@ void EditProfileDialog::accept()
         KMessageBox::sorry(this,
                            i18n("<p>Each profile must have a name before it can be saved "
                                 "into disk.</p>"));
-        return;
+        // revert the name in the dialog
+        _ui->profileNameEdit->setText(_profile->name());
+        selectProfileName();
+        return false;
+    } else if (!_tempProfile->name().isEmpty() && otherExistingProfileNames.contains(_tempProfile->name())) {
+        KMessageBox::sorry(this,
+                            i18n("<p>A profile with this name already exists.</p>"));
+        // revert the name in the dialog
+        _ui->profileNameEdit->setText(_profile->name());
+        selectProfileName();
+        return false;
+    } else {
+        return true;
     }
-    save();
-    unpreviewAll();
-    KDialog::accept();
 }
+
 QString EditProfileDialog::groupProfileNames(const ProfileGroup::Ptr group, int maxLength)
 {
     QString caption;

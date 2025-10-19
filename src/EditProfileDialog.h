@@ -89,9 +89,11 @@ public:
 
 public slots:
     // reimplemented
-    virtual void accept();
+    void accept() override;
     // reimplemented
-    virtual void reject();
+    void reject() override;
+
+    void apply();
 
 protected:
     virtual bool eventFilter(QObject* watched , QEvent* event);
@@ -237,6 +239,13 @@ private:
         const char* slot;
     };
     void setupCheckBoxes(BooleanOption* options , const Profile::Ptr profile);
+
+    // returns false if:
+    // - the profile name is empty
+    // - the name matches the name of an already existing profile
+    // - the existing profile config file is read-only
+    // otherwise returns true.
+    bool isValidProfileName();
 
     Ui::EditProfileDialog* _ui;
     Profile::Ptr _tempProfile;

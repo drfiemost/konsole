@@ -193,6 +193,9 @@ Profile::Ptr ProfileManager::loadProfile(const QString& shortPath)
     if (!result) {
         kWarning() << "Could not load profile from " << path;
         return Profile::Ptr();
+    } else if (newProfile->name().isEmpty()) {
+        kWarning() << path << " does not have a valid name, ignoring.";
+        return Profile::Ptr();
     } else {
         addProfile(newProfile);
         return newProfile;
@@ -346,6 +349,8 @@ void ProfileManager::changeProfile(Profile::Ptr profile,
 {
     Q_ASSERT(profile);
 
+    const QString origPath = profile->path();
+
     // never save a profile with empty name into disk!
     persistent = persistent && !profile->name().isEmpty();
 
@@ -415,6 +420,27 @@ void ProfileManager::changeProfile(Profile::Ptr profile,
     // it has no file on disk
     if (persistent && !newProfile->isHidden()) {
         newProfile->setProperty(Profile::Path, saveProfile(newProfile));
+        // if the profile was renamed, after saving the new profile
+        // delete the the old/redundant profile.
+        // only do this if origPath is not empty, because it's empty
+        // when creating a new profile, this works around a bug where
+        // the newly created profile appears twice in the ProfileSettings
+        // dialog
+        if (!origPath.isEmpty() && (newProfile->path() != origPath)) {
+            // this is needed to include the old profile too
+            _loadedAllProfiles = false;
+           const QList<Profile::Ptr> availableProfiles = ProfileManager::instance()->allProfiles();
+            for(auto oldProfile: availableProfiles) {
+                if (oldProfile->path() == origPath) {
+                    // assign the same shortcut of the old profile to
+                    // the newly renamed profile
+                    const auto oldShortcut = shortcut(oldProfile);
+                    if (deleteProfile(oldProfile)) {
+                        setShortcut(newProfile, oldShortcut);
+                    }
+                }
+            }
+        }
     }
 
     // notify the world about the change
@@ -527,7 +553,7 @@ void ProfileManager::loadShortcuts()
         // if the file is not an absolute path, look it up
         QFileInfo fileInfo(profilePath);
         if (!fileInfo.isAbsolute()) {
-            profilePath = KStandardDirs::locate("data", "konsole/" + profilePath);
+            profilePath = KStandardDirs::locate("data", QStringLiteral("konsole/") + profilePath);
         }
 
         data.profilePath = profilePath;
@@ -554,7 +580,7 @@ void ProfileManager::saveShortcuts()
             // Check to see if file is under KDE's data locations.  If not,
             // store full path.
             QString location = KGlobal::dirs()->locate("data",
-                               "konsole/" + fileInfo.fileName());
+                               QStringLiteral("konsole/") + fileInfo.fileName());
             if (location.isEmpty()) {
                 profileName = iter.value().profilePath;
             } else  {
@@ -633,7 +659,7 @@ void ProfileManager::saveFavorites()
             // Check to see if file is under KDE's data locations.  If not,
             // store full path.
             QString location = KGlobal::dirs()->locate("data",
-                               "konsole/" + fileInfo.fileName());
+                               QStringLiteral("konsole/") + fileInfo.fileName());
             if (location.isEmpty()) {
                 profileName = profile->path();
             } else {
