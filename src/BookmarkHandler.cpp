@@ -25,7 +25,7 @@
 #include "BookmarkHandler.h"
 
 // Qt
-#include <QtCore/QFileInfo>
+#include <QFileInfo>
 
 // KDE
 #include <KShell>
@@ -44,10 +44,10 @@ BookmarkHandler::BookmarkHandler(KActionCollection* collection,
     :  QObject(parent)
     , KBookmarkOwner()
     , _menu(menu)
-    , _bookmarkMenu(0)
+    , _bookmarkMenu(nullptr)
     , _file(QString())
     , _toplevel(toplevel)
-    , _activeView(0)
+    , _activeView(nullptr)
     , _views(QList<ViewProperties*>())
 {
     setObjectName(QLatin1String("BookmarkHandler"));
@@ -63,7 +63,7 @@ BookmarkHandler::BookmarkHandler(KActionCollection* collection,
     if (toplevel)
         _bookmarkMenu = new KBookmarkMenu(manager, this, _menu, collection);
     else
-        _bookmarkMenu = new KBookmarkMenu(manager, this, _menu, 0);
+        _bookmarkMenu = new KBookmarkMenu(manager, this, _menu, nullptr);
 }
 
 BookmarkHandler::~BookmarkHandler()

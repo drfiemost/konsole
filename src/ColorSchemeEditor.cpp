@@ -49,7 +49,7 @@ const int FAINT_COLOR_COLUMN = 3;    // column 2 : faint colors
 ColorSchemeEditor::ColorSchemeEditor(QWidget* aParent)
     : KDialog(aParent)
     , _isNewScheme(false)
-    , _colors(0)
+    , _colors(nullptr)
 {
     // Kdialog buttons
     setButtons(KDialog::Ok | KDialog::Cancel | KDialog::Apply);

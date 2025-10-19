@@ -23,7 +23,7 @@
 #define VIEWSPLITTER_H
 
 // Qt
-#include <QtCore/QList>
+#include <QList>
 #include <QSplitter>
 
 class QFocusEvent;
@@ -49,7 +49,7 @@ class ViewSplitter : public QSplitter
     Q_OBJECT
 
 public:
-    explicit ViewSplitter(QWidget* parent = 0);
+    explicit ViewSplitter(QWidget* parent = nullptr);
 
     /**
      * Locates the child ViewSplitter widget which currently has the focus

@@ -22,7 +22,7 @@
 
 // Qt
 #include <QWidget>
-#include <QtCore/QBitArray>
+#include <QBitArray>
 
 class QAction;
 class QLabel;
@@ -75,7 +75,7 @@ public:
     /**
      * Constructs a new incremental search bar with the given parent widget
      */
-    explicit IncrementalSearchBar(QWidget* parent = 0);
+    explicit IncrementalSearchBar(QWidget* parent = nullptr);
 
     /* Returns search options that are checked */
     const QBitArray optionsChecked();

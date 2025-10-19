@@ -22,8 +22,8 @@
 
 // Qt
 #include <QAbstractItemDelegate>
-#include <QtCore/QHash>
-#include <QtCore/QPointer>
+#include <QHash>
+#include <QPointer>
 
 // KDE
 #include <KDialog>
@@ -64,7 +64,7 @@ class KONSOLEPRIVATE_EXPORT EditProfileDialog : public KDialog
 
 public:
     /** Constructs a new dialog with the specified parent. */
-    explicit EditProfileDialog(QWidget* parent = 0);
+    explicit EditProfileDialog(QWidget* parent = nullptr);
     virtual ~EditProfileDialog();
 
     /**

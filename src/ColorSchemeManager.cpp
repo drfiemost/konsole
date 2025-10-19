@@ -23,9 +23,9 @@
 #include "ColorSchemeManager.h"
 
 // Qt
-#include <QtCore/QIODevice>
-#include <QtCore/QFileInfo>
-#include <QtCore/QFile>
+#include <QIODevice>
+#include <QFileInfo>
+#include <QFile>
 
 // KDE
 #include <KStandardDirs>
@@ -185,7 +185,7 @@ const ColorScheme* ColorSchemeManager::findColorScheme(const QString& name)
 
         kWarning() << "Could not find color scheme - " << name;
 
-        return 0;
+        return nullptr;
     }
 }
 

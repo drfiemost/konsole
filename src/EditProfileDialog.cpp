@@ -24,22 +24,16 @@
 #include <cmath>
 
 // Qt
-#include <QtGui/QBrush>
-#include <QtGui/QPainter>
+#include <QBrush>
+#include <QPainter>
 #include <QStandardItem>
-#include <QtCore/QTextCodec>
-#include <QtGui/QLinearGradient>
-#include <QtGui/QRadialGradient>
-#include <QtCore/QTimer>
+#include <QTextCodec>
+#include <QLinearGradient>
+#include <QRadialGradient>
+#include <QTimer>
 
 // KDE
-#include <kdeversion.h>
-#if KDE_IS_VERSION(4, 9, 1)
 #include <KCodecAction>
-#else
-#include <kcodecaction.h>
-#endif
-
 #include <KFontDialog>
 #include <KIcon>
 #include <KIconDialog>
@@ -879,7 +873,7 @@ void EditProfileDialog::showKeyBindingEditor(bool isNewTranslator)
     QModelIndexList selected = _ui->keyBindingList->selectionModel()->selectedIndexes();
     QAbstractItemModel* model = _ui->keyBindingList->model();
 
-    const KeyboardTranslator* translator = 0;
+    const KeyboardTranslator* translator = nullptr;
     if (!selected.isEmpty())
         translator = model->data(selected.first(), Qt::UserRole + 1).value<const KeyboardTranslator*>();
     else
@@ -932,7 +926,7 @@ void EditProfileDialog::editKeyBinding()
 }
 void EditProfileDialog::setupCheckBoxes(BooleanOption* options , const Profile::Ptr profile)
 {
-    while (options->button != 0) {
+    while (options->button != nullptr) {
         options->button->setChecked(profile->property<bool>(options->property));
         connect(options->button, SIGNAL(toggled(bool)), this, options->slot);
 
@@ -941,7 +935,7 @@ void EditProfileDialog::setupCheckBoxes(BooleanOption* options , const Profile::
 }
 void EditProfileDialog::setupRadio(RadioOption* possibilities , int actual)
 {
-    while (possibilities->button != 0) {
+    while (possibilities->button != nullptr) {
         if (possibilities->value == actual)
             possibilities->button->setChecked(true);
         else
@@ -961,7 +955,7 @@ void EditProfileDialog::setupScrollingPage(const Profile::Ptr profile)
     RadioOption positions[] = { {_ui->scrollBarHiddenButton, Enum::ScrollBarHidden, SLOT(hideScrollBar())},
         {_ui->scrollBarLeftButton, Enum::ScrollBarLeft, SLOT(showScrollBarLeft())},
         {_ui->scrollBarRightButton, Enum::ScrollBarRight, SLOT(showScrollBarRight())},
-        {0, 0, 0}
+        {nullptr, 0, nullptr}
     };
 
     setupRadio(positions , scrollBarPosition);
@@ -982,7 +976,7 @@ void EditProfileDialog::setupScrollingPage(const Profile::Ptr profile)
     RadioOption pageamounts[] = {
         {_ui->scrollHalfPage, Enum::ScrollPageHalf, SLOT(scrollHalfPage())},
         {_ui->scrollFullPage, Enum::ScrollPageFull, SLOT(scrollFullPage())},
-        {0, 0, 0}
+        {nullptr, 0, nullptr}
     };
 
     setupRadio(pageamounts, scrollFullPage);
@@ -1042,7 +1036,7 @@ void EditProfileDialog::setupMousePage(const Profile::Ptr profile)
             _ui->openLinksByDirectClickButton , Profile::OpenLinksByDirectClickEnabled,
             SLOT(toggleOpenLinksByDirectClick(bool))
         },
-        { 0 , Profile::Property(0) , 0 }
+        { nullptr , Profile::Property(0) , nullptr }
     };
     setupCheckBoxes(options , profile);
 
@@ -1051,7 +1045,7 @@ void EditProfileDialog::setupMousePage(const Profile::Ptr profile)
     RadioOption pasteModes[] = {
         {_ui->pasteFromX11SelectionButton, Enum::PasteFromX11Selection, SLOT(pasteFromX11Selection())},
         {_ui->pasteFromClipboardButton, Enum::PasteFromClipboard, SLOT(pasteFromClipboard())},
-        {0, 0, 0}
+        {nullptr, 0, nullptr}
     };
     setupRadio(pasteModes , middleClickPasteMode);
 
@@ -1091,7 +1085,7 @@ void EditProfileDialog::setupAdvancedPage(const Profile::Ptr profile)
             _ui->enableBidiRenderingButton , Profile::BidiRenderingEnabled ,
             SLOT(togglebidiRendering(bool))
         },
-        { 0 , Profile::Property(0) , 0 }
+        { nullptr , Profile::Property(0) , nullptr }
     };
     setupCheckBoxes(options , profile);
 

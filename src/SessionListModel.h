@@ -23,8 +23,8 @@
 #define SESSIONLISTMODEL_H
 
 // Qt
-#include <QtCore/QAbstractListModel>
-#include <QtCore/QVariant>
+#include <QAbstractListModel>
+#include <QVariant>
 
 namespace Konsole
 {
@@ -44,7 +44,7 @@ class SessionListModel : public QAbstractListModel
     Q_OBJECT
 
 public:
-    explicit SessionListModel(QObject* parent = 0);
+    explicit SessionListModel(QObject* parent = nullptr);
 
     /**
      * Sets the list of sessions displayed in the model.

@@ -72,7 +72,7 @@ static bool useTransparency()
 
 MainWindow::MainWindow()
     : KXmlGuiWindow()
-    , _bookmarkHandler(0)
+    , _bookmarkHandler(nullptr)
     , _pluggedController(nullptr)
     , _menuBarInitialVisibility(true)
     , _menuBarInitialVisibilityApplied(false)
@@ -219,14 +219,14 @@ void MainWindow::disconnectController(SessionController* controller)
     if (controller->isValid())
         guiFactory()->removeClient(controller);
 
-    controller->setSearchBar(0);
+    controller->setSearchBar(nullptr);
 }
 
 void MainWindow::activeViewChanged(SessionController* controller)
 {
     // associate bookmark menu with current session
     bookmarkHandler()->setActiveView(controller);
-    disconnect(bookmarkHandler(), &Konsole::BookmarkHandler::openUrl, 0, 0);
+    disconnect(bookmarkHandler(), &Konsole::BookmarkHandler::openUrl, nullptr, nullptr);
     connect(bookmarkHandler(), &Konsole::BookmarkHandler::openUrl, controller,
             &Konsole::SessionController::openUrl);
 
@@ -303,7 +303,7 @@ IncrementalSearchBar* MainWindow::searchBar() const
 void MainWindow::setupActions()
 {
     KActionCollection* collection = actionCollection();
-    KAction* menuAction = 0;
+    KAction* menuAction = nullptr;
 
     // File Menu
     _newTabMenuAction = new KActionMenu(KIcon("tab-new"), i18nc("@action:inmenu", "&New Tab"), collection);

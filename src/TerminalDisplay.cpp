@@ -111,7 +111,7 @@ void TerminalDisplay::setScreenWindow(ScreenWindow* window)
 {
     // disconnect existing screen window if any
     if (!_screenWindow.isNull()) {
-        disconnect(_screenWindow , 0 , this , 0);
+        disconnect(_screenWindow , nullptr , this , nullptr);
     }
 
     _screenWindow = window;
@@ -313,7 +313,7 @@ QAccessibleInterface* accessibleInterfaceFactory(const QString &key, QObject *ob
     Q_UNUSED(key)
     if (TerminalDisplay *display = qobject_cast<TerminalDisplay*>(object))
         return new TerminalDisplayAccessible(display);
-    return 0;
+    return nullptr;
 }
 }
 
@@ -325,9 +325,9 @@ QAccessibleInterface* accessibleInterfaceFactory(const QString &key, QObject *ob
 
 TerminalDisplay::TerminalDisplay(QWidget* parent)
     : QWidget(parent)
-    , _screenWindow(0)
+    , _screenWindow(nullptr)
     , _bellMasked(false)
-    , _gridLayout(0)
+    , _gridLayout(nullptr)
     , _fontHeight(1)
     , _fontWidth(1)
     , _fontAscent(1)
@@ -336,7 +336,7 @@ TerminalDisplay::TerminalDisplay(QWidget* parent)
     , _columns(1)
     , _usedLines(1)
     , _usedColumns(1)
-    , _image(0)
+    , _image(nullptr)
     , _resizing(false)
     , _showTerminalSizeHint(true)
     , _bidiEnabled(false)
@@ -361,8 +361,8 @@ TerminalDisplay::TerminalDisplay(QWidget* parent)
     , _ctrlRequiredForDrag(true)
     , _tripleClickMode(Enum::SelectWholeLine)
     , _possibleTripleClick(false)
-    , _resizeWidget(0)
-    , _resizeTimer(0)
+    , _resizeWidget(nullptr)
+    , _resizeTimer(nullptr)
     , _flowControlWarningEnabled(false)
     , _outputSuspendedLabel(0)
     , _lineSpacing(0)
@@ -373,7 +373,7 @@ TerminalDisplay::TerminalDisplay(QWidget* parent)
     , _antialiasText(true)
     , _useFontLineCharacters(false)
     , _printerFriendly(false)
-    , _sessionController(0)
+    , _sessionController(nullptr)
     , _trimTrailingSpaces(false)
     , _margin(1)
     , _centerContents(false)
@@ -2582,7 +2582,7 @@ QPoint TerminalDisplay::findWordStart(const QPoint &pnt)
     QVector<LineProperty> lineProperties = _lineProperties;
     Screen *screen = _screenWindow->screen();
     Character *image = _image;
-    Character *tmp_image = NULL;
+    Character *tmp_image = nullptr;
     const QChar selClass = charClass(image[j]);
     const int imageSize = regSize * _columns;
 
@@ -2635,7 +2635,7 @@ QPoint TerminalDisplay::findWordEnd(const QPoint &pnt)
     QVector<LineProperty> lineProperties = _lineProperties;
     Screen *screen = _screenWindow->screen();
     Character *image = _image;
-    Character *tmp_image = NULL;
+    Character *tmp_image = nullptr;
     const QChar selClass = charClass(image[j]);
     const int imageSize = regSize * _columns;
     const int maxY = _screenWindow->lineCount() - 1;

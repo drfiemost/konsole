@@ -21,11 +21,11 @@
 #define FILTER_H
 
 // Qt
-#include <QtCore/QList>
-#include <QtCore/QObject>
-#include <QtCore/QStringList>
-#include <QtCore/QRegExp>
-#include <QtCore/QMultiHash>
+#include <QList>
+#include <QObject>
+#include <QStringList>
+#include <QRegExp>
+#include <QMultiHash>
 
 // Konsole
 #include "Character.h"
@@ -107,7 +107,7 @@ public:
          * one of the objects from the actions() list.  In which case the associated
          * action should be performed.
          */
-        virtual void activate(QObject* object = 0) = 0;
+        virtual void activate(QObject* object = nullptr) = 0;
         /**
          * Returns a list of actions associated with the hotspot which can be used in a
          * menu or toolbar
@@ -190,7 +190,7 @@ public:
     {
     public:
         HotSpot(int startLine, int startColumn, int endLine , int endColumn);
-        virtual void activate(QObject* object = 0);
+        void activate(QObject* object = nullptr) override;
 
         /** Sets the captured texts associated with this hotspot */
         void setCapturedTexts(const QStringList& texts);
@@ -255,7 +255,7 @@ public:
          * Open a web browser at the current URL.  The url itself can be determined using
          * the capturedTexts() method.
          */
-        virtual void activate(QObject* object = 0);
+        void activate(QObject* object = nullptr) override;
 
     private:
         enum UrlType {

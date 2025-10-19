@@ -52,13 +52,7 @@
 #include <KStringHandler>
 #include <KConfigGroup>
 #include <KGlobal>
-
-#include <kdeversion.h>
-#if KDE_IS_VERSION(4, 9, 1)
 #include <KCodecAction>
-#else
-#include <kcodecaction.h>
-#endif
 
 // Konsole
 #include "EditProfileDialog.h"
@@ -102,25 +96,25 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
     , KXMLGUIClient()
     , _session(session)
     , _view(view)
-    , _copyToGroup(0)
-    , _profileList(0)
+    , _copyToGroup(nullptr)
+    , _profileList(nullptr)
     , _previousState(-1)
-    , _searchFilter(0)
-    , _copyInputToAllTabsAction(0)
-    , _findAction(0)
-    , _findNextAction(0)
-    , _findPreviousAction(0)
+    , _searchFilter(nullptr)
+    , _copyInputToAllTabsAction(nullptr)
+    , _findAction(nullptr)
+    , _findNextAction(nullptr)
+    , _findPreviousAction(nullptr)
     , _urlFilterUpdateRequired(false)
     , _searchStartLine(0)
     , _prevSearchResultLine(0)
-    , _searchBar(0)
-    , _codecAction(0)
-    , _switchProfileMenu(0)
-    , _webSearchMenu(0)
+    , _searchBar(nullptr)
+    , _codecAction(nullptr)
+    , _switchProfileMenu(nullptr)
+    , _webSearchMenu(nullptr)
     , _listenForScreenWindowUpdates(false)
     , _preventClose(false)
     , _keepIconUntilInteraction(false)
-    , _showMenuAction(0)
+    , _showMenuAction(nullptr)
     , _isSearchBarEnabled(false)
 {
     Q_ASSERT(session);
@@ -223,7 +217,7 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
 SessionController::~SessionController()
 {
     if (!_view.isNull())
-        _view->setScreenWindow(0);
+        _view->setScreenWindow(nullptr);
 
     _allControllers.remove(this);
 
@@ -475,7 +469,7 @@ bool SessionController::eventFilter(QObject* watched , QEvent* event)
         // by the focused view
 
         // first, disconnect any other views which are listening for bell signals from the session
-        disconnect(_session.data(), &Konsole::Session::bellRequest, 0, 0);
+        disconnect(_session.data(), &Konsole::Session::bellRequest, nullptr, nullptr);
         // second, connect the newly focused view to listen for the session's bell signal
         connect(_session.data(), &Konsole::Session::bellRequest,
                     _view.data(), &Konsole::TerminalDisplay::bell);
@@ -497,15 +491,15 @@ void SessionController::removeSearchFilter()
 
     _view->filterChain()->removeFilter(_searchFilter);
     delete _searchFilter;
-    _searchFilter = 0;
+    _searchFilter = nullptr;
 }
 
 void SessionController::setSearchBar(IncrementalSearchBar* searchBar)
 {
     // disconnect the existing search bar
     if (!_searchBar.isNull()) {
-        disconnect(this, 0, _searchBar, 0);
-        disconnect(_searchBar, 0, this, 0);
+        disconnect(this, nullptr, _searchBar, nullptr);
+        disconnect(_searchBar, nullptr, this, nullptr);
     }
 
     // connect new search bar
@@ -635,8 +629,8 @@ void SessionController::setupCommonActions()
 
 void SessionController::setupExtraActions()
 {
-    KAction* action = 0;
-    KToggleAction* toggleAction = 0;
+    KAction* action = nullptr;
+    KToggleAction* toggleAction = nullptr;
     KActionCollection* collection = actionCollection();
 
     // Rename Session
@@ -943,14 +937,14 @@ void SessionController::selectLine()
 static const KXmlGuiWindow* findWindow(const QObject* object)
 {
     // Walk up the QObject hierarchy to find a KXmlGuiWindow.
-    while (object != 0) {
+    while (object != nullptr) {
         const KXmlGuiWindow* window = qobject_cast<const KXmlGuiWindow*>(object);
-        if (window != 0) {
+        if (window != nullptr) {
             return(window);
         }
         object = object->parent();
     }
-    return(0);
+    return(nullptr);
 }
 
 static bool hasTerminalDisplayInSameWindow(const Session* session, const KXmlGuiWindow* window)
@@ -1068,7 +1062,7 @@ void SessionController::copyInputToNone()
         }
     }
     delete _copyToGroup;
-    _copyToGroup = 0;
+    _copyToGroup = nullptr;
     snapshot();
 }
 
@@ -1495,7 +1489,7 @@ void SessionController::showDisplayContextMenu(const QPoint& position)
         QAction* contentSeparator = new QAction(popup);
         contentSeparator->setSeparator(true);
         contentActions << contentSeparator;
-        popup->insertActions(popup->actions().value(0, 0), contentActions);
+        popup->insertActions(popup->actions().value(0, nullptr), contentActions);
 
         // always update this submenu before showing the context menu,
         // because the available search services might have changed
@@ -1685,7 +1679,7 @@ void SaveHistoryTask::execute()
 
         if (!url.isValid()) {
             // UI:  Can we make this friendlier?
-            KMessageBox::sorry(0 , i18n("%1 is an invalid URL, the output could not be saved.", url.url()));
+            KMessageBox::sorry(nullptr , i18n("%1 is an invalid URL, the output could not be saved.", url.url()));
             continue;
         }
 
@@ -1763,7 +1757,7 @@ void SaveHistoryTask::jobDataRequested(KIO::Job* job , QByteArray& data)
 void SaveHistoryTask::jobResult(KJob* job)
 {
     if (job->error() != 0) {
-        KMessageBox::sorry(0 , i18n("A problem occurred when saving the output.\n%1", job->errorString()));
+        KMessageBox::sorry(nullptr , i18n("A problem occurred when saving the output.\n%1", job->errorString()));
     }
 
     TerminalCharacterDecoder * decoder = _jobSession[job].decoder;

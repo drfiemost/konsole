@@ -53,17 +53,17 @@ static const char ENCODING_GROUP[]    = "Encoding Options";
 
 const Profile::PropertyInfo Profile::DefaultPropertyNames[] = {
     // General
-    { Path , "Path" , 0 , QVariant::String }
+    { Path , "Path" , nullptr , QVariant::String }
     , { Name , "Name" , GENERAL_GROUP , QVariant::String }
-    , { UntranslatedName, "UntranslatedName" , 0 , QVariant::String }
+    , { UntranslatedName, "UntranslatedName" , nullptr , QVariant::String }
     , { Icon , "Icon" , GENERAL_GROUP , QVariant::String }
-    , { Command , "Command" , 0 , QVariant::String }
-    , { Arguments , "Arguments" , 0 , QVariant::StringList }
-    , { MenuIndex, "MenuIndex" , 0, QVariant::String }
+    , { Command , "Command" , nullptr , QVariant::String }
+    , { Arguments , "Arguments" , nullptr , QVariant::StringList }
+    , { MenuIndex, "MenuIndex" , nullptr, QVariant::String }
     , { Environment , "Environment" , GENERAL_GROUP , QVariant::StringList }
     , { Directory , "Directory" , GENERAL_GROUP , QVariant::String }
     , { LocalTabTitleFormat , "LocalTabTitleFormat" , GENERAL_GROUP , QVariant::String }
-    , { LocalTabTitleFormat , "tabtitle" , 0 , QVariant::String }
+    , { LocalTabTitleFormat , "tabtitle" , nullptr , QVariant::String }
     , { RemoteTabTitleFormat , "RemoteTabTitleFormat" , GENERAL_GROUP , QVariant::String }
     , { ShowTerminalSizeHint , "ShowTerminalSizeHint" , GENERAL_GROUP , QVariant::Bool }
     , { StartInCurrentSessionDir , "StartInCurrentSessionDir" , GENERAL_GROUP , QVariant::Bool }
@@ -76,7 +76,7 @@ const Profile::PropertyInfo Profile::DefaultPropertyNames[] = {
     // Appearance
     , { Font , "Font" , APPEARANCE_GROUP , QVariant::Font }
     , { ColorScheme , "ColorScheme" , APPEARANCE_GROUP , QVariant::String }
-    , { ColorScheme , "colors" , 0 , QVariant::String }
+    , { ColorScheme , "colors" , nullptr , QVariant::String }
     , { AntiAliasFonts, "AntiAliasFonts" , APPEARANCE_GROUP , QVariant::Bool }
     , { BoldIntense, "BoldIntense", APPEARANCE_GROUP, QVariant::Bool }
     , { UseFontLineCharacters, "UseFontLineChararacters", APPEARANCE_GROUP, QVariant::Bool }
@@ -119,7 +119,7 @@ const Profile::PropertyInfo Profile::DefaultPropertyNames[] = {
     // Encoding
     , { DefaultEncoding , "DefaultEncoding" , ENCODING_GROUP , QVariant::String }
 
-    , { (Property)0 , 0 , 0, QVariant::Invalid }
+    , { (Property)0 , nullptr , nullptr, QVariant::Invalid }
 };
 
 QHash<QString, Profile::PropertyInfo> Profile::PropertyInfoByName;
@@ -133,7 +133,7 @@ void Profile::fillTableWithDefaultNames()
         return;
 
     const PropertyInfo* iter = DefaultPropertyNames;
-    while (iter->name != 0) {
+    while (iter->name != nullptr) {
         registerProperty(*iter);
         iter++;
     }
@@ -214,7 +214,7 @@ Profile::Profile(Profile::Ptr parent)
 void Profile::clone(Profile::Ptr profile, bool differentOnly)
 {
     const PropertyInfo* properties = DefaultPropertyNames;
-    while (properties->name != 0) {
+    while (properties->name != nullptr) {
         Property current = properties->property;
         QVariant otherValue = profile->property<QVariant>(current);
         switch (current) {
@@ -300,7 +300,7 @@ const QStringList Profile::propertiesInfoList() const
 {
     QStringList info;
     const PropertyInfo* iter = DefaultPropertyNames;
-    while (iter->name != 0) {
+    while (iter->name != nullptr) {
         info << QLatin1String(iter->name) + QStringLiteral(" : ") + QLatin1String(QVariant(iter->type).typeName());
         iter++;
     }
@@ -341,7 +341,7 @@ QHash<Profile::Property, QVariant> ProfileCommandParser::parse(const QString& in
 void ProfileGroup::updateValues()
 {
     const PropertyInfo* properties = Profile::DefaultPropertyNames;
-    while (properties->name != 0) {
+    while (properties->name != nullptr) {
         // the profile group does not store a value for some properties
         // (eg. name, path) if even they are equal between profiles -
         //

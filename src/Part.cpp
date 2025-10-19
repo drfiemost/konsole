@@ -21,9 +21,9 @@
 #include "Part.h"
 
 // Qt
-#include <QtCore/QStringList>
-#include <QtCore/QDir>
-#include <QtGui/QKeyEvent>
+#include <QStringList>
+#include <QDir>
+#include <QKeyEvent>
 
 // KDE
 #include <KAction>
@@ -54,8 +54,8 @@ K_EXPORT_PLUGIN(KonsolePartFactory("konsole"))
 
 Part::Part(QWidget* parentWidget , QObject* parent, const QVariantList&)
     : KParts::ReadOnlyPart(parent)
-    , _viewManager(0)
-    , _pluggedController(0)
+    , _viewManager(nullptr)
+    , _pluggedController(nullptr)
 {
     // make sure the konsole catalog is loaded
     KGlobal::locale()->insertCatalog("konsole");
@@ -334,7 +334,7 @@ bool Part::openUrl(const KUrl& aUrl)
     setUrl(aUrl);
     emit setWindowCaption(aUrl.pathOrUrl());
     //kdDebug() << "Set Window Caption to " << url.pathOrUrl();
-    emit started(0);
+    emit started(nullptr);
 
     if (aUrl.isLocalFile()) {
         showShellInDir(aUrl.path());

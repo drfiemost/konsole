@@ -25,12 +25,12 @@
 #define SESSION_H
 
 // Qt
-#include <QtCore/QStringList>
-#include <QtCore/QHash>
-//#include <QtCore/QByteRef>
-#include <QtCore/QUuid>
-#include <QtCore/QSize>
-#include <QtCore/QProcess>
+#include <QStringList>
+#include <QHash>
+//#include <QByteRef>
+#include <QUuid>
+#include <QSize>
+#include <QProcess>
 #include <QWidget>
 
 // KDE
@@ -98,7 +98,7 @@ public:
      * falls back to using the program specified in the SHELL environment
      * variable.
      */
-    explicit Session(QObject* parent = 0);
+    explicit Session(QObject* parent = nullptr);
     ~Session();
 
     /**

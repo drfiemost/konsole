@@ -57,7 +57,7 @@ using namespace Konsole;
 // History File ///////////////////////////////////////////
 HistoryFile::HistoryFile()
     : _length(0),
-      _fileMap(0),
+      _fileMap(nullptr),
       _readWriteBalance(0)
 {
     const QString tmpFormat = KStandardDirs::locateLocal("tmp", QString())
@@ -79,7 +79,7 @@ HistoryFile::~HistoryFile()
 //to avoid this.
 void HistoryFile::map()
 {
-    Q_ASSERT(_fileMap == 0);
+    Q_ASSERT(_fileMap == nullptr);
 
     if (_tmpFile.flush()) {
         Q_ASSERT(_tmpFile.size() >= _length);
@@ -87,7 +87,7 @@ void HistoryFile::map()
     }
 
     //if mmap'ing fails, fall back to the read-lseek combination
-    if (_fileMap == 0) {
+    if (_fileMap == nullptr) {
         _readWriteBalance = 0;
         kWarning() << "mmap'ing history failed.  errno = " << errno;
     }
@@ -95,17 +95,17 @@ void HistoryFile::map()
 
 void HistoryFile::unmap()
 {
-    Q_ASSERT(_fileMap != 0);
+    Q_ASSERT(_fileMap != nullptr);
 
     if (_tmpFile.unmap(_fileMap))
         _fileMap = 0;
 
-    Q_ASSERT(_fileMap == 0);
+    Q_ASSERT(_fileMap == nullptr);
 }
 
 bool HistoryFile::isMapped() const
 {
-    return (_fileMap != 0);
+    return (_fileMap != nullptr);
 }
 
 void HistoryFile::add(const char* buffer, qint64 count)
@@ -302,7 +302,7 @@ void* CompactHistoryBlock::allocate(size_t size)
 {
     Q_ASSERT(size > 0);
     if (_tail - _blockStart + size > _blockLength)
-        return 0;
+        return nullptr;
 
     void* block = _tail;
     _tail += size;
@@ -366,8 +366,8 @@ void* CompactHistoryLine::operator new(size_t size, CompactHistoryBlockList& blo
 
 CompactHistoryLine::CompactHistoryLine(const TextLine& line, CompactHistoryBlockList& bList)
     : _blockListRef(bList),
-      _formatArray(0),
-      _text(0),
+      _formatArray(nullptr),
+      _text(nullptr),
       _formatLength(0),
       _wrapped(false)
 {
@@ -389,9 +389,9 @@ CompactHistoryLine::CompactHistoryLine(const TextLine& line, CompactHistoryBlock
 
         //kDebug() << "number of different formats in string: " << _formatLength;
         _formatArray = (CharacterFormat*) _blockListRef.allocate(sizeof(CharacterFormat) * _formatLength);
-        Q_ASSERT(_formatArray != 0);
+        Q_ASSERT(_formatArray != nullptr);
         _text = (quint16*) _blockListRef.allocate(sizeof(quint16) * line.size());
-        Q_ASSERT(_text != 0);
+        Q_ASSERT(_text != nullptr);
 
         _length = line.size();
         _wrapped = false;

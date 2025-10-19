@@ -26,7 +26,7 @@
 #include <signal.h>
 
 // Qt
-#include <QtCore/QStringList>
+#include <QStringList>
 
 // KDE
 #include <KDebug>
@@ -74,7 +74,7 @@ void Pty::sendData(const QByteArray& data)
     if (data.isEmpty())
         return;
 
-    if (pty()->write(data.constData()) == -1) {
+    if (pty()->write(data) == -1) {
         kWarning() << "Could not send input data to terminal process.";
         return;
     }
@@ -324,7 +324,7 @@ void Pty::setupChildProcess()
     action.sa_handler = SIG_DFL;
     action.sa_flags = 0;
     for (int signal = 1; signal < NSIG; signal++)
-        sigaction(signal, &action, 0);
+        sigaction(signal, &action, nullptr);
 }
 
 #include "Pty.moc"

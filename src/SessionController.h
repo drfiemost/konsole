@@ -22,11 +22,11 @@
 #define SESSIONCONTROLLER_H
 
 // Qt
-#include <QtCore/QList>
-#include <QtCore/QSet>
-#include <QtCore/QPointer>
-#include <QtCore/QString>
-#include <QtCore/QHash>
+#include <QList>
+#include <QSet>
+#include <QPointer>
+#include <QString>
+#include <QHash>
 
 // KDE
 #include <KIcon>
@@ -380,7 +380,7 @@ class SessionTask : public QObject
     Q_OBJECT
 
 public:
-    explicit SessionTask(QObject* parent = 0);
+    explicit SessionTask(QObject* parent = nullptr);
 
     /**
      * Sets whether the task automatically deletes itself when the task has been finished.
@@ -430,7 +430,7 @@ class SaveHistoryTask : public SessionTask
 
 public:
     /** Constructs a new task to save session output to URLs */
-    explicit SaveHistoryTask(QObject* parent = 0);
+    explicit SaveHistoryTask(QObject* parent = nullptr);
     virtual ~SaveHistoryTask();
 
     /**
@@ -484,7 +484,7 @@ public:
     /**
      * Constructs a new search task.
      */
-    explicit SearchHistoryTask(QObject* parent = 0);
+    explicit SearchHistoryTask(QObject* parent = nullptr);
 
     /** Adds a screen window to the list to search when execute() is called. */
     void addScreenWindow(Session* session , ScreenWindow* searchWindow);

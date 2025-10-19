@@ -21,8 +21,8 @@
 #define COPYINPUTDIALOG_H
 
 // Qt
-#include <QtCore/QPointer>
-#include <QtCore/QSet>
+#include <QPointer>
+#include <QSet>
 
 // KDE
 #include <KDialog>
@@ -52,7 +52,7 @@ class CopyInputDialog : public KDialog
     Q_OBJECT
 
 public:
-    explicit CopyInputDialog(QWidget* parent = 0);
+    explicit CopyInputDialog(QWidget* parent = nullptr);
     ~CopyInputDialog();
     /**
      * Sets the 'source' session whose input will be copied to

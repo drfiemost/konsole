@@ -38,7 +38,7 @@ using Konsole::TabbedViewContainer;
 
 ViewContainerTabBar::ViewContainerTabBar(QWidget* parent, TabbedViewContainer* container)
     : KTabBar(parent)
-    , _dropIndicator(0)
+    , _dropIndicator(nullptr)
     , _dropIndicatorIndex(-1)
     , _drawIndicatorDisabled(false)
     , _connectedContainer(container)
@@ -57,7 +57,7 @@ ViewContainerTabBar::ViewContainerTabBar(QWidget* parent, TabbedViewContainer* c
 void ViewContainerTabBar::dragEnterEvent(QDragEnterEvent* event)
 {
     if (event->mimeData()->hasFormat(_supportedMimeType) &&
-            event->source() != 0)
+            event->source() != nullptr)
         event->acceptProposedAction();
 }
 
@@ -69,7 +69,7 @@ void ViewContainerTabBar::dragLeaveEvent(QDragLeaveEvent*)
 void ViewContainerTabBar::dragMoveEvent(QDragMoveEvent* event)
 {
     if (event->mimeData()->hasFormat(_supportedMimeType)
-            && event->source() != 0) {
+            && event->source() != nullptr) {
         int index = dropIndex(event->pos());
         if (index == -1)
             index = count();
@@ -105,7 +105,7 @@ void ViewContainerTabBar::dropEvent(QDropEvent* event)
         TabbedViewContainer* sourceTabbedContainer = sourceContainerTabBar->connectedTabbedViewContainer();
         emit moveViewRequest(index, event, success, sourceTabbedContainer);
     } else {
-        emit moveViewRequest(index, event, success, NULL);
+        emit moveViewRequest(index, event, success, nullptr);
     }
 
     if (success)

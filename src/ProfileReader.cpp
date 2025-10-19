@@ -23,7 +23,7 @@
 #include "ProfileReader.h"
 
 // Qt
-#include <QtCore/QFile>
+#include <QFile>
 
 // KDE
 #include <KConfig>
@@ -50,9 +50,9 @@ void KDE4ProfileReader::readProperties(const KConfig& config, Profile::Ptr profi
     const char* groupName = nullptr;
     KConfigGroup group;
 
-    while (properties->name != 0) {
-        if (properties->group != 0) {
-            if (groupName == 0 || qstrcmp(groupName, properties->group) != 0) {
+    while (properties->name != nullptr) {
+        if (properties->group != nullptr) {
+            if (groupName == nullptr || qstrcmp(groupName, properties->group) != 0) {
                 group = config.group(properties->group);
                 groupName = properties->group;
             }

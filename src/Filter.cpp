@@ -23,9 +23,9 @@
 // Qt
 #include <QAction>
 #include <QApplication>
-#include <QtGui/QClipboard>
-#include <QtCore/QString>
-#include <QtCore/QTextStream>
+#include <QClipboard>
+#include <QString>
+#include <QTextStream>
 
 // KDE
 #include <KLocalizedString>
@@ -84,12 +84,12 @@ Filter::HotSpot* FilterChain::hotSpotAt(int line , int column) const
     while (iter.hasNext()) {
         Filter* filter = iter.next();
         Filter::HotSpot* spot = filter->hotSpotAt(line, column);
-        if (spot != 0) {
+        if (spot != nullptr) {
             return spot;
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 QList<Filter::HotSpot*> FilterChain::hotSpots() const
@@ -104,8 +104,8 @@ QList<Filter::HotSpot*> FilterChain::hotSpots() const
 }
 
 TerminalImageFilterChain::TerminalImageFilterChain()
-    : _buffer(0)
-    , _linePositions(0)
+    : _buffer(nullptr)
+    , _linePositions(nullptr)
 {
 }
 
@@ -164,8 +164,8 @@ void TerminalImageFilterChain::setImage(const Character* const image , int lines
 Filter::Filter()
     : _hotspots(QMultiHash<int, HotSpot*>())
     , _hotspotList(QList<HotSpot*>())
-    , _linePositions(0)
-    , _buffer(0)
+    , _linePositions(nullptr)
+    , _buffer(nullptr)
 {
 }
 
@@ -251,7 +251,7 @@ Filter::HotSpot* Filter::hotSpotAt(int line , int column) const
         return spot;
     }
 
-    return 0;
+    return nullptr;
 }
 
 Filter::HotSpot::HotSpot(int startLine , int startColumn , int endLine , int endColumn)

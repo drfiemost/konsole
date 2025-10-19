@@ -65,7 +65,7 @@ ViewManager::ViewManager(QObject* parent , KActionCollection* collection)
     , _managerId(0)
 {
     // create main view area
-    _viewSplitter = new ViewSplitter(0);
+    _viewSplitter = new ViewSplitter(nullptr);
     KAcceleratorManager::setNoAccel(_viewSplitter);
 
     // the ViewSplitter class supports both recursive and non-recursive splitting,
@@ -411,7 +411,7 @@ void ViewManager::focusActiveView()
 
 void ViewManager::viewActivated(QWidget* view)
 {
-    Q_ASSERT(view != 0);
+    Q_ASSERT(view != nullptr);
 
     // focus the activated view, this will cause the SessionController
     // to notify the world that the view has been focused and the appropriate UI
@@ -455,7 +455,7 @@ void ViewManager::splitView(Qt::Orientation orientation)
 
     // ensure that the active view is focused after the split / unsplit
     ViewContainer* activeContainer = _viewSplitter->activeContainer();
-    QWidget* activeView = activeContainer ? activeContainer->activeView() : 0;
+    QWidget* activeView = activeContainer ? activeContainer->activeView() : nullptr;
 
     if (activeView)
         activeView->setFocus(Qt::OtherFocusReason);
@@ -788,7 +788,7 @@ void ViewManager::viewDestroyed(QWidget* view)
 
 TerminalDisplay* ViewManager::createTerminalDisplay()
 {
-    return new TerminalDisplay(0);
+    return new TerminalDisplay(nullptr);
 }
 
 const ColorScheme* ViewManager::colorSchemeForProfile(const Profile::Ptr &profile)
@@ -828,8 +828,8 @@ void ViewManager::profileChanged(Profile::Ptr profile)
         iter.next();
 
         // if session uses this profile, update the display
-        if (iter.key() != 0 &&
-                iter.value() != 0 &&
+        if (iter.key() != nullptr &&
+                iter.value() != nullptr &&
                 SessionManager::instance()->sessionProfile(iter.value()) == profile) {
             applyProfileToView(iter.key(), profile);
         }
@@ -897,7 +897,7 @@ void ViewManager::restoreSessions(const KConfigGroup& group)
 {
     QList<int> ids = group.readEntry("Sessions", QList<int>());
     int activeTab  = group.readEntry("Active", 0);
-    TerminalDisplay* display = 0;
+    TerminalDisplay* display = nullptr;
 
     int tab = 1;
     for(int id: ids) {
@@ -938,8 +938,8 @@ int ViewManager::sessionCount()
 
 int ViewManager::currentSession()
 {
-    QHash<TerminalDisplay*, Session*>::iterator i;
-    for (i = this->_sessionMap.begin(); i != this->_sessionMap.end(); ++i)
+    QHash<TerminalDisplay*, Session*>::const_iterator i;
+    for (i = _sessionMap.constBegin(); i != _sessionMap.constEnd(); ++i)
         if (i.key()->isVisible())
             return i.value()->sessionId();
     return -1;

@@ -68,7 +68,7 @@ class KONSOLEPRIVATE_EXPORT TerminalDisplay : public QWidget
 
 public:
     /** Constructs a new terminal display widget with the specified parent. */
-    explicit TerminalDisplay(QWidget* parent = 0);
+    explicit TerminalDisplay(QWidget* parent = nullptr);
     virtual ~TerminalDisplay();
 
     void applyProfile(const Profile::Ptr& profile);

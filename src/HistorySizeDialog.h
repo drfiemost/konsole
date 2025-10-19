@@ -39,7 +39,7 @@ class HistorySizeDialog : public KDialog
     Q_OBJECT
 
 public:
-    explicit HistorySizeDialog(QWidget* parent = 0);
+    explicit HistorySizeDialog(QWidget* parent = nullptr);
     ~HistorySizeDialog();
 
     /** See HistorySizeWidget::setMode. */

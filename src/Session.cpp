@@ -65,8 +65,8 @@ static bool show_disallow_certain_dbus_methods_message = true;
 
 Session::Session(QObject* parent) :
     QObject(parent)
-    , _shellProcess(0)
-    , _emulation(0)
+    , _shellProcess(nullptr)
+    , _emulation(nullptr)
     , _monitorActivity(false)
     , _monitorSilence(false)
     , _notifiedActivity(false)
@@ -76,12 +76,12 @@ Session::Session(QObject* parent) :
     , _addToUtmp(true)
     , _flowControlEnabled(true)
     , _sessionId(0)
-    , _sessionProcessInfo(0)
-    , _foregroundProcessInfo(0)
+    , _sessionProcessInfo(nullptr)
+    , _foregroundProcessInfo(nullptr)
     , _foregroundPid(0)
     , _zmodemBusy(false)
-    , _zmodemProc(0)
-    , _zmodemProgress(0)
+    , _zmodemProc(nullptr)
+    , _zmodemProgress(nullptr)
     , _hasDarkBackground(false)
 {
     _uniqueIdentifier = QUuid::createUuid();
@@ -196,7 +196,7 @@ WId Session::windowId() const
 
         Q_ASSERT(window);
 
-        while (window->parentWidget() != 0)
+        while (window->parentWidget() != nullptr)
             window = window->parentWidget();
 
         return window->winId();
@@ -330,7 +330,7 @@ void Session::removeView(TerminalDisplay* widget)
 {
     _views.removeAll(widget);
 
-    disconnect(widget, 0, this, 0);
+    disconnect(widget, nullptr, this, nullptr);
 
     // disconnect
     //  - key presses signals from widget
@@ -338,10 +338,10 @@ void Session::removeView(TerminalDisplay* widget)
     //  - string sending signals from widget
     //
     //  ... and any other signals connected in addView()
-    disconnect(widget, 0, _emulation, 0);
+    disconnect(widget, nullptr, _emulation, nullptr);
 
     // disconnect state change signals emitted by emulation
-    disconnect(_emulation, 0, widget, 0);
+    disconnect(_emulation, nullptr, widget, nullptr);
 
     // close the session automatically when the last view is removed
     if (_views.count() == 0) {
@@ -1354,7 +1354,7 @@ void Session::zmodemFinished()
        when the KProcess is deleted! */
     if (_zmodemProc) {
         KProcess* process = _zmodemProc;
-        _zmodemProc = 0;   // Set _zmodemProc to 0 avoid recursive invocations!
+        _zmodemProc = nullptr;   // Set _zmodemProc to 0 avoid recursive invocations!
         _zmodemBusy = false;
         delete process;    // Now, the KProcess may be disposed safely.
 
