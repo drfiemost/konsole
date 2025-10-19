@@ -22,7 +22,7 @@
 
 // Qt
 #include <QStyledItemDelegate>
-#include <QtCore/QSet>
+#include <QSet>
 
 // KDE
 #include <KDialog>
@@ -52,7 +52,7 @@ class ProfileSettings : public QWidget, private Ui::ProfileSettings
 
 public:
     /** Constructs a new profile type with the specified parent. */
-    explicit ProfileSettings(QWidget* parent = 0);
+    explicit ProfileSettings(QWidget* parent = nullptr);
     virtual ~ProfileSettings();
 
     /**
@@ -121,7 +121,7 @@ class FavoriteItemDelegate : public QStyledItemDelegate
     Q_OBJECT
 
 public:
-    explicit FavoriteItemDelegate(QObject* parent = 0);
+    explicit FavoriteItemDelegate(QObject* parent = nullptr);
 
     virtual bool editorEvent(QEvent* event, QAbstractItemModel* model,
                              const QStyleOptionViewItem& option, const QModelIndex& index);
@@ -134,7 +134,7 @@ class ShortcutItemDelegate : public QStyledItemDelegate
     Q_OBJECT
 
 public:
-    explicit ShortcutItemDelegate(QObject* parent = 0);
+    explicit ShortcutItemDelegate(QObject* parent = nullptr);
 
     virtual void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
     virtual QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option,

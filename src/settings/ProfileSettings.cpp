@@ -313,7 +313,7 @@ void ProfileSettings::editSelected()
     for (Session* session: SessionManager::instance()->sessions()) {
          for (TerminalDisplay* terminal: session->views()) {
              // Searching for opened profiles
-             if (terminal->sessionController()->profileDialogPointer() != NULL) {
+             if (terminal->sessionController()->profileDialogPointer() != nullptr) {
                  for (const Profile::Ptr & profile: profiles) {
                      if (profile->name() == terminal->sessionController()->profileDialogPointer()->lookupProfile()->name()
                          && terminal->sessionController()->profileDialogPointer()->isVisible()) {

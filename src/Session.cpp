@@ -400,7 +400,7 @@ QString Session::shellSessionId() const
 
 void Session::run()
 {
-    // extra safeguard for potential bug.
+    // FIXME: run() is called twice in some instances
     if (isRunning()) {
         kWarning() << "Attempted to re-run an already running session.";
         return;

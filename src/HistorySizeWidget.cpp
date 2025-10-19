@@ -66,7 +66,7 @@ HistorySizeWidget::HistorySizeWidget(QWidget* parent)
     connect(modeGroup, static_cast<void(QButtonGroup::*)(QAbstractButton*)>(&QButtonGroup::buttonClicked),
             this, &Konsole::HistorySizeWidget::buttonClicked);
 
-    _ui->historyLineSpinner->setSuffix(ki18ncp("Unit of scrollback", " line", " lines"));
+    _ui->historyLineSpinner->setSuffix(ki18ncp("@label:textbox Unit of scrollback", " line", " lines"));
     this->setLineCount(HistorySizeWidget::DefaultLineCount);
 
     connect(_ui->historyLineSpinner, static_cast<void(KIntSpinBox::*)(int)>(&KIntSpinBox::valueChanged),

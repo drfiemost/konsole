@@ -21,9 +21,9 @@
 #define VIEWMANAGER_H
 
 // Qt
-#include <QtCore/QHash>
-#include <QtCore/QObject>
-#include <QtCore/QPointer>
+#include <QHash>
+#include <QObject>
+#include <QPointer>
 
 // Konsole
 #include "Profile.h"
@@ -229,6 +229,12 @@ public slots:
 
     /** DBus slot that returns the current (active) session window */
     Q_SCRIPTABLE int currentSession();
+
+    /** DBus slot that creates a new session in the current view.
+     * @param profile the name of the profile to be used
+     * started.
+     */
+    Q_SCRIPTABLE int newSession(const QString &profile);
 
     /** DBus slot that creates a new session in the current view.
      * @param profile the name of the profile to be used
