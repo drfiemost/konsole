@@ -304,6 +304,8 @@ public:
             _stack.pop();
     }
 private:
+    Q_DISABLE_COPY(PopStackOnExit)
+
     QStack<T>& _stack;
     int _count;
 };

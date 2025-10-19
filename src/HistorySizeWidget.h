@@ -68,7 +68,7 @@ signals:
     void historyModeChanged(Enum::HistoryModeEnum) const;
 
     /** Emitted when the history size is changed. */
-    void historySizeChanged(int) const;
+    void historySizeChanged(int);
 
 private slots:
     void buttonClicked(QAbstractButton*) const;

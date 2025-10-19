@@ -312,6 +312,26 @@ public:
 
     void printContent(QPainter& painter, bool friendly);
 
+    /**
+     * Gets the background of the display
+     * @see setBackgroundColor(), setColorTable(), setForegroundColor()
+     */
+    QColor getBackgroundColor() const;
+
+    bool bracketedPasteMode() const;
+
+    /**
+     * Returns true if the flow control warning box is enabled.
+     * See outputSuspended() and setFlowControlWarningEnabled()
+     */
+    bool flowControlWarningEnabled() const
+    {
+        return _flowControlWarningEnabled;
+    }
+
+    /** See setUsesMouse() */
+    bool usesMouse() const;
+
 public slots:
     /**
      * Scrolls current ScreenWindow
@@ -357,13 +377,6 @@ public slots:
        * stop key (Ctrl+S) are pressed.
        */
     void setFlowControlWarningEnabled(bool enabled);
-    /**
-     * Returns true if the flow control warning box is enabled.
-     * See outputSuspended() and setFlowControlWarningEnabled()
-     */
-    bool flowControlWarningEnabled() const {
-        return _flowControlWarningEnabled;
-    }
 
     /**
      * Causes the widget to display or hide a message informing the user that terminal
@@ -391,23 +404,13 @@ public slots:
      */
     void setUsesMouse(bool usesMouse);
 
-    /** See setUsesMouse() */
-    bool usesMouse() const;
-
     void setBracketedPasteMode(bool bracketedPasteMode);
-    bool bracketedPasteMode() const;
 
     /**
      * Shows a notification that a bell event has occurred in the terminal.
      * TODO: More documentation here
      */
     void bell(const QString& message);
-
-    /**
-     * Gets the background of the display
-     * @see setBackgroundColor(), setColorTable(), setForegroundColor()
-     */
-    QColor getBackgroundColor() const;
 
     /**
      * Sets the background of the display to the specified color.
