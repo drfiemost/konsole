@@ -21,7 +21,7 @@
 #include "KeyBindingEditor.h"
 
 // Qt
-#include <QtGui/QKeyEvent>
+#include <QKeyEvent>
 
 // Konsole
 #include "ui_KeyBindingEditor.h"
@@ -216,7 +216,7 @@ void KeyBindingEditor::setupKeyBindingTable(const KeyboardTranslator* translator
         QTableWidgetItem* keyItem = new QTableWidgetItem(entry.conditionToString());
         keyItem->setData(Qt::UserRole , QVariant::fromValue(entry));
 
-        QTableWidgetItem* textItem = new QTableWidgetItem(QString(entry.resultToString()));
+        QTableWidgetItem* textItem = new QTableWidgetItem(entry.resultToString());
 
         _ui->keyBindingTable->setItem(row, 0, keyItem);
         _ui->keyBindingTable->setItem(row, 1, textItem);

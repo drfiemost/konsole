@@ -262,7 +262,7 @@ void EditProfileDialog::setupGeneralPage(const Profile::Ptr profile)
     _ui->initialDirEdit->setText(profile->defaultWorkingDirectory());
     _ui->initialDirEdit->setClearButtonShown(true);
 
-    _ui->dirSelectButton->setIcon(KIcon("folder-open"));
+    _ui->dirSelectButton->setIcon(KIcon(QStringLiteral("folder-open")));
     _ui->iconSelectButton->setIcon(KIcon(profile->icon()));
     _ui->startInSameDirButton->setChecked(profile->startInCurrentSessionDir());
 
@@ -299,10 +299,19 @@ void EditProfileDialog::showEnvironmentEditor()
 {
     const Profile::Ptr profile = lookupProfile();
 
+    QStringList currentEnvironment;
+
+    // The user could re-open the environment editor before clicking
+    // OK/Apply in the parent edit profile dialog, so we make sure
+    // to show the new environment vars
+    if (_tempProfile->isPropertySet(Profile::Environment)) {
+            currentEnvironment  = _tempProfile->environment();
+    } else {
+        currentEnvironment = profile->environment();
+    }
+
     QWeakPointer<KDialog> dialog = new KDialog(this);
     KTextEdit* edit = new KTextEdit(dialog.data());
-
-    QStringList currentEnvironment = profile->environment();
 
     edit->setPlainText(currentEnvironment.join(QStringLiteral("\n")));
     edit->setToolTip(i18nc("@info:tooltip", "One environment variable per line"));
@@ -560,7 +569,7 @@ void EditProfileDialog::updateKeyBindingsList(bool selectCurrentTranslator)
         QStandardItem* item = new QStandardItem(translator->description());
         item->setEditable(false);
         item->setData(QVariant::fromValue(translator), Qt::UserRole + 1);
-        item->setIcon(KIcon("preferences-desktop-keyboard"));
+        item->setIcon(KIcon(QStringLiteral("preferences-desktop-keyboard")));
 
         if (translator == currentTranslator)
             selectedItem = item;
@@ -1216,11 +1225,11 @@ void EditProfileDialog::fontSelected(const QFont& aFont)
 }
 void EditProfileDialog::showFontDialog()
 {
-    QString sampleText = QString("ell 'lL', one '1', little eye 'i', big eye");
-    sampleText += QString("'I', lL1iI, Zero '0', little oh 'o', big oh 'O', 0oO");
-    sampleText += QString("`~!@#$%^&*()_+-=[]\\{}|:\";'<>?,./");
-    sampleText += QString("0123456789");
-    sampleText += QString("\nThe Quick Brown Fox Jumps Over The Lazy Dog\n");
+    QString sampleText = QLatin1String("ell 'lL', one '1', little eye 'i', big eye");
+    sampleText += QLatin1String("'I', lL1iI, Zero '0', little oh 'o', big oh 'O', 0oO");
+    sampleText += QLatin1String("`~!@#$%^&*()_+-=[]\\{}|:\";'<>?,./");
+    sampleText += QLatin1String("0123456789");
+    sampleText += QLatin1String("\nThe Quick Brown Fox Jumps Over The Lazy Dog\n");
     sampleText += i18n("--- Type anything in this box ---");
     QFont currentFont = _ui->fontPreviewLabel->font();
 
