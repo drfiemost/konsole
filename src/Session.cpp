@@ -792,7 +792,7 @@ void Session::close()
             closeInForceWay();
     } else {
         // terminal process has finished, just close the session
-        QTimer::singleShot(1, this, SIGNAL(finished()));
+        QTimer::singleShot(1, this, &Konsole::Session::finished);
     }
 }
 
@@ -1261,7 +1261,7 @@ bool Session::flowControlEnabled() const
 void Session::fireZModemDetected()
 {
     if (!_zmodemBusy) {
-        QTimer::singleShot(10, this, SIGNAL(zmodemDetected()));
+        QTimer::singleShot(10, this, &Konsole::Session::zmodemDetected);
         _zmodemBusy = true;
     }
 }

@@ -106,8 +106,11 @@ void ViewSplitter::updateSizes()
     }
 
     QList<int> widgetSizes;
-    for (int i = 0; i < count(); i++)
+    const int widgetCount = count();
+    widgetSizes.reserve(widgetCount);
+    for (int i = 0; i < widgetCount; i++) {
         widgetSizes << space;
+    }
 
     setSizes(widgetSizes);
 }

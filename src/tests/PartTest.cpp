@@ -87,7 +87,7 @@ void PartTest::testFd()
     QVBoxLayout* layout = new QVBoxLayout(dialog.data()->mainWidget());
     layout->addWidget(new QLabel(QStringLiteral("Output of 'ping localhost' should appear in a terminal below for 5 seconds")));
     layout->addWidget(terminalPart->widget());
-    QTimer::singleShot(5000, dialog.data(), SLOT(close()));
+    QTimer::singleShot(5000, dialog.data(), &QDialog::close);
     dialog.data()->exec();
 
     delete terminalPart;

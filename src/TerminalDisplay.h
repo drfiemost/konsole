@@ -545,9 +545,7 @@ protected slots:
 
 private slots:
 
-    void unmaskBell();
     void swapFGBGColors();
-    void tripleClickTimeout();  // resets possibleTripleClick
     void viewScrolledByUser();
 
     /**

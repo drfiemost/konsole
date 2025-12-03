@@ -2435,8 +2435,9 @@ void TerminalDisplay::mouseDoubleClickEvent(QMouseEvent* ev)
 
     _possibleTripleClick = true;
 
-    QTimer::singleShot(QApplication::doubleClickInterval(), this,
-                       SLOT(tripleClickTimeout()));
+    QTimer::singleShot(QApplication::doubleClickInterval(), [this]() {
+        _possibleTripleClick = false;
+    });
 }
 
 void TerminalDisplay::wheelEvent(QWheelEvent* ev)
@@ -2499,11 +2500,6 @@ void TerminalDisplay::wheelEvent(QWheelEvent* ev)
                          charLine + 1 + _scrollBar->value() - _scrollBar->maximum() ,
                          0);
     }
-}
-
-void TerminalDisplay::tripleClickTimeout()
-{
-    _possibleTripleClick = false;
 }
 
 void TerminalDisplay::viewScrolledByUser()
@@ -3180,11 +3176,6 @@ int TerminalDisplay::bellMode() const
     return _bellMode;
 }
 
-void TerminalDisplay::unmaskBell()
-{
-    _bellMasked = false;
-}
-
 void TerminalDisplay::bell(const QString& message)
 {
     if (_bellMasked)
@@ -3213,13 +3204,15 @@ void TerminalDisplay::bell(const QString& message)
     // ...mainly for sound effects where rapid bells in sequence
     // produce a horrible noise.
     _bellMasked = true;
-    QTimer::singleShot(500, this, SLOT(unmaskBell()));
+    QTimer::singleShot(500, [this]() {
+        _bellMasked = false;
+    });
 }
 
 void TerminalDisplay::visualBell()
 {
     swapFGBGColors();
-    QTimer::singleShot(200, this, SLOT(swapFGBGColors()));
+    QTimer::singleShot(200, this, &Konsole::TerminalDisplay::swapFGBGColors);
 }
 
 void TerminalDisplay::swapFGBGColors()
