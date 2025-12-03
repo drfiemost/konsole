@@ -172,7 +172,9 @@ ColorScheme::ColorScheme()
 }
 
 ColorScheme::ColorScheme(const ColorScheme& other)
-    : _table(nullptr)
+    : _description(QString())
+    , _name(QString())
+    , _table(nullptr)
     , _randomTable(nullptr)
     , _opacity(other._opacity)
     , _wallpaper(other._wallpaper)

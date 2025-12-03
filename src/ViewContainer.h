@@ -414,6 +414,8 @@ signals:
     void closeTab(ViewContainer * self, QWidget * activeView);
 
 private:
+    Q_DISABLE_COPY(TabbedViewContainer)
+
     void dynamicTabBarVisibility();
     void setTabBarVisible(bool visible);
     void setTabActivity(int index, bool activity);

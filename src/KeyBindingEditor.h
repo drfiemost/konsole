@@ -88,6 +88,8 @@ private slots:
     void addNewEntry();
 
 private:
+    Q_DISABLE_COPY(KeyBindingEditor)
+
     void setupKeyBindingTable(const KeyboardTranslator* translator);
 
     Ui::KeyBindingEditor* _ui;

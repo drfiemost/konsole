@@ -30,6 +30,9 @@ using namespace Konsole;
 
 CopyInputDialog::CopyInputDialog(QWidget* parent)
     : KDialog(parent)
+    , _ui(nullptr)
+    , _model(nullptr)
+    , _masterSession(nullptr)
 {
     setCaption(i18n("Copy Input"));
     setButtons(KDialog::Ok | KDialog::Cancel);
@@ -119,6 +122,8 @@ void CopyInputDialog::setRowChecked(int row, bool checked)
 }
 CheckableSessionModel::CheckableSessionModel(QObject* parent)
     : SessionListModel(parent)
+    , _checkedSessions(QSet<Session *>())
+    , _fixedSessions(QSet<Session *>())
     , _checkColumn(0)
 {
 }

@@ -442,7 +442,9 @@ bool FavoriteItemDelegate::editorEvent(QEvent* aEvent, QAbstractItemModel*,
     return true;
 }
 ShortcutItemDelegate::ShortcutItemDelegate(QObject* aParent)
-    : QStyledItemDelegate(aParent)
+    : QStyledItemDelegate(aParent),
+    _modifiedEditors(QSet<QWidget *>()),
+    _itemsBeingEdited(QSet<QModelIndex>())
 {
 }
 void ShortcutItemDelegate::editorModified(const QKeySequence& keys)

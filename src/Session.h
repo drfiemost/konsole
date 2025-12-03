@@ -716,6 +716,8 @@ private slots:
     void sessionAttributeRequest(int id);
 
 private:
+    Q_DISABLE_COPY(Session)
+
     // checks that the binary 'program' is available and can be executed
     // returns the binary name if available or an empty string otherwise
     static QString checkProgram(const QString& program);

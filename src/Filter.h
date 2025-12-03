@@ -165,6 +165,8 @@ protected:
     void getLineColumn(int position , int& startLine , int& startColumn);
 
 private:
+    Q_DISABLE_COPY(Filter)
+
     QMultiHash<int, HotSpot*> _hotspots;
     QList<HotSpot*> _hotspotList;
 
@@ -360,6 +362,8 @@ public:
                   const QVector<LineProperty>& lineProperties);
 
 private:
+    Q_DISABLE_COPY(TerminalImageFilterChain)
+
     QString* _buffer;
     QList<int>* _linePositions;
 };

@@ -149,6 +149,8 @@ private slots:
     void updateButtonsAccordingToReverseSearchSetting();
 
 private:
+    Q_DISABLE_COPY(IncrementalSearchBar)
+
     KLineEdit* _searchEdit;
     QAction* _caseSensitive;
     QAction* _regExpression;

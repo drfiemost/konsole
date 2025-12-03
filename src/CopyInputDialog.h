@@ -77,6 +77,8 @@ private slots:
     }
 
 private:
+    Q_DISABLE_COPY(CopyInputDialog)
+
     // Checks or unchecks selected sessions.  If there are no
     // selected items then all sessions are checked or unchecked
     void setSelectionChecked(bool checked);

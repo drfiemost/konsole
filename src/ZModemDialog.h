@@ -47,6 +47,8 @@ private slots:
     void slotClose();
 
 private:
+    Q_DISABLE_COPY(ZModemDialog)
+
     KTextEdit* _textEdit;
 };
 }

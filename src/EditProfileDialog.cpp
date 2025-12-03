@@ -57,6 +57,12 @@ using namespace Konsole;
 
 EditProfileDialog::EditProfileDialog(QWidget* aParent)
     : KDialog(aParent)
+    , _ui(nullptr)
+    , _tempProfile(nullptr)
+    , _profile(nullptr)
+    , _pageNeedsUpdate(QVector<bool>())
+    , _previewedProperties(QHash<int, QVariant>())
+    , _delayedPreviewProperties(QHash<int, QVariant>())
     , _delayedPreviewTimer(new QTimer(this))
     , _colorDialog(nullptr)
 {
@@ -146,7 +152,7 @@ bool EditProfileDialog::isValidProfileName()
     QFileInfo fileInfo(_profile->path());
     if (fileInfo.exists() && !fileInfo.isWritable()) {
         if (!_tempProfile->isPropertySet(Profile::Name)
-            || (_tempProfile->isPropertySet(Profile::Name) && _tempProfile->name() == _profile->name())) {
+            || (_tempProfile->name() == _profile->name())) {
                 KMessageBox::sorry(this,
                                    i18n("<p>Konsole does not have permission to save this profile to:<br /> \"%1\"</p>"
                                         "<p>To be able to save settings you can either change the permissions "

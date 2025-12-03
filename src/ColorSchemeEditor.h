@@ -87,6 +87,8 @@ private slots:
     void saveColorScheme();
 
 private:
+    Q_DISABLE_COPY(ColorSchemeEditor)
+
     void setupColorTable(const ColorScheme* table);
 
     bool _isNewScheme;

@@ -58,6 +58,8 @@ protected:
     virtual void dropEvent(QDropEvent* event);
 
 private:
+    Q_DISABLE_COPY(ViewContainerTabBar)
+
     // show the indicator arrow which shows where a dropped tab will
     // be inserted at 'index'
     void setDropIndicator(int index, bool drawDisabled = false);
