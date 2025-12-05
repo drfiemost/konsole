@@ -29,8 +29,6 @@
 // Konsole
 #include "Profile.h"
 
-class QSignalMapper;
-
 class KConfig;
 
 namespace Konsole
@@ -108,7 +106,7 @@ protected slots:
      *
      * @param session The Session which has finished executing.
      */
-    void sessionTerminated(QObject* sessionObject);
+    void sessionTerminated(Session *session);
 
 private slots:
     void sessionProfileCommandReceived(const QString& text);
@@ -135,8 +133,6 @@ private:
     QHash<Session*, Profile::Ptr> _sessionProfiles;
     QHash<Session*, Profile::Ptr> _sessionRuntimeProfiles;
     QHash<Session*, int> _restoreMapping;
-
-    QSignalMapper* _sessionMapper;
 };
 
 /** Utility class to simplify code in SessionManager::applyProfile(). */

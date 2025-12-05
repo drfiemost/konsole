@@ -23,7 +23,6 @@
 #include <config-konsole.h>
 
 // Qt
-#include <QSignalMapper>
 #include <QStringList>
 #include <QMenu>
 
@@ -55,7 +54,6 @@ ViewManager::ViewManager(QObject* parent , KActionCollection* collection)
     : QObject(parent)
     , _viewSplitter(nullptr)
     , _actionCollection(collection)
-    , _containerSignalMapper(new QSignalMapper(this))
     , _navigationMethod(TabbedNavigation)
     , _navigationVisibility(ViewContainer::AlwaysShowNavigation)
     , _navigationPosition(ViewContainer::NavigationPositionTop)
@@ -83,10 +81,6 @@ ViewManager::ViewManager(QObject* parent , KActionCollection* collection)
     // emit a signal when all of the views held by this view manager are destroyed
     connect(_viewSplitter.data() , &Konsole::ViewSplitter::allContainersEmpty , this , &Konsole::ViewManager::empty);
     connect(_viewSplitter.data() , &Konsole::ViewSplitter::empty , this , &Konsole::ViewManager::empty);
-
-    // listen for addition or removal of views from associated containers
-    connect(_containerSignalMapper , static_cast<void(QSignalMapper::*)(QObject*)>(&QSignalMapper::mapped) , this ,
-            &Konsole::ViewManager::containerViewsChanged);
 
     // listen for profile changes
     connect(ProfileManager::instance() , &Konsole::ProfileManager::profileChanged , this,
@@ -213,14 +207,13 @@ void ViewManager::setupActions()
     collection->addAction(QStringLiteral("move-view-right"), moveViewRightAction);
 
     // Switch to tab N shortcuts
-    const int SWITCH_TO_TAB_COUNT = 19;
-    QSignalMapper* switchToTabMapper = new QSignalMapper(this);
-    connect(switchToTabMapper, static_cast<void(QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &Konsole::ViewManager::switchToView);
+    constexpr int SWITCH_TO_TAB_COUNT = 19;
     for (int i = 0; i < SWITCH_TO_TAB_COUNT; i++) {
         KAction* switchToTabAction = new KAction(i18nc("@action Shortcut entry", "Switch to Tab %1", i + 1), this);
-        switchToTabMapper->setMapping(switchToTabAction, i);
-        connect(switchToTabAction, &KAction::triggered, switchToTabMapper,
-                static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
+        connect(switchToTabAction, &QAction::triggered, this,
+           [this, i]() {
+               switchToView(i);
+           });
         collection->addAction(QStringLiteral("switch-to-tab-%1").arg(i), switchToTabAction);
     }
 
@@ -654,11 +647,15 @@ ViewContainer* ViewManager::createContainer()
     }
 
     // connect signals and slots
-    connect(container , &Konsole::ViewContainer::viewAdded , _containerSignalMapper ,
-            static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
-    connect(container , &Konsole::ViewContainer::viewRemoved , _containerSignalMapper ,
-            static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
-    _containerSignalMapper->setMapping(container, container);
+    connect(container, &Konsole::ViewContainer::viewAdded, this,
+           [this, container]() {
+               containerViewsChanged(container);
+           });
+
+    connect(container, &Konsole::ViewContainer::viewRemoved, this,
+           [this, container]() {
+               containerViewsChanged(container);
+           });
 
     connect(container, static_cast<void(ViewContainer::*)()>(&Konsole::ViewContainer::newViewRequest), this, static_cast<void(ViewManager::*)()>(&Konsole::ViewManager::newViewRequest));
     connect(container, static_cast<void(ViewContainer::*)(Profile::Ptr)>(&Konsole::ViewContainer::newViewRequest), this, static_cast<void(ViewManager::*)(Profile::Ptr)>(&Konsole::ViewManager::newViewRequest));
@@ -751,7 +748,7 @@ ViewManager::NavigationMethod ViewManager::navigationMethod() const
     return _navigationMethod;
 }
 
-void ViewManager::containerViewsChanged(QObject* container)
+void ViewManager::containerViewsChanged(ViewContainer* container)
 {
     if ((!_viewSplitter.isNull()) && container == _viewSplitter->activeContainer()) {
         emit viewPropertiesChanged(viewProperties());
