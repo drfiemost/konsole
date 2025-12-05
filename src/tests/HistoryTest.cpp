@@ -110,6 +110,8 @@ void HistoryTest::testHistoryScroll()
     QCOMPARE(historyTypeNone.isUnlimited(), false);
     QCOMPARE(historyTypeNone.maximumLineCount(), 0);
 
+    delete historyScroll;
+
     // File
     historyScroll = new HistoryScrollFile(QStringLiteral("test.log"));
     QVERIFY(historyScroll->hasScroll());
@@ -121,6 +123,8 @@ void HistoryTest::testHistoryScroll()
     QCOMPARE(historyTypeFile.isEnabled(), true);
     QCOMPARE(historyTypeFile.isUnlimited(), true);
     QCOMPARE(historyTypeFile.maximumLineCount(), -1);
+
+    delete historyScroll;
 
     // Compact
     historyScroll = new CompactHistoryScroll(42);
