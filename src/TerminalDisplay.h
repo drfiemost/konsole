@@ -402,9 +402,9 @@ public slots:
      * @param usesMouse Set to true if the program running in the terminal is interested in mouse events
      * or false otherwise.
      */
-    void setUsesMouse(bool usesMouse);
+    void setUsesMouse(bool on);
 
-    void setBracketedPasteMode(bool bracketedPasteMode);
+    void setBracketedPasteMode(bool on);
 
     /**
      * Shows a notification that a bell event has occurred in the terminal.
@@ -580,7 +580,7 @@ private:
     // if useOpacitySetting is true then the color's alpha value will be set to
     // the display's transparency (set with setOpacity()), otherwise the background
     // will be drawn fully opaque
-    void drawBackground(QPainter& painter, const QRect& rect, const QColor& color,
+    void drawBackground(QPainter& painter, const QRect& rect, const QColor& backgroundColor,
                         bool useOpacitySetting);
     // draws the cursor character
     void drawCursor(QPainter& painter, const QRect& rect , const QColor& foregroundColor,
@@ -618,7 +618,7 @@ private:
     // 'region' is the part of the image to scroll - currently only
     // the top, bottom and height of 'region' are taken into account,
     // the left and right are ignored.
-    void scrollImage(int lines , const QRect& region);
+    void scrollImage(int lines , const QRect& screenWindowRegion);
 
     void calcGeometry();
     void propagateSize();
@@ -637,7 +637,7 @@ private:
     // redraws the cursor
     void updateCursor();
 
-    bool handleShortcutOverrideEvent(QKeyEvent* event);
+    bool handleShortcutOverrideEvent(QKeyEvent* keyEvent);
 
     void doPaste(QString text, bool appendReturn);
 

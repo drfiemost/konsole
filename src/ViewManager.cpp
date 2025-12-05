@@ -329,13 +329,13 @@ void ViewManager::detachActiveView()
     detachView(container, container->activeView());
 }
 
-void ViewManager::detachView(ViewContainer* container, QWidget* widgetView)
+void ViewManager::detachView(ViewContainer* container, QWidget* view)
 {
 #if !defined(ENABLE_DETACHING)
     return;
 #endif
 
-    TerminalDisplay * viewToDetach = qobject_cast<TerminalDisplay*>(widgetView);
+    TerminalDisplay * viewToDetach = qobject_cast<TerminalDisplay*>(view);
 
     if (!viewToDetach)
         return;
@@ -670,7 +670,7 @@ ViewContainer* ViewManager::createContainer()
     return container;
 }
 
-void ViewManager::containerMoveViewRequest(int index, int id, bool& moved, TabbedViewContainer* sourceTabbedContainer)
+void ViewManager::containerMoveViewRequest(int index, int id, bool& success, TabbedViewContainer* sourceTabbedContainer)
 {
     ViewContainer* container = qobject_cast<ViewContainer*>(sender());
     SessionController* controller = qobject_cast<SessionController*>(ViewProperties::propertiesById(id));
@@ -696,7 +696,7 @@ void ViewManager::containerMoveViewRequest(int index, int id, bool& moved, Tabbe
 
     createView(controller->session(), container, index);
     controller->session()->refresh();
-    moved = true;
+    success = true;
 }
 
 void ViewManager::setNavigationMethod(NavigationMethod method)

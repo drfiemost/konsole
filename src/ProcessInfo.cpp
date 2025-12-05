@@ -67,14 +67,14 @@
 
 using namespace Konsole;
 
-ProcessInfo::ProcessInfo(int aPid)
+ProcessInfo::ProcessInfo(int pid)
     : _fields(ARGUMENTS)   // arguments
     // are currently always valid,
     // they just return an empty
     // vector / map respectively
     // if no arguments
     // have been explicitly set
-    , _pid(aPid)
+    , _pid(pid)
     , _parentPid(0)
     , _foregroundPid(0)
     , _userId(0)
@@ -229,9 +229,9 @@ QString ProcessInfo::localHost()
     return QHostInfo::localHostName();
 }
 
-void ProcessInfo::setPid(int aPid)
+void ProcessInfo::setPid(int pid)
 {
-    _pid = aPid;
+    _pid = pid;
     _fields |= PROCESS_ID;
 }
 
@@ -256,14 +256,14 @@ void ProcessInfo::setUserHomeDir()
         _userHomeDir = QDir::homePath();
 }
 
-void ProcessInfo::setParentPid(int aPid)
+void ProcessInfo::setParentPid(int pid)
 {
-    _parentPid = aPid;
+    _parentPid = pid;
     _fields |= PARENT_PID;
 }
-void ProcessInfo::setForegroundPid(int aPid)
+void ProcessInfo::setForegroundPid(int pid)
 {
-    _foregroundPid = aPid;
+    _foregroundPid = pid;
     _fields |= FOREGROUND_PID;
 }
 
@@ -324,8 +324,8 @@ void ProcessInfo::setFileError(QFile::FileError error)
 // implementations of the UnixProcessInfo abstract class.
 //
 
-NullProcessInfo::NullProcessInfo(int aPid, const QString& /*titleFormat*/)
-    : ProcessInfo(aPid)
+NullProcessInfo::NullProcessInfo(int pid, const QString& /*titleFormat*/)
+    : ProcessInfo(pid)
 {
 }
 
@@ -338,21 +338,21 @@ void NullProcessInfo::readUserName()
 }
 
 #if !defined(Q_OS_WIN)
-UnixProcessInfo::UnixProcessInfo(int aPid, const QString& titleFormat)
-    : ProcessInfo(aPid)
+UnixProcessInfo::UnixProcessInfo(int pid, const QString& titleFormat)
+    : ProcessInfo(pid)
 {
     setUserNameRequired(titleFormat.contains(QLatin1String("%u")));
 }
 
-void UnixProcessInfo::readProcessInfo(int aPid)
+void UnixProcessInfo::readProcessInfo(int pid)
 {
     // prevent _arguments from growing longer and longer each time this
     // method is called.
     clearArguments();
 
-    if (readProcInfo(aPid)) {
-        readArguments(aPid);
-        readCurrentDir(aPid);
+    if (readProcInfo(pid)) {
+        readArguments(pid);
+        readCurrentDir(pid);
     }
 }
 
@@ -395,15 +395,15 @@ void UnixProcessInfo::readUserName()
 class LinuxProcessInfo : public UnixProcessInfo
 {
 public:
-    LinuxProcessInfo(int aPid, const QString& titleFormat) :
-        UnixProcessInfo(aPid, titleFormat) {
+    LinuxProcessInfo(int pid, const QString& titleFormat) :
+        UnixProcessInfo(pid, titleFormat) {
     }
 
 protected:
-    virtual bool readCurrentDir(int aPid) {
+    virtual bool readCurrentDir(int pid) {
         char path_buffer[MAXPATHLEN + 1];
         path_buffer[MAXPATHLEN] = 0;
-        QByteArray procCwd = QFile::encodeName(QStringLiteral("/proc/%1/cwd").arg(aPid));
+        QByteArray procCwd = QFile::encodeName(QStringLiteral("/proc/%1/cwd").arg(pid));
         const int length = static_cast<int>(readlink(procCwd.constData(), path_buffer, MAXPATHLEN));
         if (length == -1) {
             setError(UnknownError);
@@ -418,7 +418,7 @@ protected:
     }
 
 private:
-    virtual bool readProcInfo(int aPid) {
+    virtual bool readProcInfo(int pid) {
         // indicies of various fields within the process status file which
         // contain various information about the process
         const int PARENT_PID_FIELD = 3;
@@ -434,7 +434,7 @@ private:
 
         // For user id read process status file ( /proc/<pid>/status )
         //  Can not use getuid() due to it does not work for 'su'
-        QFile statusInfo(QStringLiteral("/proc/%1/status").arg(aPid));
+        QFile statusInfo(QStringLiteral("/proc/%1/status").arg(pid));
         if (statusInfo.open(QIODevice::ReadOnly)) {
             QTextStream stream(&statusInfo);
             QString statusLine;
@@ -473,7 +473,7 @@ private:
         //
         // FIELD FIELD (FIELD WITH SPACES) FIELD FIELD
         //
-        QFile processInfo(QStringLiteral("/proc/%1/stat").arg(aPid));
+        QFile processInfo(QStringLiteral("/proc/%1/stat").arg(pid));
         if (processInfo.open(QIODevice::ReadOnly)) {
             QTextStream stream(&processInfo);
             const QString& data = stream.readAll();
@@ -526,17 +526,17 @@ private:
             setName(processNameString);
 
         // update object state
-        setPid(aPid);
+        setPid(pid);
 
         return ok;
     }
 
-    virtual bool readArguments(int aPid) {
+    virtual bool readArguments(int pid) {
         // read command-line arguments file found at /proc/<pid>/cmdline
         // the expected format is a list of strings delimited by null characters,
         // and ending in a double null character pair.
 
-        QFile argumentsFile(QStringLiteral("/proc/%1/cmdline").arg(aPid));
+        QFile argumentsFile(QStringLiteral("/proc/%1/cmdline").arg(pid));
         if (argumentsFile.open(QIODevice::ReadOnly)) {
             QTextStream stream(&argumentsFile);
             const QString& data = stream.readAll();
@@ -559,12 +559,12 @@ private:
 class FreeBSDProcessInfo : public UnixProcessInfo
 {
 public:
-    FreeBSDProcessInfo(int aPid, const QString& titleFormat) :
-        UnixProcessInfo(aPid, titleFormat) {
+    FreeBSDProcessInfo(int pid, const QString& titleFormat) :
+        UnixProcessInfo(pid, titleFormat) {
     }
 
 protected:
-    virtual bool readCurrentDir(int aPid) {
+    virtual bool readCurrentDir(int pid) {
 #if defined(HAVE_OS_DRAGONFLYBSD)
         char buf[PATH_MAX];
         int managementInfoBase[4];
@@ -573,7 +573,7 @@ protected:
         managementInfoBase[0] = CTL_KERN;
         managementInfoBase[1] = KERN_PROC;
         managementInfoBase[2] = KERN_PROC_CWD;
-        managementInfoBase[3] = aPid;
+        managementInfoBase[3] = pid;
 
         len = sizeof(buf);
         if (sysctl(managementInfoBase, 4, buf, &len, NULL, 0) == -1)
@@ -586,7 +586,7 @@ protected:
         int numrecords;
         struct kinfo_file* info = 0;
 
-        info = kinfo_getfile(aPid, &numrecords);
+        info = kinfo_getfile(pid, &numrecords);
 
         if (!info)
             return false;
@@ -606,7 +606,7 @@ protected:
     }
 
 private:
-    virtual bool readProcInfo(int aPid) {
+    virtual bool readProcInfo(int pid) {
         int managementInfoBase[4];
         size_t mibLength;
         struct kinfo_proc* kInfoProc;
@@ -614,7 +614,7 @@ private:
         managementInfoBase[0] = CTL_KERN;
         managementInfoBase[1] = KERN_PROC;
         managementInfoBase[2] = KERN_PROC_PID;
-        managementInfoBase[3] = aPid;
+        managementInfoBase[3] = pid;
 
         if (sysctl(managementInfoBase, 4, NULL, &mibLength, NULL, 0) == -1)
             return false;
@@ -646,7 +646,7 @@ private:
         return true;
     }
 
-    virtual bool readArguments(int aPid) {
+    virtual bool readArguments(int pid) {
         char args[ARG_MAX];
         int managementInfoBase[4];
         size_t len;
@@ -654,7 +654,7 @@ private:
         managementInfoBase[0] = CTL_KERN;
         managementInfoBase[1] = KERN_PROC;
         managementInfoBase[2] = KERN_PROC_PID;
-        managementInfoBase[3] = aPid;
+        managementInfoBase[3] = pid;
 
         len = sizeof(args);
         if (sysctl(managementInfoBase, 4, args, &len, NULL, 0) == -1)
@@ -674,19 +674,19 @@ private:
 class OpenBSDProcessInfo : public UnixProcessInfo
 {
 public:
-    OpenBSDProcessInfo(int aPid, const QString& titleFormat) :
-        UnixProcessInfo(aPid, titleFormat) {
+    OpenBSDProcessInfo(int pid, const QString& titleFormat) :
+        UnixProcessInfo(pid, titleFormat) {
     }
 
 protected:
-    virtual bool readCurrentDir(int aPid) {
+    virtual bool readCurrentDir(int pid) {
         char    buf[PATH_MAX];
         int     managementInfoBase[3];
         size_t  len;
 
         managementInfoBase[0] = CTL_KERN;
         managementInfoBase[1] = KERN_PROC_CWD;
-        managementInfoBase[2] = aPid;
+        managementInfoBase[2] = pid;
 
         len = sizeof(buf);
         if (::sysctl(managementInfoBase, 3, buf, &len, NULL, 0) == -1) {
@@ -699,7 +699,7 @@ protected:
     }
 
 private:
-    virtual bool readProcInfo(int aPid) {
+    virtual bool readProcInfo(int pid) {
         int      managementInfoBase[6];
         size_t   mibLength;
         struct kinfo_proc*  kInfoProc;
@@ -707,7 +707,7 @@ private:
         managementInfoBase[0] = CTL_KERN;
         managementInfoBase[1] = KERN_PROC;
         managementInfoBase[2] = KERN_PROC_PID;
-        managementInfoBase[3] = aPid;
+        managementInfoBase[3] = pid;
         managementInfoBase[4] = sizeof(struct kinfo_proc);
         managementInfoBase[5] = 1;
 
@@ -735,7 +735,7 @@ private:
         return true;
     }
 
-    char** readProcArgs(int aPid, int whatMib) {
+    char** readProcArgs(int pid, int whatMib) {
         void*   buf = NULL;
         void*   nbuf;
         size_t  len = 4096;
@@ -744,7 +744,7 @@ private:
 
         managementInfoBase[0] = CTL_KERN;
         managementInfoBase[1] = KERN_PROC_ARGS;
-        managementInfoBase[2] = aPid;
+        managementInfoBase[2] = pid;
         managementInfoBase[3] = whatMib;
 
         do {
@@ -767,10 +767,10 @@ private:
         return (char**)buf;
     }
 
-    virtual bool readArguments(int aPid) {
+    virtual bool readArguments(int pid) {
         char**  argv;
 
-        argv = readProcArgs(aPid, KERN_PROC_ARGV);
+        argv = readProcArgs(pid, KERN_PROC_ARGV);
         if (argv == NULL) {
             return false;
         }
@@ -787,14 +787,14 @@ private:
 class MacProcessInfo : public UnixProcessInfo
 {
 public:
-    MacProcessInfo(int aPid, const QString& titleFormat) :
-        UnixProcessInfo(aPid, titleFormat) {
+    MacProcessInfo(int pid, const QString& titleFormat) :
+        UnixProcessInfo(pid, titleFormat) {
     }
 
 protected:
-    virtual bool readCurrentDir(int aPid) {
+    virtual bool readCurrentDir(int pid) {
         struct proc_vnodepathinfo vpi;
-        const int nb = proc_pidinfo(aPid, PROC_PIDVNODEPATHINFO, 0, &vpi, sizeof(vpi));
+        const int nb = proc_pidinfo(pid, PROC_PIDVNODEPATHINFO, 0, &vpi, sizeof(vpi));
         if (nb == sizeof(vpi)) {
             setCurrentDir(QString(vpi.pvi_cdir.vip_path));
             return true;
@@ -803,7 +803,7 @@ protected:
     }
 
 private:
-    virtual bool readProcInfo(int aPid) {
+    virtual bool readProcInfo(int pid) {
         int managementInfoBase[4];
         size_t mibLength;
         struct kinfo_proc* kInfoProc;
@@ -813,7 +813,7 @@ private:
         managementInfoBase[0] = CTL_KERN;
         managementInfoBase[1] = KERN_PROC;
         managementInfoBase[2] = KERN_PROC_PID;
-        managementInfoBase[3] = aPid;
+        managementInfoBase[3] = pid;
 
         if (sysctl(managementInfoBase, 4, NULL, &mibLength, NULL, 0) == -1) {
             return false;
@@ -852,13 +852,13 @@ private:
 
                 delete [] kInfoProc;
             }
-            setPid(aPid);
+            setPid(pid);
         }
         return true;
     }
 
-    virtual bool readArguments(int aPid) {
-        Q_UNUSED(aPid);
+    virtual bool readArguments(int pid) {
+        Q_UNUSED(pid);
         return false;
     }
 };
@@ -878,15 +878,15 @@ private:
 class SolarisProcessInfo : public UnixProcessInfo
 {
 public:
-    SolarisProcessInfo(int aPid, const QString& titleFormat)
-        : UnixProcessInfo(aPid, titleFormat) {
+    SolarisProcessInfo(int pid, const QString& titleFormat)
+        : UnixProcessInfo(pid, titleFormat) {
     }
 
 protected:
     // FIXME: This will have the same issues as BKO 251351; the Linux
     // version uses readlink.
-    virtual bool readCurrentDir(int aPid) {
-        QFileInfo info(QString("/proc/%1/path/cwd").arg(aPid));
+    virtual bool readCurrentDir(int pid) {
+        QFileInfo info(QString("/proc/%1/path/cwd").arg(pid));
         const bool readable = info.isReadable();
 
         if (readable && info.isSymLink()) {
@@ -903,8 +903,8 @@ protected:
     }
 
 private:
-    virtual bool readProcInfo(int aPid) {
-        QFile psinfo(QString("/proc/%1/psinfo").arg(aPid));
+    virtual bool readProcInfo(int pid) {
+        QFile psinfo(QString("/proc/%1/psinfo").arg(pid));
         if (psinfo.open(QIODevice::ReadOnly)) {
             struct psinfo info;
             if (psinfo.read((char *)&info, sizeof(info)) != sizeof(info)) {
@@ -914,7 +914,7 @@ private:
             setParentPid(info.pr_ppid);
             setForegroundPid(info.pr_pgid);
             setName(info.pr_fname);
-            setPid(aPid);
+            setPid(pid);
 
             // Bogus, because we're treating the arguments as one single string
             info.pr_psargs[PRARGSZ - 1] = 0;
@@ -1101,23 +1101,23 @@ QString SSHProcessInfo::format(const QString& input) const
     return output;
 }
 
-ProcessInfo* ProcessInfo::newInstance(int aPid, const QString& titleFormat)
+ProcessInfo* ProcessInfo::newInstance(int pid, const QString& titleFormat)
 {
     ProcessInfo *info;
 #if defined(Q_OS_LINUX)
-    info =  new LinuxProcessInfo(aPid, titleFormat);
+    info =  new LinuxProcessInfo(pid, titleFormat);
 #elif defined(Q_OS_SOLARIS)
-    info =  new SolarisProcessInfo(aPid, titleFormat);
+    info =  new SolarisProcessInfo(pid, titleFormat);
 #elif defined(Q_OS_MAC)
-    info =  new MacProcessInfo(aPid, titleFormat);
+    info =  new MacProcessInfo(pid, titleFormat);
 #elif defined(Q_OS_FREEBSD)
-    info =  new FreeBSDProcessInfo(aPid, titleFormat);
+    info =  new FreeBSDProcessInfo(pid, titleFormat);
 #elif defined(Q_OS_OPENBSD)
-    info =  new OpenBSDProcessInfo(aPid, titleFormat);
+    info =  new OpenBSDProcessInfo(pid, titleFormat);
 #else
-    info =  new NullProcessInfo(aPid, titleFormat);
+    info =  new NullProcessInfo(pid, titleFormat);
 #endif
-    info->readProcessInfo(aPid);
+    info->readProcessInfo(pid);
     return info;
 }
 

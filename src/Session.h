@@ -111,7 +111,7 @@ public:
      *
      * @param masterFd The file descriptor of the pseudo-teletype master (See KPtyProcess::KPtyProcess())
      */
-    void openTeletype(int masterFd);
+    void openTeletype(int fd);
 
     /**
      * Returns true if the session is currently running.  This will be true
@@ -340,7 +340,7 @@ public:
      */
     void refresh();
 
-    void startZModem(const QString& rz, const QString& dir, const QStringList& list);
+    void startZModem(const QString& zmodem, const QString& dir, const QStringList& list);
     void cancelZModem();
     bool isZModemBusy() {
         return _zmodemBusy;
@@ -519,7 +519,7 @@ public slots:
       * Overloaded to accept a QByteArray for convenience since DBus
       * does not accept QTextCodec directly.
       */
-    Q_SCRIPTABLE bool setCodec(const QByteArray& codec);
+    Q_SCRIPTABLE bool setCodec(const QByteArray& name);
 
     /** Returns the codec used to decode incoming characters in this
      * terminal emulation
@@ -734,7 +734,7 @@ private:
     bool updateForegroundProcessInfo();
     void updateWorkingDirectory();
 
-    QString validDirectory(const QString& directory) const;
+    QString validDirectory(const QString& dir) const;
 
     QUuid            _uniqueIdentifier; // SHELL_SESSION_ID
 

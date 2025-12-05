@@ -385,12 +385,12 @@ public:
     ViewManager* connectedViewManager();
 
 protected:
-    virtual void addViewWidget(QWidget* view , int index);
-    virtual void removeViewWidget(QWidget* view);
-    virtual void navigationVisibilityChanged(NavigationVisibility mode);
-    virtual void navigationPositionChanged(NavigationPosition position);
-    virtual void navigationTextModeChanged(bool mode);
-    virtual void moveViewWidget(int fromIndex , int toIndex);
+    void addViewWidget(QWidget* view , int index) override;
+    void removeViewWidget(QWidget* view) override;
+    void navigationVisibilityChanged(NavigationVisibility mode) override;
+    void navigationPositionChanged(NavigationPosition position) override;
+    void navigationTextModeChanged(bool useTextWidth) override;
+    void moveViewWidget(int fromIndex , int toIndex) override;
 
 private slots:
     void updateTitle(ViewProperties* item);

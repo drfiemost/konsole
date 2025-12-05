@@ -150,9 +150,9 @@ void ViewContainer::addView(QWidget* view , ViewProperties* item, int index)
 
     emit viewAdded(view, item);
 }
-void ViewContainer::viewDestroyed(QObject* object)
+void ViewContainer::viewDestroyed(QObject* view)
 {
-    QWidget* widget = qobject_cast<QWidget*>(object);
+    QWidget* widget = qobject_cast<QWidget*>(view);
 
     _views.removeAll(widget);
     _navigation.remove(widget);
@@ -245,11 +245,11 @@ void ViewContainer::activatePreviousView()
     setActiveView(_views.at(index));
 }
 
-ViewProperties* ViewContainer::viewProperties(QWidget* widget) const
+ViewProperties* ViewContainer::viewProperties(QWidget* view) const
 {
-    Q_ASSERT(_navigation.contains(widget));
+    Q_ASSERT(_navigation.contains(view));
 
-    return _navigation[widget];
+    return _navigation[view];
 }
 
 QList<QWidget*> ViewContainer::widgetsForItem(ViewProperties* item) const
@@ -457,11 +457,11 @@ TabbedViewContainer::~TabbedViewContainer()
         _containerWidget->deleteLater();
 }
 
-void TabbedViewContainer::startTabDrag(int tab)
+void TabbedViewContainer::startTabDrag(int index)
 {
     QPointer<QDrag> drag = new QDrag(_tabBar);
-    const QRect tabRect = _tabBar->tabRect(tab);
-    QPixmap tabPixmap = _tabBar->dragDropPixmap(tab);
+    const QRect tabRect = _tabBar->tabRect(index);
+    QPixmap tabPixmap = _tabBar->dragDropPixmap(index);
 
     drag->setPixmap(tabPixmap);
 
@@ -472,8 +472,8 @@ void TabbedViewContainer::startTabDrag(int tab)
 
     drag->setHotSpot(mappedPos);
 
-    const int id = viewProperties(views()[tab])->identifier();
-    QWidget* view = views()[tab];
+    const int id = viewProperties(views()[index])->identifier();
+    QWidget* view = views()[index];
     drag->setMimeData(ViewProperties::createMimeData(id));
 
     // start dragging
@@ -552,7 +552,7 @@ void TabbedViewContainer::renameTab(int index)
     viewProperties(views()[index])->rename();
 }
 
-void TabbedViewContainer::openTabContextMenu(int index, const QPoint& pos)
+void TabbedViewContainer::openTabContextMenu(int index, const QPoint& point)
 {
     _contextMenuTabIndex = index;
 
@@ -563,7 +563,7 @@ void TabbedViewContainer::openTabContextMenu(int index, const QPoint& pos)
     detachAction->setEnabled(_tabBar->count() > 1);
 #endif
 
-    _contextPopupMenu->exec(pos);
+    _contextPopupMenu->exec(point);
 }
 
 void TabbedViewContainer::tabContextMenuCloseTab()

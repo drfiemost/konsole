@@ -502,7 +502,7 @@ public:
     Enum::SearchDirection searchDirection() const;
 
     /** The line from which the search will be done **/
-    void setStartLine(int startLine);
+    void setStartLine(int line);
 
     /**
      * Performs a search through the session's history, starting at the position

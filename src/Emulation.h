@@ -256,10 +256,10 @@ public slots:
      * to be emitted when it expires.  The timer allows multiple updates in quick
      * succession to be buffered into a single outputChanged() signal emission.
      *
-     * @param buffer A string of characters received from the terminal program.
-     * @param len The length of @p buffer
+     * @param text A string of characters received from the terminal program.
+     * @param length The length of @p text
      */
-    void receiveData(const char* buffer, int len);
+    void receiveData(const char* text, int length);
 
 signals:
 
@@ -422,9 +422,9 @@ protected:
 
     /**
      * Processes an incoming character.  See receiveData()
-     * @p ch A unicode character code.
+     * @p c A unicode character code.
      */
-    virtual void receiveChar(int ch);
+    virtual void receiveChar(int c);
 
     /**
      * Sets the active screen.  The terminal has two screens, primary and alternate.

@@ -109,12 +109,12 @@ private slots:
     void selectInitialDir();
     void selectIcon();
 
-    void profileNameChanged(const QString& text);
-    void initialDirChanged(const QString& text);
+    void profileNameChanged(const QString& name);
+    void initialDirChanged(const QString& dir);
     void startInSameDir(bool);
-    void commandChanged(const QString& text);
-    void tabTitleFormatChanged(const QString& text);
-    void remoteTabTitleFormatChanged(const QString& text);
+    void commandChanged(const QString& command);
+    void tabTitleFormatChanged(const QString& format);
+    void remoteTabTitleFormatChanged(const QString& format);
 
     void terminalColumnsEntryChanged(int);
     void terminalRowsEntryChanged(int);
@@ -204,7 +204,7 @@ private:
 
     void showColorSchemeEditor(bool isNewScheme);
     void closeColorSchemeEditor();
-    void showKeyBindingEditor(bool newTranslator);
+    void showKeyBindingEditor(bool isNewTranslator);
 
     void preview(int property , const QVariant& value);
     void delayedPreview(int property , const QVariant& value);

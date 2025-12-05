@@ -46,8 +46,8 @@ public:
     HistoryFile();
     virtual ~HistoryFile();
 
-    virtual void add(const char* bytes, qint64 len);
-    virtual void get(char* bytes, qint64 len, qint64 loc);
+    virtual void add(const char* buffer, qint64 count);
+    virtual void get(char* buffer, qint64 count, qint64 loc);
     virtual qint64 len() const;
 
     //mmaps the file in read-only mode
@@ -94,10 +94,10 @@ public:
     virtual int  getLines() = 0;
     virtual int  getLineLen(int lineno) = 0;
     virtual void getCells(int lineno, int colno, int count, Character res[]) = 0;
-    virtual bool isWrappedLine(int lineno) = 0;
+    virtual bool isWrappedLine(int lineNumber) = 0;
 
     // adding lines.
-    virtual void addCells(const Character a[], int count) = 0;
+    virtual void addCells(const Character text[], int count) = 0;
     // convenience method - this is virtual so that subclasses can take advantage
     // of QVector's implicit copying
     virtual void addCellsVector(const QVector<Character>& cells) {
@@ -221,7 +221,7 @@ public:
     virtual unsigned  length() {
         return _blockLength;
     }
-    virtual void* allocate(size_t length);
+    virtual void* allocate(size_t size);
     virtual bool contains(void* addr) {
         return addr >= _blockStart && addr < (_blockStart + _blockLength);
     }
@@ -266,7 +266,7 @@ public:
         /* do nothing, deallocation from pool is done in destructor*/
     }
 
-    virtual void getCharacters(Character* array, int length, int startColumn);
+    virtual void getCharacters(Character* array, int size, int startColumn);
     virtual void getCharacter(int index, Character& r);
     virtual bool isWrapped() const {
         return _wrapped;
@@ -296,15 +296,15 @@ public:
     virtual ~CompactHistoryScroll();
 
     int  getLines() override;
-    int  getLineLen(int lineno) override;
-    void getCells(int lineno, int colno, int count, Character res[]) override;
-    bool isWrappedLine(int lineno) override;
+    int  getLineLen(int lineNumber) override;
+    void getCells(int lineNumber, int startColumn, int count, Character buffer[]) override;
+    bool isWrappedLine(int lineNumber) override;
 
     void addCells(const Character a[], int count) override;
     void addCellsVector(const TextLine& cells) override;
     void addLine(bool previousWrapped = false) override;
 
-    void setMaxNbLines(unsigned int nbLines);
+    void setMaxNbLines(unsigned int lineCount);
 
 private:
     bool hasDifferentColors(const TextLine& line) const;
@@ -375,7 +375,7 @@ protected:
 class KONSOLEPRIVATE_EXPORT CompactHistoryType : public HistoryType
 {
 public:
-    explicit CompactHistoryType(unsigned int size);
+    explicit CompactHistoryType(unsigned int nbLines);
 
     bool isEnabled() const override;
     int maximumLineCount() const override;

@@ -108,7 +108,7 @@ protected slots:
      *
      * @param session The Session which has finished executing.
      */
-    void sessionTerminated(QObject* session);
+    void sessionTerminated(QObject* sessionObject);
 
 private slots:
     void sessionProfileCommandReceived(const QString& text);

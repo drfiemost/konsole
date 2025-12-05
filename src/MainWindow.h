@@ -105,8 +105,8 @@ public:
 
     void setNavigationVisibility(int visibility);
     void setNavigationPosition(int position);
-    void setNavigationStyleSheet(const QString& stylesheet);
-    void setNavigationStyleSheetFromFile(const KUrl& stylesheetfile);
+    void setNavigationStyleSheet(const QString& styleSheet);
+    void setNavigationStyleSheetFromFile(const KUrl& styleSheetFile);
     void setNavigationBehavior(int behavior);
     void setShowQuickButtons(bool show);
 
@@ -157,7 +157,7 @@ private slots:
     void disconnectController(SessionController* controller);
     void activeViewTitleChanged(ViewProperties*);
 
-    void profileListChanged(const QList<QAction*>& actions);
+    void profileListChanged(const QList<QAction*>& sessionActions);
     void configureNotifications();
 
     void updateWindowIcon();

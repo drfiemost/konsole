@@ -621,10 +621,10 @@ private:
     //
     //NOTE: moveImage() can only move whole lines
     void moveImage(int dest, int sourceBegin, int sourceEnd);
-    // scroll up 'i' lines in current region, clearing the bottom 'i' lines
-    void scrollUp(int from, int i);
-    // scroll down 'i' lines in current region, clearing the top 'i' lines
-    void scrollDown(int from, int i);
+    // scroll up 'n' lines in current region, clearing the bottom 'n' lines
+    void scrollUp(int from, int n);
+    // scroll down 'n' lines in current region, clearing the top 'n' lines
+    void scrollDown(int from, int n);
 
     //when we handle scroll commands, we need to know which screenwindow will scroll
     TerminalDisplay* _currentTerminalDisplay;

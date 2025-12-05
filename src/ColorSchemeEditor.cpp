@@ -183,13 +183,13 @@ void ColorSchemeEditor::wallpaperPathChanged(const QString& path)
             _colors->setWallpaper(path);
     }
 }
-void ColorSchemeEditor::setDescription(const QString& text)
+void ColorSchemeEditor::setDescription(const QString& description)
 {
     if (_colors)
-        _colors->setDescription(text);
+        _colors->setDescription(description);
 
-    if (_ui->descriptionEdit->text() != text)
-        _ui->descriptionEdit->setText(text);
+    if (_ui->descriptionEdit->text() != description)
+        _ui->descriptionEdit->setText(description);
 }
 void ColorSchemeEditor::setTransparencyPercentLabel(int percent)
 {
@@ -198,9 +198,9 @@ void ColorSchemeEditor::setTransparencyPercentLabel(int percent)
     const qreal opacity = (100.0 - percent) / 100.0;
     _colors->setOpacity(opacity);
 }
-void ColorSchemeEditor::setRandomizedBackgroundColor(bool randomize)
+void ColorSchemeEditor::setRandomizedBackgroundColor(bool randomized)
 {
-    _colors->setRandomizedBackgroundColor(randomize);
+    _colors->setRandomizedBackgroundColor(randomized);
 }
 void ColorSchemeEditor::setup(const ColorScheme* scheme, bool isNewScheme)
 {
