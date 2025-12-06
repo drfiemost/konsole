@@ -39,15 +39,18 @@ using namespace Konsole;
 // FIXME: A dup line from Profile.cpp - redo these
 static const char GENERAL_GROUP[]     = "General";
 
+ProfileWriter::ProfileWriter() = default;
+ProfileWriter::~ProfileWriter() = default;
+
 // All profiles changes are stored under users' local account
-QString KDE4ProfileWriter::getPath(const Profile::Ptr profile)
+QString ProfileWriter::getPath(const Profile::Ptr profile)
 {
     // If any changes are made to this location, check that programs using
     // the Konsole part can write/save profiles
     static const QString localDataLocation = KStandardDirs::locateLocal("data", QStringLiteral("/konsole"));
     return localDataLocation % QLatin1String("/") % profile->untranslatedName() % QLatin1String(".profile");
 }
-void KDE4ProfileWriter::writeProperties(KConfig& config,
+void ProfileWriter::writeProperties(KConfig& config,
                                         const Profile::Ptr profile,
                                         const Profile::PropertyInfo* properties)
 {
@@ -69,7 +72,7 @@ void KDE4ProfileWriter::writeProperties(KConfig& config,
         properties++;
     }
 }
-bool KDE4ProfileWriter::writeProfile(const QString& path , const Profile::Ptr profile)
+bool ProfileWriter::writeProfile(const QString& path , const Profile::Ptr profile)
 {
     KConfig config(path, KConfig::NoGlobals);
 
@@ -94,4 +97,3 @@ bool KDE4ProfileWriter::writeProfile(const QString& path , const Profile::Ptr pr
 
     return true;
 }
-

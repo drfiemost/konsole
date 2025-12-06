@@ -39,12 +39,15 @@ using namespace Konsole;
 // FIXME: A dup line from Profile.cpp - redo these
 static const char GENERAL_GROUP[]     = "General";
 
-QStringList KDE4ProfileReader::findProfiles()
+ProfileReader::ProfileReader() = default;
+ProfileReader::~ProfileReader() = default;
+
+QStringList ProfileReader::findProfiles()
 {
     return KGlobal::dirs()->findAllResources("data", QStringLiteral("konsole/*.profile"),
             KStandardDirs::NoDuplicates);
 }
-void KDE4ProfileReader::readProperties(const KConfig& config, Profile::Ptr profile,
+void ProfileReader::readProperties(const KConfig& config, Profile::Ptr profile,
                                        const Profile::PropertyInfo* properties)
 {
     const char* groupName = nullptr;
@@ -68,7 +71,7 @@ void KDE4ProfileReader::readProperties(const KConfig& config, Profile::Ptr profi
     }
 }
 
-bool KDE4ProfileReader::readProfile(const QString& path , Profile::Ptr profile , QString& parentProfile)
+bool ProfileReader::readProfile(const QString& path , Profile::Ptr profile , QString& parentProfile)
 {
     if (!QFile::exists(path))
         return false;

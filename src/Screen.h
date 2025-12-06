@@ -75,6 +75,15 @@ class HistoryScroll;
 class Screen
 {
 public:
+    /* PlainText: Return plain text (default)
+     * ConvertToHtml: Specifies if returned text should have HTML tags.
+     * PreserveLineBreaks: Specifies whether new line characters should be
+     *      inserted into the returned text at the end of each terminal line.
+     * TrimLeadingWhitespace: Specifies whether leading spaces should be
+     *      trimmed in the returned text.
+     * TrimTrailingWhitespace: Specifies whether trailing spaces should be
+     *      trimmed in the returned text.
+     */
     enum DecodingOption {
         PlainText = 0x0,
         ConvertToHtml = 0x1,
@@ -443,12 +452,7 @@ public:
 
     /**
      * Convenience method.  Returns the currently selected text.
-     * @param preserveLineBreaks Specifies whether new line characters should
-     * be inserted into the returned text at the end of each terminal line.
-     * @param trimTrailingSpaces Specifies whether trailing spaces should be
-     * trimmed in the returned text.
-     * @param trimLeadingSpaces Specifies whether leading spaces should be
-     * trimmed in the returned text.
+     * @param options See Screen::DecodingOptions
      */
     QString selectedText(const DecodingOptions options) const;
 
@@ -456,12 +460,7 @@ public:
      * Convenience method.  Returns the text between two indices.
      * @param startIndex Specifies the starting text index
      * @param endIndex Specifies the ending text index
-     * @param preserveLineBreaks Specifies whether new line characters should
-     * be inserted into the returned text at the end of each terminal line.
-     * @param trimTrailingSpaces Specifies whether trailing spaces should be
-     * trimmed in the returned text.
-     * @param trimLeadingSpaces Specifies whether leading spaces should be
-     * trimmed in the returned text.
+     * @param options See Screen::DecodingOptions
      */
     QString text(int startIndex, int endIndex, const DecodingOptions options) const;
 
@@ -481,12 +480,7 @@ public:
      * @param decoder A decoder which converts terminal characters into text.
      * PlainTextDecoder is the most commonly used decoder which converts characters
      * into plain text with no formatting.
-     * @param preserveLineBreaks Specifies whether new line characters should
-     * be inserted into the returned text at the end of each terminal line.
-     * @param trimTrailingSpaces Specifies whether trailing spaces should be
-     * trimmed in the returned text.
-     * @param trimLeadingSpaces Specifies whether leading spaces should be
-     * trimmed in the returned text.
+     * @param options See Screen::DecodingOptions
      */
     void writeSelectionToStream(TerminalCharacterDecoder* decoder ,
                                 const Konsole::Screen::DecodingOptions options) const;

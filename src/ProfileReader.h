@@ -29,14 +29,14 @@ class KConfig;
 namespace Konsole
 {
 /** Interface for all classes which can load profile settings from a file. */
-class ProfileReader
+class KONSOLEPRIVATE_EXPORT ProfileReader
 {
 public:
-    virtual ~ProfileReader() {}
+    ProfileReader();
+    ~ProfileReader();
     /** Returns a list of paths to profiles which this reader can read. */
-    virtual QStringList findProfiles() {
-        return QStringList();
-    }
+    QStringList findProfiles();
+
     /**
      * Attempts to read a profile from @p path and
      * save the property values described into @p profile.
@@ -47,15 +47,8 @@ public:
      * @param profile Pointer to the Profile the settings will be read into
      * @param parentProfile Receives the name of the parent profile
      */
-    virtual bool readProfile(const QString& path , Profile::Ptr profile , QString& parentProfile) = 0;
-};
+    bool readProfile(const QString &path, Profile::Ptr profile, QString &parentProfile);
 
-/** Reads a KDE 4 .profile file. */
-class KDE4ProfileReader : public ProfileReader
-{
-public:
-    virtual QStringList findProfiles();
-    virtual bool readProfile(const QString& path , Profile::Ptr profile, QString& parentProfile);
 private:
     void readProperties(const KConfig& config, Profile::Ptr profile,
                         const Profile::PropertyInfo* properties);

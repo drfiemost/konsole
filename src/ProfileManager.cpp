@@ -177,7 +177,7 @@ Profile::Ptr ProfileManager::loadProfile(const QString& shortPath)
     }
 
     // load the profile
-    ProfileReader* reader = new KDE4ProfileReader;
+    auto reader = new ProfileReader;
 
     Profile::Ptr newProfile = Profile::Ptr(new Profile(fallbackProfile()));
     newProfile->setProperty(Profile::Path, path);
@@ -205,13 +205,14 @@ Profile::Ptr ProfileManager::loadProfile(const QString& shortPath)
 }
 QStringList ProfileManager::availableProfilePaths() const
 {
-    KDE4ProfileReader kde4Reader;
+    auto reader = new ProfileReader();
 
     QStringList paths;
-    paths += kde4Reader.findProfiles();
+    paths += reader->findProfiles();
 
     std::stable_sort(paths.begin(), paths.end(), stringLessThan);
 
+    delete reader;
     return paths;
 }
 
@@ -332,7 +333,7 @@ Profile::Ptr ProfileManager::fallbackProfile() const
 
 QString ProfileManager::saveProfile(Profile::Ptr profile)
 {
-    ProfileWriter* writer = new KDE4ProfileWriter;
+    auto writer = new ProfileWriter;
 
     QString newPath = writer->getPath(profile);
 
@@ -506,15 +507,18 @@ void ProfileManager::setDefaultProfile(Profile::Ptr profile)
 void ProfileManager::saveDefaultProfile()
 {
     QString path = _defaultProfile->path();
+    auto writer = new ProfileWriter();
 
     if (path.isEmpty())
-        path = KDE4ProfileWriter().getPath(_defaultProfile);
+        path = writer->getPath(_defaultProfile);
 
     QFileInfo fileInfo(path);
 
     KSharedConfigPtr appConfig = KGlobal::config();
     KConfigGroup group = appConfig->group("Desktop Entry");
     group.writeEntry("DefaultProfile", fileInfo.fileName());
+
+    delete writer;
 }
 
 QSet<Profile::Ptr> ProfileManager::findFavorites()

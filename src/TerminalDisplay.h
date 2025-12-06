@@ -399,7 +399,7 @@ public slots:
      * view area - since the program running in the terminal is being allowed to handle normal mouse
      * events itself.
      *
-     * @param usesMouse Set to true if the program running in the terminal is interested in mouse events
+     * @param on Set to true if the program running in the terminal is interested in mouse events
      * or false otherwise.
      */
     void setUsesMouse(bool on);

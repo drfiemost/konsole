@@ -188,8 +188,8 @@ void ProfileTest::testProfileFileNames()
 {
     Profile::Ptr profile = Profile::Ptr(new Profile);
     QFileInfo fileInfo;
-    ProfileWriter* writer = new KDE4ProfileWriter;
-  
+    auto writer = new ProfileWriter;
+
     profile->setProperty(Profile::UntranslatedName, QStringLiteral("Indiana"));
     fileInfo.setFile(writer->getPath(profile));
     QCOMPARE(fileInfo.fileName(), QStringLiteral("Indiana.profile"));
