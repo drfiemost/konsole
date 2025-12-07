@@ -359,7 +359,7 @@ public:
      * is inserted at the current cursor position, otherwise it will replace the
      * character already at the current cursor position.
      */
-    void displayCharacter(unsigned short c);
+    void displayCharacter(uint c);
 
     /**
      * Resizes the image to a new fixed size of @p new_lines by @p new_columns.
@@ -575,8 +575,8 @@ public:
         return _currentTerminalDisplay;
     }
 
-    QSet<ushort> usedExtendedChars() const {
-        QSet<ushort> result;
+    QSet<uint> usedExtendedChars() const {
+        QSet<uint> result;
         for (int i = 0; i < _lines; ++i) {
             const ImageLine& il = _screenLines[i];
             for (int j = 0; j < il.length(); ++j) {
@@ -720,7 +720,7 @@ private:
     int _lastPos;
 
     // used in REP (repeating char)
-    unsigned short _lastDrawnChar;
+    quint32 _lastDrawnChar;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Screen::DecodingOptions)

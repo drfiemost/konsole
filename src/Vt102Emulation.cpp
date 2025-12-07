@@ -338,7 +338,7 @@ constexpr int DEL = 127;
 constexpr int SP  = 32;
 
 // process an incoming unicode character
-void Vt102Emulation::receiveChar(int cc)
+void Vt102Emulation::receiveChar(uint cc)
 {
   if (cc == DEL)
     return; //VT100: ignore.
@@ -1119,19 +1119,23 @@ void Vt102Emulation::sendKeyEvent(QKeyEvent* event)
 
             if (entry.command() & KeyboardTranslator::EraseCommand) {
                 textToSend += eraseChar();
-            } else if (entry.command() & KeyboardTranslator::ScrollPageUpCommand)
-                currentView->scrollScreenWindow(ScreenWindow::ScrollPages, -1);
-            else if (entry.command() & KeyboardTranslator::ScrollPageDownCommand)
-                currentView->scrollScreenWindow(ScreenWindow::ScrollPages, 1);
-            else if (entry.command() & KeyboardTranslator::ScrollLineUpCommand)
-                currentView->scrollScreenWindow(ScreenWindow::ScrollLines, -1);
-            else if (entry.command() & KeyboardTranslator::ScrollLineDownCommand)
-                currentView->scrollScreenWindow(ScreenWindow::ScrollLines, 1);
-            else if (entry.command() & KeyboardTranslator::ScrollUpToTopCommand)
-                currentView->scrollScreenWindow(ScreenWindow::ScrollLines,
-                                                - currentView->screenWindow()->currentLine());
-            else if (entry.command() & KeyboardTranslator::ScrollDownToBottomCommand)
-                currentView->scrollScreenWindow(ScreenWindow::ScrollLines, lineCount());
+            }
+            if (currentView != nullptr) {
+                if ((entry.command() & KeyboardTranslator::ScrollPageUpCommand) != 0) {
+                    currentView->scrollScreenWindow(ScreenWindow::ScrollPages, -1);
+                } else if ((entry.command() & KeyboardTranslator::ScrollPageDownCommand) != 0) {
+                    currentView->scrollScreenWindow(ScreenWindow::ScrollPages, 1);
+                } else if ((entry.command() & KeyboardTranslator::ScrollLineUpCommand) != 0) {
+                    currentView->scrollScreenWindow(ScreenWindow::ScrollLines, -1);
+                } else if ((entry.command() & KeyboardTranslator::ScrollLineDownCommand) != 0) {
+                    currentView->scrollScreenWindow(ScreenWindow::ScrollLines, 1);
+                } else if ((entry.command() & KeyboardTranslator::ScrollUpToTopCommand) != 0) {
+                    currentView->scrollScreenWindow(ScreenWindow::ScrollLines,
+                                                    - currentView->screenWindow()->currentLine());
+                } else if ((entry.command() & KeyboardTranslator::ScrollDownToBottomCommand) != 0) {
+                    currentView->scrollScreenWindow(ScreenWindow::ScrollLines, lineCount());
+                }
+            }
         }
         else if (!entry.text().isEmpty())
         {
@@ -1183,7 +1187,7 @@ void Vt102Emulation::sendKeyEvent(QKeyEvent* event)
 
 // Apply current character map.
 
-unsigned short Vt102Emulation::applyCharset(unsigned short c)
+unsigned int Vt102Emulation::applyCharset(uint c)
 {
     if (CHARSET.graphic && 0x5f <= c && c <= 0x7e) return vt100_graphics[c - 0x5f];
     if (CHARSET.pound && c == '#') return 0xa3;  //This mode is obsolete

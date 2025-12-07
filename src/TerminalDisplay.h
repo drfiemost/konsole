@@ -692,6 +692,8 @@ private:
     // Uses the current settings for trimming whitespace and preserving linebreaks to create a proper flag value for Screen
     Screen::DecodingOptions currentDecodingOptions();
 
+    int loc(int x, int y) const;
+
     // the window onto the terminal screen which this display
     // is currently showing.
     QPointer<ScreenWindow> _screenWindow;

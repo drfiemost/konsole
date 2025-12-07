@@ -77,10 +77,6 @@
 
 using namespace Konsole;
 
-#ifndef loc
-#define loc(X,Y) ((Y)*_columns+(X))
-#endif
-
 #define REPCHAR   "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
     "abcdefgjijklmnopqrstuvwxyz" \
     "0123456789./+@"
@@ -88,6 +84,17 @@ using namespace Konsole;
 // we use this to force QPainter to display text in LTR mode
 // more information can be found in: http://unicode.org/reports/tr9/
 const QChar LTR_OVERRIDE_CHAR(0x202D);
+
+inline int TerminalDisplay::loc(int x, int y) const {
+    Q_ASSERT(_lines > 0);
+    Q_ASSERT(_columns > 0);
+    Q_ASSERT(y >= 0 && y < _lines);
+    Q_ASSERT(x >= 0 && x < _columns);
+    x = std::clamp(x, 0, _columns - 1);
+    y = std::clamp(y, 0, _lines - 1);
+
+    return y * _columns + x;
+}
 
 /* ------------------------------------------------------------------------- */
 /*                                                                           */
@@ -1479,12 +1486,12 @@ void TerminalDisplay::paintFilters(QPainter& painter)
 }
 
 inline static bool isRtl(const Character &chr) {
-    ushort c = 0;
+    uint c = 0;
     if ((chr.rendition & RE_EXTENDED_CHAR) == 0) {
         c = chr.character;
     } else {
         ushort extendedCharLength = 0;
-        const ushort* chars = ExtendedCharTable::instance.lookupExtendedChar(chr.character, extendedCharLength);
+        const uint* chars = ExtendedCharTable::instance.lookupExtendedChar(chr.character, extendedCharLength);
         if (chars != nullptr) {
             c = chars[0];
         }
@@ -1514,8 +1521,8 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
     const int rly = std::min(_usedLines - 1,  std::max(0, (rect.bottom() - tLy - _contentRect.top()) / _fontHeight));
 
     const int numberOfColumns = _usedColumns;
-    QString unistr;
-    unistr.reserve(numberOfColumns);
+    QVector<uint> univec;
+    univec.reserve(numberOfColumns);
     for (int y = luy; y <= rly; y++) {
         int x = lux;
         if (!_image[loc(lux, y)].character && x)
@@ -1526,19 +1533,19 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
 
             // reset our buffer to the number of columns
             int bufferSize = numberOfColumns;
-            unistr.resize(bufferSize);
-            QChar *disstrU = unistr.data();
+            univec.resize(bufferSize);
+            uint *disstrU = univec.data();
 
             // is this a single character or a sequence of characters ?
             if (_image[loc(x, y)].rendition & RE_EXTENDED_CHAR) {
                 // sequence of characters
                 ushort extendedCharLength = 0;
-                const ushort* chars = ExtendedCharTable::instance.lookupExtendedChar(_image[loc(x, y)].character, extendedCharLength);
+                const uint* chars = ExtendedCharTable::instance.lookupExtendedChar(_image[loc(x, y)].character, extendedCharLength);
                 if (chars) {
                     Q_ASSERT(extendedCharLength > 1);
                     bufferSize += extendedCharLength - 1;
-                    unistr.resize(bufferSize);
-                    disstrU = unistr.data();
+                    univec.resize(bufferSize);
+                    disstrU = univec.data();
                     for (int index = 0 ; index < extendedCharLength ; index++) {
                         Q_ASSERT(p < bufferSize);
                         disstrU[p++] = chars[index];
@@ -1546,10 +1553,10 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
                 }
             } else {
                 // single character
-                const quint16 c = _image[loc(x, y)].character;
+                const uint c = _image[loc(x, y)].character;
                 if (c) {
                     Q_ASSERT(p < bufferSize);
-                    disstrU[p++] = c; //fontMap(c);
+                    disstrU[p++] = c;
                 }
             }
 
@@ -1568,16 +1575,16 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
                         (_image[ std::min(loc(x + len, y) + 1, _imageSize - 1) ].character == 0) == doubleWidth &&
                         _image[loc(x + len, y)].isLineChar() == lineDraw &&
                         (_image[loc(x + len, y)].character <= 0x7e || rtl)) {
-                    const quint16 c = _image[loc(x + len, y)].character;
+                    const uint c = _image[loc(x + len, y)].character;
                     if ((_image[loc(x + len, y)].rendition & RE_EXTENDED_CHAR) != 0) {
                         // sequence of characters
                         ushort extendedCharLength = 0;
-                        const ushort* chars = ExtendedCharTable::instance.lookupExtendedChar(c, extendedCharLength);
+                        const uint* chars = ExtendedCharTable::instance.lookupExtendedChar(c, extendedCharLength);
                         if (chars != nullptr) {
                             Q_ASSERT(extendedCharLength > 1);
                             bufferSize += extendedCharLength - 1;
-                            unistr.resize(bufferSize);
-                            disstrU = unistr.data();
+                            univec.resize(bufferSize);
+                            disstrU = univec.data();
                             for (int index = 0 ; index < extendedCharLength ; index++) {
                                 Q_ASSERT(p < bufferSize);
                                 disstrU[p++] = chars[index];
@@ -1587,7 +1594,7 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
                         // single character
                         if (c != 0u) {
                             Q_ASSERT(p < bufferSize);
-                            disstrU[p++] = c; //fontMap(c);
+                            disstrU[p++] = c;
                         }
                     }
 
@@ -1605,7 +1612,7 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
                 _fixedFont = false;
             if (doubleWidth)
                 _fixedFont = false;
-            unistr.resize(p);
+            univec.resize(p);
 
             // Create a text scaling matrix for double width and double height lines.
             QMatrix textScale;
@@ -1631,6 +1638,8 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
             //painting does actually start from textArea.topLeft()
             //(instead of textArea.topLeft() * painter-scale)
             textArea.moveTopLeft(textScale.inverted().map(textArea.topLeft()));
+
+            QString unistr = QString::fromUcs4(univec.data(), univec.length());
 
             //paint text fragment
             if (_printerFriendly) {
@@ -2311,7 +2320,7 @@ void TerminalDisplay::extendSelection(const QPoint& position)
 
         // Find left (left_not_right ? from start : from here)
         QPoint right = left_not_right ? _iPntSelCorr : here;
-        i = loc(std::clamp(left.x(), 0, _columns - 1), std::clamp(left.y(), 0, _lines - 1));
+        i = loc(std::clamp(right.x(), 0, _columns - 1), std::clamp(right.y(), 0, _lines - 1));
         if (i >= 0 && i < _imageSize) {
             selClass = charClass(_image[std::min(i, _imageSize - 1)]);
             selClass = charClass(_image[i]);
@@ -2928,9 +2937,9 @@ QChar TerminalDisplay::charClass(const Character& ch) const
 {
     if (ch.rendition & RE_EXTENDED_CHAR) {
         ushort extendedCharLength = 0;
-        const ushort* chars = ExtendedCharTable::instance.lookupExtendedChar(ch.character, extendedCharLength);
+        const uint* chars = ExtendedCharTable::instance.lookupExtendedChar(ch.character, extendedCharLength);
         if (chars && extendedCharLength > 0) {
-            const QString s = QString::fromUtf16(chars, extendedCharLength);
+            const QString s = QString::fromUcs4(chars, extendedCharLength);
             if (_wordCharacters.contains(s, Qt::CaseInsensitive))
                 return QLatin1Char('a');
             bool letterOrNumber = false;

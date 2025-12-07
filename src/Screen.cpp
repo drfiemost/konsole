@@ -482,8 +482,9 @@ void Screen::getImage(Character* dest, int size, int startLine, int endLine) con
             reverseRendition(dest[i]); // for reverse display
     }
 
+    int visX = std::min(_cuX, _columns - 1);
     // mark the character at the current cursor position
-    int cursorIndex = loc(_cuX, _cuY + linesInHistoryBuffer);
+    int cursorIndex = loc(visX, _cuY + linesInHistoryBuffer);
     if (getMode(MODE_Cursor) && cursorIndex < _columns * mergedLines)
         dest[cursorIndex].rendition |= RE_CURSOR;
 }
@@ -625,7 +626,7 @@ void Screen::checkSelection(int from, int to)
         clearSelection();
 }
 
-void Screen::displayCharacter(unsigned short c)
+void Screen::displayCharacter(uint c)
 {
     // Note that VT100 does wrapping BEFORE putting the character.
     // This has impact on the assumption of valid cursor positions.
@@ -638,8 +639,8 @@ void Screen::displayCharacter(unsigned short c)
         // Non-printable character
         return;
     } else if (w == 0) {
-        const QChar::Category category = QChar(c).category();
-        if (category != QChar::Mark_NonSpacing && category != QChar::Letter_Other && !QChar::isLowSurrogate(c)) {
+        const QChar::Category category = QChar::category(c);
+        if (category != QChar::Mark_NonSpacing && category != QChar::Letter_Other) {
             return;
         }
         // Find previous "real character" to try to combine with
@@ -663,18 +664,18 @@ void Screen::displayCharacter(unsigned short c)
 
         Character& currentChar = _screenLines[charToCombineWithY][charToCombineWithX];
         if ((currentChar.rendition & RE_EXTENDED_CHAR) == 0) {
-            const ushort chars[2] = { currentChar.character, c };
+            const uint chars[2] = { currentChar.character, c };
             currentChar.rendition |= RE_EXTENDED_CHAR;
             currentChar.character = ExtendedCharTable::instance.createExtendedChar(chars, 2);
         } else {
             ushort extendedCharLength;
-            const ushort* oldChars = ExtendedCharTable::instance.lookupExtendedChar(currentChar.character, extendedCharLength);
+            const uint* oldChars = ExtendedCharTable::instance.lookupExtendedChar(currentChar.character, extendedCharLength);
             Q_ASSERT(oldChars);
             if ((oldChars) && extendedCharLength < 3) {
                 Q_ASSERT(extendedCharLength > 1);
                 Q_ASSERT(extendedCharLength < 65535);
-                ushort* chars = new ushort[extendedCharLength + 1];
-                memcpy(chars, oldChars, sizeof(ushort) * extendedCharLength);
+                auto chars = new uint[extendedCharLength + 1];
+                std::memcpy(chars, oldChars, sizeof(uint) * extendedCharLength);
                 chars[extendedCharLength] = c;
                 currentChar.character = ExtendedCharTable::instance.createExtendedChar(chars, extendedCharLength + 1);
                 delete[] chars;
@@ -688,7 +689,7 @@ void Screen::displayCharacter(unsigned short c)
             _lineProperties[_cuY] = static_cast<LineProperty>(_lineProperties[_cuY] | LINE_WRAPPED);
             nextLine();
         } else {
-            _cuX = _columns - w;
+            _cuX = std::max(_columns - w, 0);
         }
     }
 
@@ -828,7 +829,7 @@ void Screen::toStartOfLine()
 
 int Screen::getCursorX() const
 {
-    return _cuX;
+    return std::min(_cuX, _columns - 1);
 }
 
 int Screen::getCursorY() const
@@ -849,7 +850,7 @@ void Screen::clearImage(int loca, int loce, char c)
     const int topLine = loca / _columns;
     const int bottomLine = loce / _columns;
 
-    Character clearCh(c, _currentForeground, _currentBackground, DEFAULT_RENDITION, false);
+    Character clearCh(uint(c), _currentForeground, _currentBackground, DEFAULT_RENDITION, false);
 
     //if the character being used to clear the area is the same as the
     //default character, the affected _lines can simply be shrunk.
@@ -1007,7 +1008,7 @@ void Screen::setDefaultRendition()
 
 void Screen::setForeColor(int space, int color)
 {
-    _currentForeground = CharacterColor(space, color);
+    _currentForeground = CharacterColor(quint8(space), color);
 
     if (_currentForeground.isValid())
         updateEffectiveRendition();
@@ -1017,7 +1018,7 @@ void Screen::setForeColor(int space, int color)
 
 void Screen::setBackColor(int space, int color)
 {
-    _currentBackground = CharacterColor(space, color);
+    _currentBackground = CharacterColor(quint8(space), color);
 
     if (_currentBackground.isValid())
         updateEffectiveRendition();

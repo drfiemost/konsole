@@ -282,7 +282,7 @@ protected:
     CompactHistoryBlockList& _blockListRef;
     CharacterFormat* _formatArray;
     quint16 _length;
-    quint16* _text;
+    uint*   _text;
     quint16 _formatLength;
     bool _wrapped;
 };
