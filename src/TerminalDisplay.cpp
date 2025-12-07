@@ -723,34 +723,26 @@ void TerminalDisplay::drawBackground(QPainter& painter, const QRect& rect, const
     // brush from the scroll-bar's palette, to give the effect of the scroll-bar
     // being outside of the terminal display and visual consistency with other KDE
     // applications.
-    //
-    QRect scrollBarArea = _scrollBar->isVisible() ?
-                          rect.intersected(_scrollBar->geometry()) :
-                          QRect();
-    QRegion contentsRegion = QRegion(rect).subtracted(scrollBarArea);
-    QRect contentsRect = contentsRegion.boundingRect();
 
     if (useOpacitySetting && !_wallpaper->isNull() &&
-            _wallpaper->draw(painter, contentsRect, _opacity)) {
+            _wallpaper->draw(painter, rect, _opacity)) {
     } else if (qAlpha(_blendColor) < 0xff && useOpacitySetting) {
 #if defined(Q_OS_MAC)
         // TODO - On MacOS, using CompositionMode doesn't work.  Altering the
         //        transparency in the color scheme alters the brightness.
-        painter.fillRect(contentsRect, backgroundColor);
+        painter.fillRect(rect, backgroundColor);
 #else
         QColor color(backgroundColor);
         color.setAlpha(qAlpha(_blendColor));
 
         painter.save();
         painter.setCompositionMode(QPainter::CompositionMode_Source);
-        painter.fillRect(contentsRect, color);
+        painter.fillRect(rect, color);
         painter.restore();
 #endif
     } else {
-        painter.fillRect(contentsRect, backgroundColor);
+        painter.fillRect(rect, backgroundColor);
     }
-
-    painter.fillRect(scrollBarArea, _scrollBar->palette().background());
 }
 
 void TerminalDisplay::drawCursor(QPainter& painter,
@@ -857,11 +849,13 @@ void TerminalDisplay::drawCharacters(QPainter& painter,
         // This still allows RTL characters to be rendered in the RTL way.
         painter.setLayoutDirection(Qt::LeftToRight);
 
+        painter.setClipRect(rect);
         if (_bidiEnabled) {
             painter.drawText(rect.x(), rect.y() + _fontAscent + _lineSpacing, text);
         } else {
             painter.drawText(rect.x(), rect.y() + _fontAscent + _lineSpacing, LTR_OVERRIDE_CHAR + text);
         }
+        painter.setClipping(false);
     }
 }
 
@@ -1497,38 +1491,42 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
             const CharacterColor currentBackground = _image[loc(x, y)].backgroundColor;
             const RenditionFlags currentRendition = _image[loc(x, y)].rendition;
 
-            while (x + len <= rlx &&
-                    _image[loc(x + len, y)].foregroundColor == currentForeground &&
-                    _image[loc(x + len, y)].backgroundColor == currentBackground &&
-                    (_image[loc(x + len, y)].rendition & ~RE_EXTENDED_CHAR) == (currentRendition & ~RE_EXTENDED_CHAR) &&
-                    (_image[ std::min(loc(x + len, y) + 1, _imageSize) ].character == 0) == doubleWidth &&
-                    _image[loc(x + len, y)].isLineChar() == lineDraw) {
-                const quint16 c = _image[loc(x + len, y)].character;
-                if (_image[loc(x + len, y)].rendition & RE_EXTENDED_CHAR) {
-                    // sequence of characters
-                    ushort extendedCharLength = 0;
-                    const ushort* chars = ExtendedCharTable::instance.lookupExtendedChar(c, extendedCharLength);
-                    if (chars) {
-                        Q_ASSERT(extendedCharLength > 1);
-                        bufferSize += extendedCharLength - 1;
-                        unistr.resize(bufferSize);
-                        disstrU = unistr.data();
-                        for (int index = 0 ; index < extendedCharLength ; index++) {
+           if(_image[loc(x, y)].character <= 0x7e) {
+                while (x + len <= rlx &&
+                        _image[loc(x + len, y)].foregroundColor == currentForeground &&
+                        _image[loc(x + len, y)].backgroundColor == currentBackground &&
+                        (_image[loc(x + len, y)].rendition & ~RE_EXTENDED_CHAR) == (currentRendition & ~RE_EXTENDED_CHAR) &&
+                        (_image[ std::min(loc(x + len, y) + 1, _imageSize) ].character == 0) == doubleWidth &&
+                        _image[loc(x + len, y)].isLineChar() == lineDraw &&
+                        _image[loc(x + len, y)].character <= 0x7e) {
+                    const quint16 c = _image[loc(x + len, y)].character;
+                    if ((_image[loc(x + len, y)].rendition & RE_EXTENDED_CHAR) != 0) {
+                        // sequence of characters
+                        ushort extendedCharLength = 0;
+                        const ushort* chars = ExtendedCharTable::instance.lookupExtendedChar(c, extendedCharLength);
+                        if (chars != nullptr) {
+                            Q_ASSERT(extendedCharLength > 1);
+                            bufferSize += extendedCharLength - 1;
+                            unistr.resize(bufferSize);
+                            disstrU = unistr.data();
+                            for (int index = 0 ; index < extendedCharLength ; index++) {
+                                Q_ASSERT(p < bufferSize);
+                                disstrU[p++] = chars[index];
+                            }
+                        }
+                    } else {
+                        // single character
+                        if (c != 0u) {
                             Q_ASSERT(p < bufferSize);
-                            disstrU[p++] = chars[index];
+                            disstrU[p++] = c; //fontMap(c);
                         }
                     }
-                } else {
-                    // single character
-                    if (c) {
-                        Q_ASSERT(p < bufferSize);
-                        disstrU[p++] = c; //fontMap(c);
-                    }
-                }
 
-                if (doubleWidth) // assert((_image[loc(x+len,y)+1].character == 0)), see above if condition
-                    len++; // Skip trailing part of multi-column character
-                len++;
+                    if (doubleWidth) { // assert((_image[loc(x+len,y)+1].character == 0)), see above if condition
+                        len++; // Skip trailing part of multi-column character
+                    }
+                    len++;
+                }
             }
             if ((x + len < _usedColumns) && (!_image[loc(x + len, y)].character))
                 len++; // Adjust for trailing part of multi-column character
