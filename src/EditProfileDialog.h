@@ -33,6 +33,7 @@
 #include "Enumeration.h"
 #include "ColorScheme.h"
 #include "ColorSchemeEditor.h"
+#include "KeyboardTranslatorManager.h"
 
 class QAbstractButton;
 class QItemSelectionModel;
@@ -163,6 +164,7 @@ private slots:
     void newKeyBinding();
     void keyBindingSelected();
     void removeKeyBinding();
+    void resetKeyBindings();
 
     // mouse page
     void toggleUnderlineLinks(bool);
@@ -214,12 +216,18 @@ private:
     void updateColorSchemeList(const QString &selectedColorSchemeName = QString());
 
     void updateColorSchemeButtons();
-    void updateKeyBindingsList(bool selectCurrentTranslator = false);
+
+    // Convenience method
+    KeyboardTranslatorManager *_keyManager = KeyboardTranslatorManager::instance();
+
+    // Updates the key bindings list widget on the Keyboard tab and selects
+    // @p selectTranslatorName
+    void updateKeyBindingsList(const QString &selectTranslatorName = QString());
     void updateKeyBindingsButtons();
+    void showKeyBindingEditor(bool isNewTranslator);
 
     void showColorSchemeEditor(bool isNewScheme);
     void closeColorSchemeEditor();
-    void showKeyBindingEditor(bool isNewTranslator);
 
     void preview(int property , const QVariant& value);
     void delayedPreview(int property , const QVariant& value);

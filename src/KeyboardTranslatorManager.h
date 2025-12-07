@@ -69,6 +69,29 @@ public:
      */
     bool deleteTranslator(const QString& name);
 
+    /**
+     * Checks whether a translator can be deleted or not (by checking if
+     * the directory containing the .keytab file is writable, because one
+     * can still delete a file owned by a different user if the directory
+     * containing it is writable for the current user).
+     */
+    bool isTranslatorDeletable(const QString &name) const;
+
+    /**
+     * Checks whether a translator can be reset to its default values.
+     * This is only applicable for translators that exist in two different
+     * locations:
+     *  - system-wide location which is read-only for the user (typically
+     *    /usr/share/konsole/ on Linux)
+     *  - writable user-specific location under the user's home directory
+     *    (typically ~/.local/share/konsole on Linux)
+     *
+     * Reseting here basically means it deletes the translator from the
+     * location under the user's home directory, then "reloads" it from
+     * the system-wide location.
+     */
+    bool isTranslatorResettable(const QString &name) const;
+
     /** Returns the default translator for Konsole. */
     const KeyboardTranslator* defaultTranslator();
 
@@ -86,10 +109,13 @@ public:
      * The first time this is called, a search for available
      * translators is started.
      */
-    QStringList allTranslators();
+    const QStringList allTranslators();
 
     /** Returns the global KeyboardTranslatorManager instance. */
     static KeyboardTranslatorManager* instance();
+
+    /** Returns the translator path */
+    const QString findTranslatorPath(const QString &name) const;
 
 private:
     void findTranslators(); // locate all available translators
@@ -99,7 +125,6 @@ private:
     KeyboardTranslator* loadTranslator(QIODevice* device, const QString& name);
 
     bool saveTranslator(const KeyboardTranslator* translator);
-    QString findTranslatorPath(const QString& name);
 
     bool _haveLoadedAll;
 

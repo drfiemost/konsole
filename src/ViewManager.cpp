@@ -614,22 +614,11 @@ void ViewManager::createView(Session* session)
 
 ViewContainer* ViewManager::createContainer()
 {
-    ViewContainer* container = nullptr;
-
-    switch (_navigationMethod) {
-    case TabbedNavigation: {
-        TabbedViewContainer* tabbedContainer = new TabbedViewContainer(_navigationPosition, this, _viewSplitter);
-        container = tabbedContainer;
-
-        connect(tabbedContainer, &TabbedViewContainer::detachTab,
-                this, &ViewManager::detachView);
-        connect(tabbedContainer, &TabbedViewContainer::closeTab,
-                this, &ViewManager::closeTabFromContainer);
-    }
-    break;
-    case NoNavigation:
-    default:
-        container = new StackedViewContainer(_viewSplitter);
+    auto *container = new TabbedViewContainer(_navigationPosition, this, _viewSplitter);
+    if (_navigationMethod == TabbedNavigation) {
+        connect(container, &TabbedViewContainer::detachTab, this, &ViewManager::detachView);
+        connect(container, &TabbedViewContainer::closeTab, this,
+                &ViewManager::closeTabFromContainer);
     }
 
     // FIXME: these code feels duplicated
@@ -663,6 +652,10 @@ ViewContainer* ViewManager::createContainer()
             this , &Konsole::ViewManager::containerMoveViewRequest);
     connect(container , &Konsole::ViewContainer::viewRemoved , this , &Konsole::ViewManager::viewDestroyed);
     connect(container , &Konsole::ViewContainer::activeViewChanged , this , &Konsole::ViewManager::viewActivated);
+
+    if (_navigationMethod != TabbedNavigation) {
+        container->setTabBarVisible(false);
+    }
 
     return container;
 }
@@ -930,7 +923,7 @@ void ViewManager::restoreSessions(const KConfigGroup& group)
 
 int ViewManager::sessionCount()
 {
-    return this->_sessionMap.size();
+    return _sessionMap.size();
 }
 
 int ViewManager::currentSession()
@@ -949,7 +942,7 @@ int ViewManager::newSession()
 
     session->addEnvironmentEntry(QStringLiteral("KONSOLE_DBUS_WINDOW=/Windows/%1").arg(managerId()));
 
-    this->createView(session);
+    createView(session);
     session->run();
 
     return session->sessionId();
@@ -971,7 +964,7 @@ int ViewManager::newSession(const QString &profile)
 
     session->addEnvironmentEntry(QStringLiteral("KONSOLE_DBUS_WINDOW=/Windows/%1").arg(managerId()));
 
-    this->createView(session);
+    createView(session);
     session->run();
 
     return session->sessionId();
@@ -994,7 +987,7 @@ int ViewManager::newSession(const QString&  profile, const QString&  directory)
 
     session->addEnvironmentEntry(QStringLiteral("KONSOLE_DBUS_WINDOW=/Windows/%1").arg(managerId()));
 
-    this->createView(session);
+    createView(session);
     session->run();
 
     return session->sessionId();
@@ -1012,22 +1005,22 @@ QStringList ViewManager::profileList()
 
 void ViewManager::nextSession()
 {
-    this->nextView();
+    nextView();
 }
 
 void ViewManager::prevSession()
 {
-    this->previousView();
+    previousView();
 }
 
 void ViewManager::moveSessionLeft()
 {
-    this->moveActiveViewLeft();
+    moveActiveViewLeft();
 }
 
 void ViewManager::moveSessionRight()
 {
-    this->moveActiveViewRight();
+    moveActiveViewRight();
 }
 
 void ViewManager::setTabWidthToText(bool useTextWidth)

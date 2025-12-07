@@ -976,12 +976,12 @@ void TerminalDisplay::scrollImage(int lines , const QRect& screenWindowRegion)
     // internal image - 2, so that the height of 'region' is strictly less
     // than the height of the internal image.
     QRect region = screenWindowRegion;
-    region.setBottom(std::min(region.bottom(), this->_lines - 2));
+    region.setBottom(std::min(region.bottom(), _lines - 2));
 
     // return if there is nothing to do
     if (!region.isValid()
             || (region.top() + abs(lines)) >= region.bottom()
-            || this->_lines <= region.height()) return;
+            || _lines <= region.height()) return;
 
     // hide terminal size label to prevent it being scrolled
     if (_resizeWidget && _resizeWidget->isVisible())
@@ -1007,12 +1007,12 @@ void TerminalDisplay::scrollImage(int lines , const QRect& screenWindowRegion)
         scrollRect.setLeft(0);
         scrollRect.setRight(width() - scrollBarWidth - SCROLLBAR_CONTENT_GAP);
     }
-    void* firstCharPos = &_image[ region.top() * this->_columns ];
-    void* lastCharPos = &_image[(region.top() + abs(lines)) * this->_columns ];
+    void* firstCharPos = &_image[ region.top() * _columns ];
+    void* lastCharPos = &_image[(region.top() + abs(lines)) * _columns ];
 
     const int top = _contentRect.top() + (region.top() * _fontHeight);
     const int linesToMove = region.height() - abs(lines);
-    const int bytesToMove = linesToMove * this->_columns * sizeof(Character);
+    const int bytesToMove = linesToMove * _columns * sizeof(Character);
 
     Q_ASSERT(linesToMove > 0);
     Q_ASSERT(bytesToMove > 0);
@@ -1021,9 +1021,9 @@ void TerminalDisplay::scrollImage(int lines , const QRect& screenWindowRegion)
     if (lines > 0) {
         // check that the memory areas that we are going to move are valid
         Q_ASSERT((char*)lastCharPos + bytesToMove <
-                 (char*)(_image + (this->_lines * this->_columns)));
+                 (char*)(_image + (_lines * _columns)));
 
-        Q_ASSERT((lines * this->_columns) < _imageSize);
+        Q_ASSERT((lines * _columns) < _imageSize);
 
         //scroll internal image down
         std::memmove(firstCharPos , lastCharPos , bytesToMove);
@@ -1033,7 +1033,7 @@ void TerminalDisplay::scrollImage(int lines , const QRect& screenWindowRegion)
     } else {
         // check that the memory areas that we are going to move are valid
         Q_ASSERT((char*)firstCharPos + bytesToMove <
-                 (char*)(_image + (this->_lines * this->_columns)));
+                 (char*)(_image + (_lines * _columns)));
 
         //scroll internal image up
         std::memmove(lastCharPos , firstCharPos , bytesToMove);
@@ -1138,8 +1138,8 @@ void TerminalDisplay::updateImage()
 
     setScroll(_screenWindow->currentLine() , _screenWindow->lineCount());
 
-    Q_ASSERT(this->_usedLines <= this->_lines);
-    Q_ASSERT(this->_usedColumns <= this->_columns);
+    Q_ASSERT(_usedLines <= _lines);
+    Q_ASSERT(_usedColumns <= _columns);
 
     int y, x, len;
 
@@ -1150,8 +1150,8 @@ void TerminalDisplay::updateImage()
 
     CharacterColor cf;       // undefined
 
-    const int linesToUpdate = std::min(this->_lines, std::max(0, lines));
-    const int columnsToUpdate = std::min(this->_columns, std::max(0, columns));
+    const int linesToUpdate = std::min(_lines, std::max(0, lines));
+    const int columnsToUpdate = std::min(_columns, std::max(0, columns));
 
     char* dirtyMask = new char[columnsToUpdate + 2];
     QRegion dirtyRegion;
@@ -1162,7 +1162,7 @@ void TerminalDisplay::updateImage()
     int dirtyLineCount = 0;
 
     for (y = 0; y < linesToUpdate; ++y) {
-        const Character* currentLine = &_image[y * this->_columns];
+        const Character* currentLine = &_image[y * _columns];
         const Character* const newLine = &newimg[y * columns];
 
         bool updateLine = false;
@@ -1256,7 +1256,7 @@ void TerminalDisplay::updateImage()
     if (linesToUpdate < _usedLines) {
         dirtyRegion |= QRect(_contentRect.left() + tLx ,
                              _contentRect.top() + tLy + _fontHeight * linesToUpdate ,
-                             _fontWidth * this->_columns ,
+                             _fontWidth * _columns ,
                              _fontHeight * (_usedLines - linesToUpdate));
     }
     _usedLines = linesToUpdate;
@@ -1265,7 +1265,7 @@ void TerminalDisplay::updateImage()
         dirtyRegion |= QRect(_contentRect.left() + tLx + columnsToUpdate * _fontWidth ,
                              _contentRect.top() + tLy ,
                              _fontWidth * (_usedColumns - columnsToUpdate) ,
-                             _fontHeight * this->_lines);
+                             _fontHeight * _lines);
     }
     _usedColumns = columnsToUpdate;
 

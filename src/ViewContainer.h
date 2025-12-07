@@ -380,6 +380,7 @@ public:
     virtual Features supportedFeatures() const;
     virtual void setNewViewMenu(QMenu* menu);
     virtual void setStyleSheet(const QString& styleSheet);
+    void setTabBarVisible(bool visible);
 
     // return associated view manager
     ViewManager* connectedViewManager();
@@ -417,7 +418,6 @@ private:
     Q_DISABLE_COPY(TabbedViewContainer)
 
     void dynamicTabBarVisibility();
-    void setTabBarVisible(bool visible);
     void setTabActivity(int index, bool activity);
     void renameTab(int index);
     void updateVisibilityOfQuickButtons();
@@ -434,26 +434,5 @@ private:
     KMenu* _contextPopupMenu;
 };
 
-/** A plain view container with no navigation display */
-class StackedViewContainer : public ViewContainer
-{
-    Q_OBJECT
-
-public:
-    explicit StackedViewContainer(QObject* parent);
-    virtual ~StackedViewContainer();
-
-    virtual QWidget* containerWidget() const;
-    virtual QWidget* activeView() const;
-    virtual void setActiveView(QWidget* view);
-
-protected:
-    virtual void addViewWidget(QWidget* view , int index);
-    virtual void removeViewWidget(QWidget* view);
-
-private:
-    QPointer<QWidget> _containerWidget;
-    QPointer<QStackedWidget> _stackWidget;
-};
 }
 #endif //VIEWCONTAINER_H
