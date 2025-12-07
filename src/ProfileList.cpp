@@ -123,44 +123,58 @@ void ProfileList::syncWidgetActions(QWidget* widget, bool sync)
     _registeredWidgets.insert(widget);
 
     const QList<QAction*> currentActions = widget->actions();
-    foreach(QAction * currentAction, currentActions) {
+    for(QAction * currentAction: currentActions) {
         widget->removeAction(currentAction);
     }
 
     widget->addActions(_group->actions());
 }
-void ProfileList::favoriteChanged(Profile::Ptr profile, bool isFavorite)
+void ProfileList::addShortcutAction(Profile::Ptr profile)
 {
     ProfileManager* manager = ProfileManager::instance();
 
-    if (isFavorite) {
-        QAction* action = new QAction(_group);
-        action->setData(QVariant::fromValue(profile));
+    auto action = new QAction(_group);
+    action->setData(QVariant::fromValue(profile));
 
-        if (_addShortcuts) {
-            action->setShortcut(manager->shortcut(profile));
-        }
+    if (_addShortcuts) {
+        action->setShortcut(manager->shortcut(profile));
+    }
 
-        updateAction(action, profile);
+    updateAction(action, profile);
 
-        foreach(QWidget * widget, _registeredWidgets) {
-            widget->addAction(action);
+    for(QWidget * widget: _registeredWidgets) {
+        widget->addAction(action);
+    }
+    emit actionsChanged(_group->actions());
+
+    updateEmptyAction();
+}
+
+void ProfileList::removeShortcutAction(Profile::Ptr profile)
+{
+    QAction* action = actionForProfile(profile);
+
+    if (action != nullptr) {
+        _group->removeAction(action);
+
+        for(QWidget * widget: _registeredWidgets) {
+            widget->removeAction(action);
         }
         emit actionsChanged(_group->actions());
-    } else {
-        QAction* action = actionForProfile(profile);
-
-        if (action) {
-            _group->removeAction(action);
-            foreach(QWidget * widget, _registeredWidgets) {
-                widget->removeAction(action);
-            }
-            emit actionsChanged(_group->actions());
-        }
     }
 
     updateEmptyAction();
 }
+
+void ProfileList::favoriteChanged(Profile::Ptr profile, bool isFavorite)
+{
+    if (isFavorite) {
+        addShortcutAction(profile);
+    } else {
+        removeShortcutAction(profile);
+    }
+}
+
 void ProfileList::triggered(QAction* action)
 {
     emit profileSelected(action->data().value<Profile::Ptr>());
