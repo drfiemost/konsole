@@ -78,20 +78,20 @@ bool KeyboardTranslatorManager::deleteTranslator(const QString& name)
 
 QString KeyboardTranslatorManager::findTranslatorPath(const QString& name)
 {
-    return KStandardDirs::locate("data", "konsole/" + name + ".keytab");
+    return KStandardDirs::locate("data", QStringLiteral("konsole/") + name + QStringLiteral(".keytab"));
 }
 
 void KeyboardTranslatorManager::findTranslators()
 {
     QStringList list = KGlobal::dirs()->findAllResources("data",
-                       "konsole/*.keytab",
+                       QStringLiteral("konsole/*.keytab"),
                        KStandardDirs::NoDuplicates);
 
     // add the name of each translator to the list and associated
     // the name with a null pointer to indicate that the translator
     // has not yet been loaded from disk
-    foreach(const QString& translatorPath, list) {
-        QString name = QFileInfo(translatorPath).baseName();
+    for(const QString& translatorPath: list) {
+        QString name = QFileInfo(translatorPath).completeBaseName();
 
         if (!_translators.contains(name))
             _translators.insert(name, nullptr);
@@ -120,8 +120,8 @@ const KeyboardTranslator* KeyboardTranslatorManager::findTranslator(const QStrin
 
 bool KeyboardTranslatorManager::saveTranslator(const KeyboardTranslator* translator)
 {
-    const QString path = KGlobal::dirs()->saveLocation("data", "konsole/") + translator->name()
-                         + ".keytab";
+    const QString path = KGlobal::dirs()->saveLocation("data", QStringLiteral("konsole/")) + translator->name()
+                         + QStringLiteral(".keytab");
 
     //kDebug() << "Saving translator to" << path;
 
@@ -179,7 +179,7 @@ const KeyboardTranslator* KeyboardTranslatorManager::defaultTranslator()
 {
     // Try to find the default.keytab file if it exists, otherwise
     // fall back to the internal hard-coded fallback translator
-    const KeyboardTranslator* translator = findTranslator("default");
+    const KeyboardTranslator* translator = findTranslator(QStringLiteral("default"));
     if (!translator) {
         translator = _fallbackTranslator;
     }

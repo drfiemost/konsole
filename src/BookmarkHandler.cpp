@@ -112,7 +112,7 @@ QString BookmarkHandler::titleForView(ViewProperties* view) const
         QString path = url.path();
 
         path = KShell::tildeExpand(path);
-        path = QFileInfo(path).baseName();
+        path = QFileInfo(path).completeBaseName();
 
         return path;
     } else if (url.hasHost()) {

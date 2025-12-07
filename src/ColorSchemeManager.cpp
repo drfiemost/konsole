@@ -94,7 +94,7 @@ bool ColorSchemeManager::loadColorScheme(const QString& filePath)
 
     KConfig config(filePath , KConfig::NoGlobals);
     ColorScheme* scheme = new ColorScheme();
-    scheme->setName(info.baseName());
+    scheme->setName(info.completeBaseName());
     scheme->read(config);
 
     if (scheme->name().isEmpty()) {
@@ -103,7 +103,7 @@ bool ColorSchemeManager::loadColorScheme(const QString& filePath)
         return false;
     }
 
-    if (!_colorSchemes.contains(info.baseName())) {
+    if (!_colorSchemes.contains(info.completeBaseName())) {
         _colorSchemes.insert(scheme->name(), scheme);
     } else {
         kDebug() << "color scheme with name" << scheme->name() << "has already been" <<

@@ -124,8 +124,8 @@ void TerminalImageFilterChain::setImage(const Character* const image , int lines
     reset();
 
     PlainTextDecoder decoder;
-    decoder.setLeadingWhitespace(false);
-    decoder.setTrailingWhitespace(false);
+    decoder.setLeadingWhitespace(true);
+    decoder.setTrailingWhitespace(true);
 
     // setup new shared buffers for the filters to process on
     QString* newBuffer = new QString();
@@ -426,7 +426,7 @@ void UrlFilter::HotSpot::activate(QObject* object)
 const QRegExp UrlFilter::FullUrlRegExp("(www\\.(?!\\.)|[a-z][a-z0-9+.-]*://)[^\\s<>'\"]+[^!,\\.\\s<>'\"\\]\\)\\:]");
 // email address:
 // [word chars, dots or dashes]@[word chars, dots or dashes].[word chars]
-const QRegExp UrlFilter::EmailAddressRegExp("\\b(\\w|\\.|-)+@(\\w|\\.|-)+\\.\\w+\\b");
+const QRegExp UrlFilter::EmailAddressRegExp("\\b(\\w|\\.|-|\\+)+@(\\w|\\.|-)+\\.\\w+\\b");
 
 // matches full url or email address
 const QRegExp UrlFilter::CompleteUrlRegExp(QLatin1Char('(')  + FullUrlRegExp.pattern() + QLatin1Char('|') +

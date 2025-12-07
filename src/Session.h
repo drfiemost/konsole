@@ -345,6 +345,10 @@ public:
     bool isZModemBusy() {
         return _zmodemBusy;
     }
+    void setZModemBusy(bool busy)
+    {
+        _zmodemBusy = busy;
+    }
 
     /**
       * Possible values of the @p what parameter for setUserTitle()
@@ -635,7 +639,8 @@ signals:
      * Emitted when the request for data transmission through ZModem
      * protocol is detected.
      */
-    void zmodemDetected();
+    void zmodemDownloadDetected();
+    void zmodemUploadDetected();
 
     /**
      * Emitted when the terminal process requests a change
@@ -689,7 +694,8 @@ signals:
 private slots:
     void done(int, QProcess::ExitStatus);
 
-    void fireZModemDetected();
+    void fireZModemDownloadDetected();
+    void fireZModemUploadDetected();
 
     void onReceiveBlock(const char* buffer, int len);
     void silenceTimerDone();

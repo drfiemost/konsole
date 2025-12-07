@@ -63,6 +63,8 @@ using namespace Konsole;
 int Session::lastSessionId = 0;
 static bool show_disallow_certain_dbus_methods_message = true;
 
+static constexpr int ZMODEM_BUFFER_SIZE = 1048576; // 1 Mb
+
 Session::Session(QObject* parent) :
     QObject(parent)
     , _shellProcess(nullptr)
@@ -98,8 +100,8 @@ connect(_emulation, &Konsole::Emulation::titleChanged,
             this, &Konsole::Session::setUserTitle);
     connect(_emulation, &Konsole::Emulation::stateSet,
             this, &Konsole::Session::activityStateSet);
-    connect(_emulation, &Konsole::Emulation::zmodemDetected,
-            this, &Konsole::Session::fireZModemDetected);
+    connect(_emulation, &Konsole::Emulation::zmodemDownloadDetected, this, &Konsole::Session::fireZModemDownloadDetected);
+    connect(_emulation, &Konsole::Emulation::zmodemUploadDetected, this, &Konsole::Session::fireZModemUploadDetected);
     connect(_emulation, &Konsole::Emulation::changeTabTextColorRequest,
             this, &Konsole::Session::changeTabTextColorRequest);
     connect(_emulation, &Konsole::Emulation::profileChangeCommandReceived,
@@ -1256,11 +1258,18 @@ bool Session::flowControlEnabled() const
     else
         return _flowControlEnabled;
 }
-void Session::fireZModemDetected()
+void Session::fireZModemDownloadDetected()
 {
     if (!_zmodemBusy) {
-        QTimer::singleShot(10, this, &Konsole::Session::zmodemDetected);
+        QTimer::singleShot(10, this, &Konsole::Session::zmodemDownloadDetected);
         _zmodemBusy = true;
+    }
+}
+
+void Session::fireZModemUploadDetected()
+{
+    if (!_zmodemBusy) {
+        QTimer::singleShot(10, this, &Konsole::Session::zmodemUploadDetected);
     }
 }
 
@@ -1276,7 +1285,7 @@ void Session::startZModem(const QString& zmodem, const QString& dir, const QStri
     _zmodemProc = new KProcess();
     _zmodemProc->setOutputChannelMode(KProcess::SeparateChannels);
 
-    *_zmodemProc << zmodem << QStringLiteral("-v") << list;
+    *_zmodemProc << zmodem << QStringLiteral("-v") << QStringLiteral("-e") << list;
 
     if (!dir.isEmpty())
         _zmodemProc->setWorkingDirectory(dir);
@@ -1307,12 +1316,13 @@ void Session::startZModem(const QString& zmodem, const QString& dir, const QStri
 void Session::zmodemReadAndSendBlock()
 {
     _zmodemProc->setReadChannel(QProcess::StandardOutput);
-    QByteArray data = _zmodemProc->readAll();
+    QByteArray data = _zmodemProc->read(ZMODEM_BUFFER_SIZE);
 
-    if (data.count() == 0)
+    while (data.count() != 0) {
+        _shellProcess->sendData(data);
+        data = _zmodemProc->read(ZMODEM_BUFFER_SIZE);
         return;
-
-    _shellProcess->sendData(data);
+    }
 }
 
 void Session::zmodemReadStatus()

@@ -177,7 +177,8 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
             &Konsole::SessionController::fireActivity);
 
     // listen for detection of ZModem transfer
-    connect(_session.data(), &Konsole::Session::zmodemDetected, this, &Konsole::SessionController::zmodemDownload);
+    connect(_session.data(), &Konsole::Session::zmodemDownloadDetected, this, &Konsole::SessionController::zmodemDownload);
+    connect(_session.data(), &Konsole::Session::zmodemUploadDetected, this, &Konsole::SessionController::zmodemUpload);
 
     // listen for flow control status changes
     connect(_session.data(), &Konsole::Session::flowControlEnabledChanged, _view.data(),
@@ -1591,6 +1592,8 @@ void SessionController::zmodemUpload()
                            i18n("<p>The current session already has a ZModem file transfer in progress.</p>"));
         return;
     }
+    _session->setZModemBusy(true);
+
     QString zmodem = KStandardDirs::findExe(QStringLiteral("sz"));
     if (zmodem.isEmpty()) {
         zmodem = KStandardDirs::findExe(QStringLiteral("lsz"));
