@@ -340,6 +340,8 @@ TerminalDisplay::TerminalDisplay(QWidget* parent)
     , _resizing(false)
     , _showTerminalSizeHint(true)
     , _bidiEnabled(false)
+    , _mouseMarks(false)
+    , _alternateScrolling(true)
     , _isPrimaryScreen(true)
     , _actSel(0)
     , _wordSelectionMode(false)
@@ -680,6 +682,36 @@ Enum::CursorShapeEnum TerminalDisplay::keyboardCursorShape() const
 {
     return _cursorShape;
 }
+
+void TerminalDisplay::setCursorStyle(Enum::CursorShapeEnum shape, bool isBlinking)
+{
+    setKeyboardCursorShape(shape);
+
+    setBlinkingCursorEnabled(isBlinking);
+
+    // when the cursor shape and blinking state are changed via the
+    // Set Cursor Style (DECSCUSR) escape sequences in vim, and if the
+    // cursor isn't set to blink, the cursor shape doesn't actually
+    // change until the cursor is moved by the user; calling update()
+    // makes the cursor shape get updated sooner.
+    if (!isBlinking) {
+        update();
+    }
+}
+void TerminalDisplay::resetCursorStyle()
+{
+    if (sessionController() != nullptr) {
+        Profile::Ptr currentProfile = SessionManager::instance()->sessionProfile(sessionController()->session());
+
+        if (currentProfile != nullptr) {
+            Enum::CursorShapeEnum shape = static_cast<Enum::CursorShapeEnum>(currentProfile->property<int>(Profile::CursorShape));
+
+            setKeyboardCursorShape(shape);
+            setBlinkingCursorEnabled(currentProfile->blinkingCursorEnabled());
+        }
+    }
+}
+
 void TerminalDisplay::setKeyboardCursorColor(const QColor& color)
 {
     _cursorColor = color;
@@ -2551,7 +2583,7 @@ void TerminalDisplay::wheelEvent(QWheelEvent* ev)
     //  - Send the event to the scrollbar if the slider has room to move
     //  - Otherwise, send simulated up / down key presses to the terminal program
     //    for the benefit of programs such as 'less' (which use the alternate screen)
-    if (_mouseMarks) {
+    if (_mouseMarks && _alternateScrolling) {
         const bool canScroll = _scrollBar->maximum() > 0;
         if (canScroll) {
             _scrollBar->event(ev);
@@ -2902,6 +2934,15 @@ void TerminalDisplay::setUsesMouse(bool on)
 bool TerminalDisplay::usesMouse() const
 {
     return _mouseMarks;
+}
+
+void TerminalDisplay::setAlternateScrolling(bool enable)
+{
+    _alternateScrolling = enable;
+}
+bool TerminalDisplay::alternateScrolling() const
+{
+    return _alternateScrolling;
 }
 
 void TerminalDisplay::usingPrimaryScreen(bool use)
@@ -3606,6 +3647,8 @@ void TerminalDisplay::applyProfile(const Profile::Ptr &profile)
 
     // mouse wheel zoom
     _mouseWheelZoom = profile->mouseWheelZoomEnabled() ;
+
+    setAlternateScrolling(profile->property<bool>(Profile::AlternateScrolling));
 }
 
 #include "TerminalDisplay.moc"

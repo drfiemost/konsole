@@ -173,6 +173,7 @@ private slots:
     void toggleTrimTrailingSpacesInSelectedText(bool);
     void pasteFromX11Selection();
     void pasteFromClipboard();
+    void toggleAlternateScrolling(bool enable);
 
     void TripleClickModeChanged(int);
     void wordCharactersChanged(const QString&);

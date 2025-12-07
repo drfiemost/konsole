@@ -40,6 +40,10 @@ private slots:
     void testColorSpaceDefault();
     void testColorSpaceSystem_data();
     void testColorSpaceSystem();
+    void testColorSpaceRGB_data();
+    void testColorSpaceRGB();
+    void testColor256_data();
+    void testColor256();
 
 private:
     static const ColorEntry DefaultColorTable[];

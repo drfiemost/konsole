@@ -1035,6 +1035,16 @@
            </layout>
           </item>
           <item>
+           <widget class="QCheckBox" name="enableAlternateScrollingButton">
+            <property name="toolTip">
+             <string>Mouse scroll wheel will emulate up/down key presses in programs that use the Alternate Screen buffer (e.g. less)</string>
+            </property>
+            <property name="text">
+             <string>Enable Alternate Screen buffer scrolling</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="ctrlRequiredForDragButton">
             <property name="toolTip">
              <string>Selected text will require control key plus click to drag.</string>

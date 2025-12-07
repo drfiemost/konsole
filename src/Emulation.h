@@ -29,6 +29,7 @@
 #include <QtCore/QTimer>
 
 // Konsole
+#include "Enumeration.h"
 #include "konsole_export.h"
 
 class QKeyEvent;
@@ -313,6 +314,8 @@ signals:
      */
     void programUsesMouseChanged(bool usesMouse);
 
+    void enableAlternateScrolling(bool enable);
+
     void programBracketedPasteModeChanged(bool bracketedPasteMode);
 
     /**
@@ -415,6 +418,19 @@ signals:
      * Emitted when terminal code requiring terminal's response received.
      */
     void sessionAttributeRequest(int id);
+
+    /**
+     * Emitted when Set Cursor Style (DECSCUSR) escape sequences are sent
+     * to the terminal.
+     * @p shape cursor shape
+     * @p isBlinking if true, the cursor will be set to blink
+    */
+    void setCursorStyleRequest(Enum::CursorShapeEnum shape = Enum::BlockCursor, bool isBlinking = false);
+    /**
+     * Emitted when reset() is called to reset the cursor style to the
+     * current profile cursor shape and blinking settings.
+    */
+    void resetCursorStyleRequest();
 
 protected:
     virtual void setMode(int mode) = 0;

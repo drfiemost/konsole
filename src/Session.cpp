@@ -305,6 +305,8 @@ void Session::addView(TerminalDisplay* widget)
 
     widget->setUsesMouse(_emulation->programUsesMouse());
 
+    connect(_emulation, &Konsole::Emulation::enableAlternateScrolling, widget, &Konsole::TerminalDisplay::setAlternateScrolling);
+
     connect(_emulation, &Konsole::Emulation::programBracketedPasteModeChanged,
             widget, &Konsole::TerminalDisplay::setBracketedPasteMode);
 
@@ -318,6 +320,9 @@ void Session::addView(TerminalDisplay* widget)
 
     connect(widget, &Konsole::TerminalDisplay::destroyed,
             this, &Konsole::Session::viewDestroyed);
+
+    connect(_emulation, &Konsole::Emulation::setCursorStyleRequest, widget, &Konsole::TerminalDisplay::setCursorStyle);
+    connect(_emulation, &Konsole::Emulation::resetCursorStyleRequest, widget, &Konsole::TerminalDisplay::resetCursorStyle);
 }
 
 void Session::viewDestroyed(QObject* view)

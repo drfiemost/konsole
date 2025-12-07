@@ -180,6 +180,18 @@ public:
     Enum::CursorShapeEnum keyboardCursorShape() const;
 
     /**
+     * Sets the Cursor Style (DECSCUSR) via escape sequences
+     * @p shape cursor shape
+     * @p isBlinking if true, the cursor will be set to blink
+    */
+    void setCursorStyle(Enum::CursorShapeEnum shape, bool isBlinking);
+    /**
+     * Resets the cursor style to the current profile cursor shape and
+     * blinking settings
+    */
+    void resetCursorStyle();
+
+    /**
      * Sets the color used to draw the keyboard cursor.
      *
      * The keyboard cursor defaults to using the foreground color of the character
@@ -337,6 +349,9 @@ public:
     /** See setUsesMouse() */
     bool usesMouse() const;
 
+    /** See setAlternateScrolling() */
+    bool alternateScrolling() const;
+
 public slots:
     /**
      * Scrolls current ScreenWindow
@@ -408,6 +423,15 @@ public slots:
      * or false otherwise.
      */
     void setUsesMouse(bool on);
+
+    /**
+     * Sets the AlternateScrolling profile property which controls whether
+     * to emulate up/down key presses for mouse scroll wheel events.
+     * For more details, check the documentation of that property in the
+     * Profile header.
+     * Enabled by default.
+     */
+    void setAlternateScrolling(bool enable);
 
     /**
      * Sets _isPrimaryScreen depending on which screen is currently in
@@ -703,6 +727,7 @@ private:
     bool _showTerminalSizeHint;
     bool _bidiEnabled;
     bool _mouseMarks;
+    bool _alternateScrolling;
     bool _isPrimaryScreen;
     bool _bracketedPasteMode;
 
