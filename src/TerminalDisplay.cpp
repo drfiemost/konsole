@@ -344,7 +344,7 @@ TerminalDisplay::TerminalDisplay(QWidget* parent)
     , _actSel(0)
     , _wordSelectionMode(false)
     , _lineSelectionMode(false)
-    , _preserveLineBreaks(false)
+    , _preserveLineBreaks(true)
     , _columnSelectionMode(false)
     , _autoCopySelectedText(false)
     , _middleClickPasteMode(Enum::PasteFromX11Selection)
@@ -2838,6 +2838,17 @@ void TerminalDisplay::selectCurrentLine()
     selectLine(cursorPosition(), true);
 }
 
+void TerminalDisplay::selectAll()
+{
+    if (_screenWindow.isNull()) {
+        return;
+    }
+
+    _preserveLineBreaks = true;
+    _screenWindow->setSelectionByLineRange(0, _screenWindow->lineCount());
+    copyToX11Selection();
+}
+
 bool TerminalDisplay::focusNextPrevChild(bool next)
 {
     // for 'Tab', always disable focus switching among widgets
@@ -2936,6 +2947,7 @@ void TerminalDisplay::doPaste(QString text, bool appendReturn)
     if (!text.isEmpty()) {
         text.replace(QLatin1Char('\n'), QLatin1Char('\r'));
         if (bracketedPasteMode()) {
+            text.remove(QLatin1String("\033"));
             text.prepend(QLatin1String("\033[200~"));
             text.append(QLatin1String("\033[201~"));
         }
