@@ -1,5 +1,4 @@
 /*
-    Copyright 2008 by Robert Knight <robertknight@gmail.com>
     Copyright 2018 by Kurt Hindenburg <kurt.hindenburg@gmail.com>
 
     This program is free software; you can redistribute it and/or modify
@@ -18,28 +17,25 @@
     02110-1301  USA.
 */
 
-#ifndef TERMINALCHARACTERDECODERTEST_H
-#define TERMINALCHARACTERDECODERTEST_H
+#ifndef VT102EMULATIONTEST_H
+#define VT102EMULATIONTEST_H
 
-#include "../TerminalCharacterDecoder.h"
+#include <QObject>
 
 namespace Konsole
 {
 
-class TerminalCharacterDecoderTest : public QObject
+class Vt102EmulationTest : public QObject
 {
     Q_OBJECT
 
-private slots:
-    Character* convertToCharacter(QString text, QVector<RenditionFlags> renditions);
+private Q_SLOTS:
+    void testTokenFunctions();
 
-    void testPlainTextDecoder();
-    void testPlainTextDecoder_data();
-    void testHTMLDecoder();
-    void testHTMLDecoder_data();
+private:
 };
 
 }
 
-#endif // TERMINALCHARACTERDECODERTEST_H
+#endif // VT102EMULATIONTEST_H
 
