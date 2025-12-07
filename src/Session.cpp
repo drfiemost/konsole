@@ -97,10 +97,8 @@ Session::Session(QObject* parent) :
     //create emulation backend
     _emulation = new Vt102Emulation();
 
-connect(_emulation, &Konsole::Emulation::titleChanged,
-            this, &Konsole::Session::setUserTitle);
-    connect(_emulation, &Konsole::Emulation::stateSet,
-            this, &Konsole::Session::activityStateSet);
+    connect(_emulation, &Konsole::Emulation::sessionAttributeChanged, this, &Konsole::Session::setSessionAttribute);
+    connect(_emulation, &Konsole::Emulation::stateSet, this, &Konsole::Session::activityStateSet);
     connect(_emulation, &Konsole::Emulation::zmodemDownloadDetected, this, &Konsole::Session::fireZModemDownloadDetected);
     connect(_emulation, &Konsole::Emulation::zmodemUploadDetected, this, &Konsole::Session::fireZModemUploadDetected);
     connect(_emulation, &Konsole::Emulation::changeTabTextColorRequest,
@@ -298,12 +296,11 @@ void Session::addView(TerminalDisplay* widget)
     connect(widget, &Konsole::TerminalDisplay::sendStringToEmu,
             _emulation, &Konsole::Emulation::sendString);
 
-    // allow emulation to notify view when the foreground process
-    // indicates whether or not it is interested in mouse signals
-    connect(_emulation, &Konsole::Emulation::programUsesMouseChanged,
-            widget, &Konsole::TerminalDisplay::setUsesMouse);
+    // allow emulation to notify the view when the foreground process
+    // indicates whether or not it is interested in Mouse Tracking events
+    connect(_emulation, &Konsole::Emulation::programRequestsMouseTracking, widget, &Konsole::TerminalDisplay::setUsesMouseTracking);
 
-    widget->setUsesMouse(_emulation->programUsesMouse());
+    widget->setUsesMouseTracking(_emulation->programUsesMouseTracking());
 
     connect(_emulation, &Konsole::Emulation::enableAlternateScrolling, widget, &Konsole::TerminalDisplay::setAlternateScrolling);
 
@@ -493,9 +490,10 @@ void Session::run()
     emit started();
 }
 
-void Session::setUserTitle(int what, const QString& caption)
+void Session::setSessionAttribute(int what, const QString& caption)
 {
-    //set to true if anything is actually changed (eg. old _nameTitle != new _nameTitle )
+    // set to true if anything has actually changed
+    // eg. old _nameTitle != new _nameTitle
     bool modified = false;
 
     if ((what == IconNameAndWindowTitle) || (what == WindowTitle)) {
@@ -562,7 +560,7 @@ void Session::setUserTitle(int what, const QString& caption)
     }
 
     if (modified)
-        emit titleChanged();
+        emit sessionAttributeChanged();
 }
 
 QString Session::userTitle() const
@@ -905,7 +903,7 @@ void Session::done(int exitCode, QProcess::ExitStatus exitStatus)
 
     if (!_autoClose) {
         _userTitle = i18nc("@info:shell This session is done", "Finished");
-        emit titleChanged();
+        emit sessionAttributeChanged();
         return;
     }
 
@@ -980,7 +978,7 @@ void Session::setTitle(TitleRole role , const QString& newTitle)
         else if (role == DisplayedTitleRole)
             _displayTitle = newTitle;
 
-        emit titleChanged();
+        emit sessionAttributeChanged();
     }
 }
 
@@ -1159,7 +1157,7 @@ void Session::setIconName(const QString& iconName)
 {
     if (iconName != _iconName) {
         _iconName = iconName;
-        emit titleChanged();
+        emit sessionAttributeChanged();
     }
 }
 

@@ -265,7 +265,7 @@ private slots:
     void showDisplayContextMenu(const QPoint& position);
     void movementKeyFromSearchBarReceived(QKeyEvent *event);
     void sessionStateChanged(int state);
-    void sessionTitleChanged();
+    void sessionAttributeChanged();
     void searchTextChanged(const QString& text);
     void searchCompleted(bool success);
     void searchClosed(); // called when the user clicks on the

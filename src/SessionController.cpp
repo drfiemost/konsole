@@ -136,7 +136,7 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
     }
 
     setIdentifier(++_lastControllerId);
-    sessionTitleChanged();
+    sessionAttributeChanged();
 
     view->installEventFilter(this);
     view->setSessionController(this);
@@ -160,7 +160,7 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
     connect(_session.data(), &Konsole::Session::stateChanged, this,
             &Konsole::SessionController::sessionStateChanged);
     // listen to title and icon changes
-    connect(_session.data(), &Konsole::Session::titleChanged, this, &Konsole::SessionController::sessionTitleChanged);
+    connect(_session.data(), &Konsole::Session::sessionAttributeChanged, this, &Konsole::SessionController::sessionAttributeChanged);
 
     connect(this, &Konsole::SessionController::tabRenamedByUser,  _session,  &Konsole::Session::tabRenamedByUser);
 
@@ -1455,7 +1455,7 @@ void SessionController::updateSessionIcon()
         }
     }
 }
-void SessionController::sessionTitleChanged()
+void SessionController::sessionAttributeChanged()
 {
     if (_sessionIconName != _session->iconName()) {
         _sessionIconName = _session->iconName();

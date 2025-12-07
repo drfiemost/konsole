@@ -103,9 +103,10 @@ protected:
     void receiveChar(uint cc) override;
 
 private slots:
-    //causes changeTitle() to be emitted for each (int,QString) pair in pendingTitleUpdates
-    //used to buffer multiple title updates
-    void updateTitle();
+    // Causes sessionAttributeChanged() to be emitted for each (int,QString)
+    // pair in _pendingSessionAttributesUpdates.
+    // Used to buffer multiple attribute updates in the current session
+    void updateSessionAttributes();
 
 private:
     unsigned int applyCharset(uint c);
@@ -151,7 +152,7 @@ private:
 
     void processToken(int code, int p, int q);
     void processWindowAttributeChange();
-    void processWindowAttributeRequest();
+    void processSessionAttributeRequest();
 
     void reportTerminalType();
     void reportSecondaryAttributes();
@@ -180,13 +181,12 @@ private:
     TerminalState _currentModes;
     TerminalState _savedModes;
 
-    //hash table and timer for buffering calls to the session instance
-    //to update the name of the session
-    //or window title.
-    //these calls occur when certain escape sequences are seen in the
-    //output from the terminal
-    QHash<int, QString> _pendingTitleUpdates;
-    QTimer* _titleUpdateTimer;
+    // Hash table and timer for buffering calls to update certain session
+    // attributes (e.g. the name of the session, window title).
+    // These calls occur when certain escape sequences are detected in the
+    // output from the terminal. See Emulation::sessionAttributeChanged()
+    QHash<int, QString> _pendingSessionAttributesUpdates;
+    QTimer *_sessionAttributesUpdateTimer;
 };
 }
 
