@@ -185,6 +185,11 @@ signals:
      */
     void currentDirectoryChanged(const QString& dir);
 
+    /**
+     * Emitted when the user changes the tab title.
+     */
+    void tabRenamedByUser(bool renamed) const;
+
 public slots:
     /**
      * Issues a command to the session to navigate to the specified URL.

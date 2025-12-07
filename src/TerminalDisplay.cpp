@@ -340,6 +340,7 @@ TerminalDisplay::TerminalDisplay(QWidget* parent)
     , _resizing(false)
     , _showTerminalSizeHint(true)
     , _bidiEnabled(false)
+    , _isPrimaryScreen(true)
     , _actSel(0)
     , _wordSelectionMode(false)
     , _lineSelectionMode(false)
@@ -1603,7 +1604,7 @@ void TerminalDisplay::drawCurrentResultRect(QPainter& painter)
         return;
     }
 
-    QRect r(0, (_screenWindow->currentResultLine() - _screenWindow->currentLine())*_fontHeight,
+    QRect r(0, _contentRect.top() + (_screenWindow->currentResultLine() - _screenWindow->currentLine()) * _fontHeight,
             contentsRect().width(), _fontHeight);
     painter.fillRect(r, QColor(0, 0, 255, 80));
 }

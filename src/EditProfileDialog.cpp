@@ -764,9 +764,16 @@ void EditProfileDialog::removeColorScheme()
 
 void EditProfileDialog::resetColorScheme()
 {
-    removeColorScheme();
-    // select the colorScheme used in the current profile
-    updateColorSchemeList(currentColorSchemeName());
+    QModelIndexList selected = _ui->colorSchemeList->selectionModel()->selectedIndexes();
+
+    if (!selected.isEmpty()) {
+        const QString &name = selected.first().data(Qt::UserRole + 1).value<const ColorScheme *>()->name();
+
+        ColorSchemeManager::instance()->deleteColorScheme(name);
+
+        // select the colorScheme used in the current profile
+        updateColorSchemeList(currentColorSchemeName());
+    }
 }
 
 void EditProfileDialog::showColorSchemeEditor(bool isNewScheme)
@@ -1005,6 +1012,10 @@ void EditProfileDialog::showKeyBindingEditor(bool isNewTranslator)
 
     if (isNewTranslator)
         editor->setDescription(i18n("New Key Binding List"));
+
+    // see also the size set in the KeyBindingEditor constructor
+    dialog->setMinimumSize(480, 430);
+    dialog->resize(500, 500);
 
     if (dialog->exec() == QDialog::Accepted) {
         KeyboardTranslator* newTranslator = new KeyboardTranslator(*editor->translator());
