@@ -207,6 +207,8 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
     connect(_session.data(), &Konsole::Session::getBackgroundColor,
             this, &Konsole::SessionController::sendBackgroundColor);
 
+    connect(_session, &Konsole::Session::primaryScreenInUse, view, &Konsole::TerminalDisplay::usingPrimaryScreen);
+
     _allControllers.insert(this);
 
     // A list of programs that accept Ctrl+C to clear command line used
@@ -514,6 +516,7 @@ void SessionController::setSearchBar(IncrementalSearchBar* searchBar)
         connect(_searchBar.data(), &Konsole::IncrementalSearchBar::findPreviousClicked, this, &Konsole::SessionController::findPreviousInHistory);
         connect(_searchBar.data(), &Konsole::IncrementalSearchBar::highlightMatchesToggled , this , &Konsole::SessionController::highlightMatches);
         connect(_searchBar.data(), &Konsole::IncrementalSearchBar::matchCaseToggled, this, &Konsole::SessionController::changeSearchMatch);
+        connect(_searchBar.data(), &Konsole::IncrementalSearchBar::matchRegExpToggled, this, &Konsole::SessionController::changeSearchMatch);
 
         // if the search bar was previously active
         // then re-enter search mode

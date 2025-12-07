@@ -404,6 +404,15 @@ public slots:
      */
     void setUsesMouse(bool on);
 
+    /**
+     * Sets _isPrimaryScreen depending on which screen is currently in
+     * use, primary or alternate
+     *
+     * @param use Set to @c true if the primary screen is in use or to
+     * @c false otherwise (i.e. the alternate screen is in use)
+     */
+    void usingPrimaryScreen(bool use);
+
     void setBracketedPasteMode(bool on);
 
     /**
@@ -692,6 +701,7 @@ private:
     bool _showTerminalSizeHint;
     bool _bidiEnabled;
     bool _mouseMarks;
+    bool _isPrimaryScreen;
     bool _bracketedPasteMode;
 
     QPoint  _iPntSel; // initial selection point

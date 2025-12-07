@@ -2548,16 +2548,16 @@ void TerminalDisplay::wheelEvent(QWheelEvent* ev)
         return;
     }
 
-    // if the terminal program is not interested with mouse events:
-    //  * send the event to the scrollbar if the slider has room to move
-    //  * otherwise, send simulated up / down key presses to the terminal program
-    //    for the benefit of programs such as 'less'
+    // If the program running in the terminal is not interested in mouse events:
+    //  - Send the event to the scrollbar if the slider has room to move
+    //  - Otherwise, send simulated up / down key presses to the terminal program
+    //    for the benefit of programs such as 'less' (which use the alternate screen)
     if (_mouseMarks) {
         const bool canScroll = _scrollBar->maximum() > 0;
         if (canScroll) {
             _scrollBar->event(ev);
             _sessionController->setSearchStartToWindowCurrentLine();
-        } else {
+         } else if (!_isPrimaryScreen) {
             // assume that each Up / Down key event will cause the terminal application
             // to scroll by one line.
             //
@@ -2892,6 +2892,11 @@ void TerminalDisplay::setUsesMouse(bool on)
 bool TerminalDisplay::usesMouse() const
 {
     return _mouseMarks;
+}
+
+void TerminalDisplay::usingPrimaryScreen(bool use)
+{
+    _isPrimaryScreen = use;
 }
 
 void TerminalDisplay::setBracketedPasteMode(bool on)
