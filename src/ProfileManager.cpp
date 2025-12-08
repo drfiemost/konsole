@@ -559,6 +559,13 @@ void ProfileManager::loadShortcuts()
         _shortcuts.insert(shortcut, data);
     }
 }
+
+QString ProfileManager::normalizePath(const QString& path) const {
+    QFileInfo fileInfo(path);
+    const QString location = KGlobal::dirs()->locate("data", QStringLiteral("konsole/") + fileInfo.fileName());
+    return (!fileInfo.isAbsolute()) || location.isEmpty() ? path : fileInfo.fileName();
+}
+
 void ProfileManager::saveShortcuts()
 {
     KSharedConfigPtr appConfig = KGlobal::config();
@@ -568,30 +575,25 @@ void ProfileManager::saveShortcuts()
     QMapIterator<QKeySequence, ShortcutData> iter(_shortcuts);
     while (iter.hasNext()) {
         iter.next();
-
         QString shortcutString = iter.key().toString();
-
-        // if the profile path in "Profile Shortcuts" is an absolute path,
-        // take the profile name
-        QFileInfo fileInfo(iter.value().profilePath);
-        QString profileName;
-        if (fileInfo.isAbsolute()) {
-            // Check to see if file is under KDE's data locations.  If not,
-            // store full path.
-            QString location = KGlobal::dirs()->locate("data",
-                               QStringLiteral("konsole/") + fileInfo.fileName());
-            if (location.isEmpty()) {
-                profileName = iter.value().profilePath;
-            } else  {
-                profileName = fileInfo.fileName();
-            }
-        } else {
-            profileName = iter.value().profilePath;
-        }
-
+        QString profileName = normalizePath(iter.value().profilePath);
         shortcutGroup.writeEntry(shortcutString, profileName);
     }
 }
+
+void ProfileManager::saveFavorites()
+{
+    KSharedConfigPtr appConfig = KSharedConfig::openConfig();
+    KConfigGroup favoriteGroup = appConfig->group("Favorite Profiles");
+
+    QStringList paths;
+    for(const Profile::Ptr& profile: _favorites) {
+        Q_ASSERT(_profiles.contains(profile) && profile);
+        paths << normalizePath(profile->path());
+    }
+    favoriteGroup.writeEntry("Favorites", paths);
+}
+
 void ProfileManager::setShortcut(Profile::Ptr profile ,
                                  const QKeySequence& keySequence)
 {
@@ -641,37 +643,6 @@ void ProfileManager::loadFavorites()
     }
 
     _loadedFavorites = true;
-}
-void ProfileManager::saveFavorites()
-{
-    KSharedConfigPtr appConfig = KGlobal::config();
-    KConfigGroup favoriteGroup = appConfig->group("Favorite Profiles");
-
-    QStringList paths;
-    for(const Profile::Ptr& profile: _favorites) {
-        Q_ASSERT(_profiles.contains(profile) && profile);
-
-        QFileInfo fileInfo(profile->path());
-        QString profileName;
-
-        if (fileInfo.isAbsolute()) {
-            // Check to see if file is under KDE's data locations.  If not,
-            // store full path.
-            QString location = KGlobal::dirs()->locate("data",
-                               QStringLiteral("konsole/") + fileInfo.fileName());
-            if (location.isEmpty()) {
-                profileName = profile->path();
-            } else {
-                profileName = fileInfo.fileName();
-            }
-        } else {
-            profileName = profile->path();
-        }
-
-        paths << profileName;
-    }
-
-    favoriteGroup.writeEntry("Favorites", paths);
 }
 
 QList<QKeySequence> ProfileManager::shortcuts()

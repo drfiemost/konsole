@@ -185,29 +185,30 @@ void IncrementalSearchBar::setSearchText(const QString& text)
 
 bool IncrementalSearchBar::eventFilter(QObject* watched , QEvent* event)
 {
-    if (watched == _searchEdit) {
-        if (event->type() == QEvent::KeyPress) {
-            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+    if ((event->type() != QEvent::KeyPress) || watched != _searchEdit)
+        return QWidget::eventFilter(watched, event);
 
-            if (keyEvent->key() == Qt::Key_Escape) {
-                emit closeClicked();
-                return true;
-            }
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
 
-            if (keyEvent->key() == Qt::Key_Return && !keyEvent->modifiers()) {
-                _findNextButton->click();
-                return true;
-            }
+        if (keyEvent->key() == Qt::Key_Escape) {
+            emit closeClicked();
+            return true;
+        }
 
-            if ((keyEvent->key() == Qt::Key_Return) && (keyEvent->modifiers() == Qt::ShiftModifier)) {
-                _findPreviousButton->click();
-                return true;
-            }
+        if (keyEvent->key() == Qt::Key_Return && !keyEvent->modifiers()) {
+            _findNextButton->click();
+            return true;
+        }
 
-            if ((keyEvent->key() == Qt::Key_Return) && (keyEvent->modifiers() == Qt::ControlModifier)) {
-                _searchFromButton->click();
-                return true;
-            }
+        if ((keyEvent->key() == Qt::Key_Return) && (keyEvent->modifiers() == Qt::ShiftModifier)) {
+            _findPreviousButton->click();
+            return true;
+        }
+
+        if ((keyEvent->key() == Qt::Key_Return) && (keyEvent->modifiers() == Qt::ControlModifier)) {
+            _searchFromButton->click();
+            return true;
         }
     }
 
@@ -241,23 +242,18 @@ void IncrementalSearchBar::setVisible(bool visible)
 
 void IncrementalSearchBar::setFoundMatch(bool match)
 {
-    if (!match && !_searchEdit->text().isEmpty()) {
-        KStatefulBrush backgroundBrush(KColorScheme::View, KColorScheme::NegativeBackground);
-
-        QString matchStyleSheet = QStringLiteral("QLineEdit{ background-color:%1 }")
-                                  .arg(backgroundBrush.brush(_searchEdit).color().name());
-
-        _searchEdit->setStyleSheet(matchStyleSheet);
-    } else if (_searchEdit->text().isEmpty()) {
-        clearLineEdit();
-    } else {
-        KStatefulBrush backgroundBrush(KColorScheme::View, KColorScheme::PositiveBackground);
-
-        QString matchStyleSheet = QStringLiteral("QLineEdit{ background-color:%1 }")
-                                  .arg(backgroundBrush.brush(_searchEdit).color().name());
-
-        _searchEdit->setStyleSheet(matchStyleSheet);
+    if (_searchEdit->text().isEmpty()) {
+         clearLineEdit();
+         return;
     }
+
+    const auto backgroundBrush = KStatefulBrush(KColorScheme::View,
+        match ? KColorScheme::PositiveBackground : KColorScheme::NegativeBackground);
+
+    const auto matchStyleSheet = QStringLiteral("QLineEdit{ background-color:%1 }")
+                              .arg(backgroundBrush.brush(_searchEdit).color().name());
+
+    _searchEdit->setStyleSheet(matchStyleSheet);
 }
 
 void IncrementalSearchBar::clearLineEdit()
@@ -275,36 +271,20 @@ const QBitArray IncrementalSearchBar::optionsChecked()
 {
     QBitArray options(4, 0);
 
-    if (_caseSensitive->isChecked()) options.setBit(MatchCase);
-    if (_regExpression->isChecked()) options.setBit(RegExp);
-    if (_highlightMatches->isChecked()) options.setBit(HighlightMatches);
-    if (_reverseSearch->isChecked()) options.setBit(ReverseSearch);
+    options.setBit(MatchCase, _caseSensitive->isChecked());
+    options.setBit(RegExp, _regExpression->isChecked());
+    options.setBit(HighlightMatches, _highlightMatches->isChecked());
+    options.setBit(ReverseSearch, _reverseSearch->isChecked());
 
     return options;
 }
 
 void IncrementalSearchBar::setOptions()
 {
-    if (KonsoleSettings::searchCaseSensitive()) {
-        _caseSensitive->setChecked(true);
-    } else {
-        _caseSensitive->setChecked(false);
-    }
-    if (KonsoleSettings::searchRegExpression()) {
-        _regExpression->setChecked(true);
-    } else {
-        _regExpression->setChecked(false);
-    }
-    if (KonsoleSettings::searchHighlightMatches()) {
-        _highlightMatches->setChecked(true);
-    } else {
-        _highlightMatches->setChecked(false);
-    }
-    if (KonsoleSettings::searchReverseSearch()) {
-        _reverseSearch->setChecked(true);
-    } else {
-        _reverseSearch->setChecked(false);
-    }
+    _caseSensitive->setChecked(KonsoleSettings::searchCaseSensitive());
+    _regExpression->setChecked(KonsoleSettings::searchRegExpression());
+    _highlightMatches->setChecked(KonsoleSettings::searchHighlightMatches());
+    _reverseSearch->setChecked(KonsoleSettings::searchReverseSearch());
 }
 
 #include "IncrementalSearchBar.moc"
