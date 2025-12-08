@@ -176,17 +176,17 @@ const ColorScheme* ColorSchemeManager::findColorScheme(const QString& name)
 
     if (_colorSchemes.contains(name)) {
         return _colorSchemes[name];
-    } else {
-        // look for this color scheme
-        QString path = findColorSchemePath(name);
-        if (!path.isEmpty() && loadColorScheme(path)) {
-            return findColorScheme(name);
-        }
-
-        kWarning() << "Could not find color scheme - " << name;
-
-        return nullptr;
     }
+
+    // look for this color scheme
+    QString path = findColorSchemePath(name);
+    if (!path.isEmpty() && loadColorScheme(path)) {
+        return findColorScheme(name);
+    }
+
+    kWarning() << "Could not find color scheme - " << name;
+
+    return defaultColorScheme();
 }
 
 QString ColorSchemeManager::findColorSchemePath(const QString& name) const

@@ -29,6 +29,7 @@
 #include <KSharedPtr>
 
 // Konsole
+#include "konsole_export.h"
 #include "CharacterColor.h"
 
 class KConfig;
@@ -71,7 +72,7 @@ private:
  * The color scheme includes the palette of colors used to draw the text and character backgrounds
  * in the display and the opacity level of the display background.
  */
-class ColorScheme
+class KONSOLEPRIVATE_EXPORT ColorScheme
 {
 public:
     /**

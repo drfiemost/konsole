@@ -34,6 +34,7 @@
 
 // Konsole
 #include "konsole_export.h"
+#include "ColorScheme.h"
 
 namespace Konsole
 {
@@ -124,7 +125,7 @@ public:
          * displays using this profile.
          * Color schemes are managed by the ColorSchemeManager class.
          */
-        ColorScheme,
+        ColorSchemeName,
         /** (QString) The name of the key bindings.
          * Key bindings are managed by the KeyboardTranslatorManager class.
          */
@@ -421,8 +422,8 @@ public:
     }
 
     /** Convenience method for property<QString>(Profile::ColorScheme) */
-    QString colorScheme() const {
-        return property<QString>(Profile::ColorScheme);
+    QString colorSchemeName() const {
+        return property<QString>(Profile::ColorSchemeName);
     }
 
     /** Convenience method for property<QStringList>(Profile::Environment) */
@@ -550,6 +551,8 @@ public:
         return property<QString>(Profile::MenuIndex);
     }
 
+    ColorScheme const* colorScheme() const;
+
     int menuIndexAsInt() const;
 
     /** Return a list of all properties names and their type
@@ -597,6 +600,7 @@ private:
         QVariant::Type type;
     };
     static const PropertyInfo DefaultPropertyNames[];
+    ColorScheme const *_colorScheme;
 };
 
 inline bool Profile::canInheritProperty(Property p)

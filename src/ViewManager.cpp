@@ -574,7 +574,7 @@ void ViewManager::createView(Session* session, ViewContainer* container, int ind
     session->addView(display);
 
     // tell the session whether it has a light or dark background
-    session->setDarkBackground(colorSchemeForProfile(profile)->hasDarkBackground());
+    session->setDarkBackground(profile->colorScheme()->hasDarkBackground());
 
     if (container == _viewSplitter->activeContainer()) {
         container->setActiveView(display);
@@ -762,17 +762,6 @@ void ViewManager::viewDestroyed(QWidget* view)
 TerminalDisplay* ViewManager::createTerminalDisplay()
 {
     return new TerminalDisplay(nullptr);
-}
-
-const ColorScheme* ViewManager::colorSchemeForProfile(const Profile::Ptr &profile)
-{
-    const ColorScheme* colorScheme = ColorSchemeManager::instance()->
-                                     findColorScheme(profile->colorScheme());
-    if (!colorScheme)
-        colorScheme = ColorSchemeManager::instance()->defaultColorScheme();
-    Q_ASSERT(colorScheme);
-
-    return colorScheme;
 }
 
 void ViewManager::applyProfileToView(TerminalDisplay* view , const Profile::Ptr &profile)

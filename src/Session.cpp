@@ -871,7 +871,11 @@ bool Session::closeInForceWay()
 
 void Session::sendTextToTerminal(const QString& text, const QChar& eol) const
 {
-    _emulation->sendText(text + eol);
+    if (eol.isNull()) {
+        _emulation->sendText(text);
+    } else {
+        _emulation->sendText(text + eol);
+    }
 }
 
 // Only D-Bus calls this function (via SendText or runCommand)

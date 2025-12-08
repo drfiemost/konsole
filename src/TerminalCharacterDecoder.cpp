@@ -27,7 +27,6 @@
 #include <KDebug>
 
 // Konsole
-#include "konsole_wcwidth.h"
 #include "ExtendedCharTable.h"
 #include "ColorScheme.h"
 
@@ -138,7 +137,7 @@ void PlainTextDecoder::decodeLine(const Character* const characters, int count, 
             if (chars) {
                 const QString s = QString::fromUcs4(chars, extendedCharLength);
                 plainText.append(s);
-                i += std::max(1, string_width(s));
+                i += std::max(1, characters[i].width());
             } else {
                 ++i;
             }

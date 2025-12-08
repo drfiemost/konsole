@@ -61,7 +61,6 @@
 
 // Konsole
 #include "Filter.h"
-#include "konsole_wcwidth.h"
 #include "TerminalCharacterDecoder.h"
 #include "Screen.h"
 #include "LineFont.h"
@@ -1831,7 +1830,7 @@ void TerminalDisplay::updateCursor()
     const int cursorLocation = loc(cursorPosition().x(), cursorPosition().y());
     Q_ASSERT(cursorLocation < _imageSize);
 
-    int charWidth = konsole_wcwidth(_image[cursorLocation].character);
+    int charWidth = _image[cursorLocation].width();
     QRect cursorRect = imageToWidget(QRect(cursorPosition(), QSize(charWidth, 1)));
     update(cursorRect);
 }
@@ -3581,10 +3580,14 @@ void TerminalDisplay::dropMenuCdActionTriggered()
 
 void TerminalDisplay::doDrag()
 {
+    const QMimeData *clipboardMimeData = QApplication::clipboard()->mimeData(QClipboard::Selection);
+    if (!clipboardMimeData) {
+        return;
+    }
+    auto mimeData = new QMimeData();
     _dragInfo.state = diDragging;
     _dragInfo.dragObject = new QDrag(this);
-    QMimeData* mimeData = new QMimeData;
-    mimeData->setText(QApplication::clipboard()->text(QClipboard::Selection));
+    mimeData->setText(clipboardMimeData->text());
     _dragInfo.dragObject->setMimeData(mimeData);
     _dragInfo.dragObject->exec(Qt::CopyAction);
 }
@@ -3663,7 +3666,7 @@ void TerminalDisplay::applyProfile(const Profile::Ptr &profile)
 {
     // load color scheme
     ColorEntry table[TABLE_COLORS];
-    _colorScheme = ViewManager::colorSchemeForProfile(profile);
+    _colorScheme = profile->colorScheme();
     _colorScheme->getColorTable(table, sessionController()->session()->sessionId());
     setColorTable(table);
     setOpacity(_colorScheme->opacity());
