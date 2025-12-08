@@ -89,11 +89,6 @@ public:
     Session* createSSHSession(Profile::Ptr profile, const KUrl& url);
 
     /**
-     * create view for the specified session
-     */
-    void createView(Session* session);
-
-    /**
      * Helper method to make this window get input focus
      */
     void setFocus();
@@ -103,12 +98,7 @@ public:
      */
     void setMenuBarInitialVisibility(bool visible);
 
-    void setNavigationVisibility(int visibility);
-    void setNavigationPosition(int position);
-    void setNavigationStyleSheet(const QString& styleSheet);
     void setNavigationStyleSheetFromFile(const KUrl& styleSheetFile);
-    void setNavigationBehavior(int behavior);
-    void setShowQuickButtons(bool show);
 
 signals:
 

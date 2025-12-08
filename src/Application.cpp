@@ -93,7 +93,7 @@ void Application::createWindow(Profile::Ptr profile, const QString& directory)
 void Application::detachView(Session* session)
 {
     MainWindow* window = newMainWindow();
-    window->createView(session);
+    window->viewManager()->createView(session);
 
     // When detaching a view, the size of the new window should equal the
     // size of the source window
@@ -340,11 +340,11 @@ MainWindow* Application::processWindowArgs(KCmdLineArgs* args, bool &createdNewM
         // see ViewContainer::NavigationVisibility
         if (args->isSet("show-tabbar")) {
             // always show
-            window->setNavigationVisibility(0);
+            window->viewManager()->setNavigationVisibility(0);
         }
         if (args->isSet("hide-tabbar")) {
             // never show
-            window->setNavigationVisibility(2);
+            window->viewManager()->setNavigationVisibility(2);
         }
     }
     return window;
