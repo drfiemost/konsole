@@ -1323,7 +1323,7 @@ void Vt102Emulation::setMode(int m)
     case MODE_Mouse1001:
     case MODE_Mouse1002:
     case MODE_Mouse1003:
-        emit programRequestsMouseTracking(false);
+        emit programRequestsMouseTracking(true);
         break;
     case MODE_Mouse1007:
         emit enableAlternateScrolling(true);
@@ -1359,7 +1359,7 @@ void Vt102Emulation::resetMode(int m)
     case MODE_Mouse1001 :
     case MODE_Mouse1002 :
     case MODE_Mouse1003 :
-        emit programRequestsMouseTracking(true);
+        emit programRequestsMouseTracking(false);
         break;
     case MODE_Mouse1007:
         emit enableAlternateScrolling(false);
