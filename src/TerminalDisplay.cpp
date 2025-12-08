@@ -2067,9 +2067,11 @@ void TerminalDisplay::mousePressEvent(QMouseEvent* ev)
         return;
     }
 
-    if (!contentsRect().contains(ev->pos())) return;
+    if (!contentsRect().contains(ev->pos()))
+        return;
 
-    if (_screenWindow.isNull()) return;
+    if (_screenWindow.isNull())
+        return;
 
     int charLine;
     int charColumn;
