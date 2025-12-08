@@ -101,6 +101,7 @@ public:
     void focusLineEdit();
 
     void setOptions();
+    void correctPosition(const QSize& parentSize);
 
     // reimplemented
     virtual void setVisible(bool visible);
@@ -140,6 +141,7 @@ signals:
 protected:
     virtual bool eventFilter(QObject* watched , QEvent* event);
     virtual void keyPressEvent(QKeyEvent* event);
+    void paintEvent(QPaintEvent *event) override;
 
 public slots:
     void clearLineEdit();
@@ -160,6 +162,7 @@ private:
     QToolButton* _findPreviousButton;
     QToolButton* _searchFromButton;
 
+    QFont _searchEditFont;
     QTimer* _searchTimer;
 };
 }

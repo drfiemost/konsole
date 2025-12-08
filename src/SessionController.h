@@ -134,19 +134,6 @@ public:
     void setSearchStartToWindowCurrentLine();
 
     /**
-     * Sets the widget used for searches through the session's output.
-     *
-     * When the user clicks on the "Search Output" menu action the @p searchBar 's
-     * show() method will be called.  The SessionController will then connect to the search
-     * bar's signals to update the search when the widget's controls are pressed.
-     */
-    void setSearchBar(IncrementalSearchBar* searchBar);
-    /**
-     * see setSearchBar()
-     */
-    IncrementalSearchBar* searchBar() const;
-
-    /**
      * Sets the action displayed in the session's context menu to hide or
      * show the menu bar.
      */
@@ -260,6 +247,7 @@ private slots:
     void sendBackgroundColor();
 
     // other
+    void setupSearchBar();
     void prepareSwitchProfileMenu();
     void updateCodecAction();
     void showDisplayContextMenu(const QPoint& position);
@@ -339,7 +327,6 @@ private:
 
     int _searchStartLine;
     int _prevSearchResultLine;
-    QPointer<IncrementalSearchBar> _searchBar;
 
     KCodecAction* _codecAction;
 
@@ -367,6 +354,7 @@ private:
     QWeakPointer<EditProfileDialog> _editProfileDialog;
 
     QString _searchText;
+    QPointer<IncrementalSearchBar> _searchBar;
 };
 inline bool SessionController::isValid() const
 {

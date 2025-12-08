@@ -9,4 +9,5 @@ install( FILES konsolehere.desktop DESTINATION ${SERVICES_INSTALL_DIR}/ServiceMe
 install( FILES konsolehere_as_root.desktop DESTINATION ${SERVICES_INSTALL_DIR}/ServiceMenus )
 install( FILES konsolerun.desktop  DESTINATION ${SERVICES_INSTALL_DIR}/ServiceMenus )
 
+install( FILES konsole.khotkeys DESTINATION ${DATA_INSTALL_DIR}/khotkeys )
 install( FILES konsole.notifyrc konsoleui.rc sessionui.rc partui.rc DESTINATION  ${DATA_INSTALL_DIR}/konsole )

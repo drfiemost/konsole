@@ -52,6 +52,7 @@ namespace Konsole
 class FilterChain;
 class TerminalImageFilterChain;
 class SessionController;
+class IncrementalSearchBar;
 
 /**
  * A widget which displays output from a terminal emulation and sends input keypresses and mouse activity
@@ -474,6 +475,8 @@ public slots:
         return _scrollbarLocation;
     }
 
+    IncrementalSearchBar *searchBar() const;
+
 signals:
 
     /**
@@ -819,6 +822,8 @@ private:
     bool _centerContents;   // center the contents between margins
 
     qreal _opacity;
+
+    IncrementalSearchBar *_searchBar;
 
     friend class TerminalDisplayAccessible;
 };

@@ -72,6 +72,7 @@
 #include "Session.h"
 #include "Profile.h"
 #include "ViewManager.h" // for colorSchemeForProfile. // TODO: Rewrite this.
+#include "IncrementalSearchBar.h"
 
 #define MAX_LINE_WIDTH 1024
 
@@ -192,6 +193,8 @@ void TerminalDisplay::fontChange(const QFont&)
     QFontMetrics fm(font());
     _fontHeight = fm.height() + _lineSpacing;
 
+    Q_ASSERT(_fontHeight > 0);
+
     // waba TerminalDisplay 1.123:
     // "Base character width on widest ASCII character. This prevents too wide
     //  characters in the presence of double wide (e.g. Japanese) characters."
@@ -229,8 +232,14 @@ void TerminalDisplay::setVTFont(const QFont& f)
     QFontMetrics fontMetrics(newFont);
 
     // This check seems extreme and semi-random
-    if ((fontMetrics.height() > height()) || (fontMetrics.maxWidth() > width()))
+    // TODO: research if these checks are still needed to prevent
+    // enorgous fonts from being used; consider usage on big TV
+    // screens.
+    if ((fontMetrics.height() > height()) || (fontMetrics.maxWidth() > width())) {
+        // return here will cause the "general" non-fixed width font
+        // to be selected
         return;
+    }
 
     // hint that text should be drawn without anti-aliasing.
     // depending on the user's font configuration, this may not be respected
@@ -244,6 +253,19 @@ void TerminalDisplay::setVTFont(const QFont& f)
 
     // Konsole cannot handle non-integer font metrics
     newFont.setStyleStrategy(QFont::StyleStrategy(newFont.styleStrategy() | QFont::ForceIntegerMetrics));
+
+    // Try to check that a good font has been loaded.
+    // For some fonts, ForceIntegerMetrics causes height() == 0 which
+    // will cause Konsole to crash later.
+    QFontMetrics fontMetrics2(newFont);
+    if ((fontMetrics2.height() < 1)) {
+        kDebug()<<"The font "<<newFont.toString()<<" has an invalid height()";
+        // Ask for a generic font so at least it is usable.
+        // Font listed in profile's dialog will not be updated.
+        newFont = QFont(QStringLiteral("Monospace"));
+        newFont.setStyleHint(QFont::TypeWriter);
+        kDebug()<<"Font changed to "<<newFont.toString();
+    }
 
     QFontInfo fontInfo(newFont);
 
@@ -393,6 +415,7 @@ TerminalDisplay::TerminalDisplay(QWidget* parent)
     , _margin(1)
     , _centerContents(false)
     , _opacity(1.0)
+    , _searchBar(new IncrementalSearchBar(this))
 {
     // terminal applications are not designed with Right-To-Left in mind,
     // so the layout is forced to Left-To-Right
@@ -712,7 +735,7 @@ void TerminalDisplay::setCursorStyle(Enum::CursorShapeEnum shape, bool isBlinkin
 void TerminalDisplay::resetCursorStyle()
 {
     Q_ASSERT(_sessionController != nullptr);
-    Q_ASSERT(_sessionController->session() != nullptr);
+    Q_ASSERT(!_sessionController->session().isNull());
 
     Profile::Ptr currentProfile = SessionManager::instance()->sessionProfile(_sessionController->session());
 
@@ -1807,8 +1830,10 @@ void TerminalDisplay::updateCursor()
 /*                                                                           */
 /* ------------------------------------------------------------------------- */
 
-void TerminalDisplay::resizeEvent(QResizeEvent*)
+void TerminalDisplay::resizeEvent(QResizeEvent *event)
 {
+    const auto width = event->size().width() - _scrollBar->geometry().width();
+    _searchBar->correctPosition(QSize(width, event->size().height()));
     if (contentsRect().isValid())
         updateImageSize();
 }
@@ -2639,7 +2664,7 @@ void TerminalDisplay::wheelEvent(QWheelEvent* ev)
             _scrollBar->event(ev);
             _sessionController->setSearchStartToWindowCurrentLine();
          } else {
-            Q_ASSERT(_sessionController->session() != nullptr);
+            Q_ASSERT(!_sessionController->session().isNull());
              if (!_sessionController->session()->isPrimaryScreen()) {
                 // assume that each Up / Down key event will cause the terminal application
                 // to scroll by one line.
@@ -3554,6 +3579,11 @@ void TerminalDisplay::setSessionController(SessionController* controller)
 SessionController* TerminalDisplay::sessionController()
 {
     return _sessionController;
+}
+
+IncrementalSearchBar *TerminalDisplay::searchBar() const
+{
+    return _searchBar;
 }
 
 AutoScrollHandler::AutoScrollHandler(QWidget* parent)

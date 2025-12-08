@@ -149,8 +149,6 @@ set(konsole_KDEINIT_SRCS
    settings/ProfileSettings.cpp
    settings/TabBarSettings.cpp)
 
-kde4_add_kcfg_files(konsole_KDEINIT_SRCS settings/KonsoleSettings.kcfgc)
-
 kde4_add_app_icon(konsole_KDEINIT_SRCS "${KDE4_ICON_INSTALL_DIR}/oxygen/*/apps/utilities-terminal.png")
 
 kde4_add_kdeinit_executable(konsole ${konsole_KDEINIT_SRCS})
@@ -164,7 +162,6 @@ install(TARGETS kdeinit_konsole konsole konsoleprivate
 set(konsolepart_PART_SRCS Part.cpp
     settings/PartInfo.cpp
     settings/ProfileSettings.cpp)
-kde4_add_kcfg_files(konsolepart_PART_SRCS settings/KonsoleSettings.kcfgc)
 
 kde4_add_plugin(konsolepart WITH_PREFIX ${konsolepart_PART_SRCS})
 set_target_properties(konsolepart PROPERTIES DEFINE_SYMBOL KONSOLE_PART)
