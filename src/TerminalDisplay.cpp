@@ -1143,7 +1143,7 @@ void TerminalDisplay::updateImage()
     // optimization - scroll the existing image where possible and
     // avoid expensive text drawing for parts of the image that
     // can simply be moved up or down
-    if (_wallpaper->isNull()) {
+    if (_wallpaper->isNull() && !_searchBar->isVisible()) {
         scrollImage(_screenWindow->scrollCount() ,
                     _screenWindow->scrollRegion());
         _screenWindow->resetScrollCount();

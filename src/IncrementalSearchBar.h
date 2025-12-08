@@ -141,7 +141,6 @@ signals:
 protected:
     virtual bool eventFilter(QObject* watched , QEvent* event);
     virtual void keyPressEvent(QKeyEvent* event);
-    void paintEvent(QPaintEvent *event) override;
 
 public slots:
     void clearLineEdit();
