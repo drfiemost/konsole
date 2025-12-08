@@ -354,7 +354,6 @@ TerminalDisplay::TerminalDisplay(QWidget* parent)
     , _bidiEnabled(false)
     , _usesMouseTracking(false)
     , _alternateScrolling(true)
-    , _isPrimaryScreen(true)
     , _actSel(0)
     , _wordSelectionMode(false)
     , _lineSelectionMode(false)
@@ -712,15 +711,16 @@ void TerminalDisplay::setCursorStyle(Enum::CursorShapeEnum shape, bool isBlinkin
 }
 void TerminalDisplay::resetCursorStyle()
 {
-    if (sessionController() != nullptr) {
-        Profile::Ptr currentProfile = SessionManager::instance()->sessionProfile(sessionController()->session());
+    Q_ASSERT(_sessionController != nullptr);
+    Q_ASSERT(_sessionController->session() != nullptr);
 
-        if (currentProfile != nullptr) {
-            Enum::CursorShapeEnum shape = static_cast<Enum::CursorShapeEnum>(currentProfile->property<int>(Profile::CursorShape));
+    Profile::Ptr currentProfile = SessionManager::instance()->sessionProfile(_sessionController->session());
 
-            setKeyboardCursorShape(shape);
-            setBlinkingCursorEnabled(currentProfile->blinkingCursorEnabled());
-        }
+    if (currentProfile != nullptr) {
+        Enum::CursorShapeEnum shape = static_cast<Enum::CursorShapeEnum>(currentProfile->property<int>(Profile::CursorShape));
+
+        setKeyboardCursorShape(shape);
+        setBlinkingCursorEnabled(currentProfile->blinkingCursorEnabled());
     }
 }
 
@@ -2079,18 +2079,24 @@ void TerminalDisplay::mousePressEvent(QMouseEvent* ev)
             _preserveLineBreaks = !((ev->modifiers() & Qt::ControlModifier) && !(ev->modifiers() & Qt::AltModifier));
             _columnSelectionMode = (ev->modifiers() & Qt::AltModifier) && (ev->modifiers() & Qt::ControlModifier);
 
-            if (!_usesMouseTracking || (ev->modifiers() == Qt::ShiftModifier)) {
-                // Only extend selection for programs not interested in mouse
-                if (!_usesMouseTracking && (ev->modifiers() == Qt::ShiftModifier)) {
+    // There are a couple of use cases when selecting text :
+    // Normal buffer or Alternate buffer when not using Mouse Tracking:
+    //  select text or extendSelection or columnSelection or columnSelection + extendSelection
+    //
+    // Alternate buffer when using Mouse Tracking and with Shift pressed:
+    //  select text or columnSelection
+            if (!_usesMouseTracking &&
+                ((ev->modifiers() == Qt::ShiftModifier) ||
+                (((ev->modifiers() & Qt::ShiftModifier) != 0u) && _columnSelectionMode))) {
                     extendSelection(ev->pos());
-                } else {
-                    _screenWindow->clearSelection();
+                } else if ((!_usesMouseTracking && !((ev->modifiers() & Qt::ShiftModifier))) ||
+                       (_usesMouseTracking && ((ev->modifiers() & Qt::ShiftModifier) != 0u))) {
+                _screenWindow->clearSelection();
 
-                    pos.ry() += _scrollBar->value();
-                    _iPntSel = _pntSel = pos;
-                    _actSel = 1; // left mouse button pressed but nothing selected yet.
-                }
-            } else {
+                pos.ry() += _scrollBar->value();
+                _iPntSel = _pntSel = pos;
+                _actSel = 1; // left mouse button pressed but nothing selected yet.
+            } else if (_usesMouseTracking) {
                 emit mouseSignal(0, charColumn + 1, charLine + 1 + _scrollBar->value() - _scrollBar->maximum() , 0);
             }
 
@@ -2626,26 +2632,31 @@ void TerminalDisplay::wheelEvent(QWheelEvent* ev)
     //  - Otherwise, send simulated up / down key presses to the terminal program
     //    for the benefit of programs such as 'less' (which use the alternate screen)
     if (!_usesMouseTracking && _alternateScrolling) {
+        Q_ASSERT(_sessionController != nullptr);
+
         const bool canScroll = _scrollBar->maximum() > 0;
         if (canScroll) {
             _scrollBar->event(ev);
             _sessionController->setSearchStartToWindowCurrentLine();
-         } else if (!_isPrimaryScreen) {
-            // assume that each Up / Down key event will cause the terminal application
-            // to scroll by one line.
-            //
-            // to get a reasonable scrolling speed, scroll by one line for every 5 degrees
-            // of mouse wheel rotation.  Mouse wheels typically move in steps of 15 degrees,
-            // giving a scroll of 3 lines
-            const int keyCode = delta > 0 ? Qt::Key_Up : Qt::Key_Down;
-            QKeyEvent keyEvent(QEvent::KeyPress, keyCode, Qt::NoModifier);
+         } else {
+            Q_ASSERT(_sessionController->session() != nullptr);
+             if (!_sessionController->session()->isPrimaryScreen()) {
+                // assume that each Up / Down key event will cause the terminal application
+                // to scroll by one line.
+                //
+                // to get a reasonable scrolling speed, scroll by one line for every 5 degrees
+                // of mouse wheel rotation.  Mouse wheels typically move in steps of 15 degrees,
+                // giving a scroll of 3 lines
+                const int keyCode = delta > 0 ? Qt::Key_Up : Qt::Key_Down;
+                QKeyEvent keyEvent(QEvent::KeyPress, keyCode, Qt::NoModifier);
 
-            // QWheelEvent::delta() gives rotation in eighths of a degree
-            const int degrees = delta / 8;
-            const int lines = abs(degrees) / 5;
+                // QWheelEvent::delta() gives rotation in eighths of a degree
+                const int degrees = delta / 8;
+                const int lines = abs(degrees) / 5;
 
-            for (int i = 0; i < lines; i++)
-                emit keyPressedSignal(&keyEvent);
+                for (int i = 0; i < lines; i++)
+                    emit keyPressedSignal(&keyEvent);
+             }
         }
     } else {
         // terminal program wants notification of mouse activity
@@ -2663,6 +2674,7 @@ void TerminalDisplay::wheelEvent(QWheelEvent* ev)
 
 void TerminalDisplay::viewScrolledByUser()
 {
+    Q_ASSERT(_sessionController != nullptr);
     _sessionController->setSearchStartToWindowCurrentLine();
 }
 
@@ -2982,11 +2994,6 @@ void TerminalDisplay::setAlternateScrolling(bool enable)
 bool TerminalDisplay::alternateScrolling() const
 {
     return _alternateScrolling;
-}
-
-void TerminalDisplay::usingPrimaryScreen(bool use)
-{
-    _isPrimaryScreen = use;
 }
 
 void TerminalDisplay::setBracketedPasteMode(bool on)
@@ -3621,17 +3628,8 @@ void TerminalDisplay::applyProfile(const Profile::Ptr &profile)
     setVTFont(profile->font());
 
     // set scroll-bar position
-    int scrollBarPosition = profile->property<int>(Profile::ScrollBarPosition);
-
-    if (scrollBarPosition == Enum::ScrollBarLeft)
-        setScrollBarPosition(Enum::ScrollBarLeft);
-    else if (scrollBarPosition == Enum::ScrollBarRight)
-        setScrollBarPosition(Enum::ScrollBarRight);
-    else if (scrollBarPosition == Enum::ScrollBarHidden)
-        setScrollBarPosition(Enum::ScrollBarHidden);
-
-    bool scrollFullPage = profile->property<bool>(Profile::ScrollFullPage);
-    setScrollFullPage(scrollFullPage);
+    setScrollBarPosition(Enum::ScrollBarPositionEnum(profile->property<int>(Profile::ScrollBarPosition)));
+    setScrollFullPage(profile->property<bool>(Profile::ScrollFullPage));
 
     // show hint about terminal size after resizing
     _showTerminalSizeHint = profile->showTerminalSizeHint();
@@ -3640,8 +3638,7 @@ void TerminalDisplay::applyProfile(const Profile::Ptr &profile)
     setBlinkingCursorEnabled(profile->blinkingCursorEnabled());
     setBlinkingTextEnabled(profile->blinkingTextEnabled());
 
-    int tripleClickMode = profile->property<int>(Profile::TripleClickMode);
-    _tripleClickMode = Enum::TripleClickModeEnum(tripleClickMode);
+    _tripleClickMode = Enum::TripleClickModeEnum(profile->property<int>(Profile::TripleClickMode));
 
     setAutoCopySelectedText(profile->autoCopySelectedText());
     setUnderlineLinks(profile->underlineLinksEnabled());
@@ -3650,38 +3647,21 @@ void TerminalDisplay::applyProfile(const Profile::Ptr &profile)
     setLineSpacing(profile->lineSpacing());
     _trimLeadingSpaces = profile->property<bool>(Profile::TrimLeadingSpacesInSelectedText);
     _trimTrailingSpaces = profile->property<bool>(Profile::TrimTrailingSpacesInSelectedText);
-
     _openLinksByDirectClick = profile->property<bool>(Profile::OpenLinksByDirectClickEnabled);
 
-    int middleClickPasteMode = profile->property<int>(Profile::MiddleClickPasteMode);
-    if (middleClickPasteMode == Enum::PasteFromX11Selection)
-        setMiddleClickPasteMode(Enum::PasteFromX11Selection);
-    else if (middleClickPasteMode == Enum::PasteFromClipboard)
-        setMiddleClickPasteMode(Enum::PasteFromClipboard);
+    setMiddleClickPasteMode(Enum::MiddleClickPasteModeEnum(profile->property<int>(Profile::MiddleClickPasteMode)));
 
     // margin/center
     setMargin(profile->property<int>(Profile::TerminalMargin));
     setCenterContents(profile->property<bool>(Profile::TerminalCenter));
 
     // cursor shape
-    int cursorShape = profile->property<int>(Profile::CursorShape);
-
-    if (cursorShape == Enum::BlockCursor)
-        setKeyboardCursorShape(Enum::BlockCursor);
-    else if (cursorShape == Enum::IBeamCursor)
-        setKeyboardCursorShape(Enum::IBeamCursor);
-    else if (cursorShape == Enum::UnderlineCursor)
-        setKeyboardCursorShape(Enum::UnderlineCursor);
+    setKeyboardCursorShape(Enum::CursorShapeEnum(profile->property<int>(Profile::CursorShape)));
 
     // cursor color
-    if (profile->useCustomCursorColor()) {
-        const QColor& cursorColor = profile->customCursorColor();
-        setKeyboardCursorColor(cursorColor);
-    } else {
-        // an invalid QColor is used to inform the view widget to
-        // draw the cursor using the default color( matching the text)
-        setKeyboardCursorColor(QColor());
-    }
+    // an invalid QColor is used to inform the view widget to
+    // draw the cursor using the default color( matching the text)
+    setKeyboardCursorColor(profile->useCustomCursorColor() ? profile->customCursorColor() : QColor());
 
     // word characters
     setWordCharacters(profile->wordCharacters());
@@ -3691,7 +3671,6 @@ void TerminalDisplay::applyProfile(const Profile::Ptr &profile)
 
     // mouse wheel zoom
     _mouseWheelZoom = profile->mouseWheelZoomEnabled() ;
-
     setAlternateScrolling(profile->property<bool>(Profile::AlternateScrolling));
 }
 
