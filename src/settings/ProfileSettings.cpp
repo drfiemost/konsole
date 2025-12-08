@@ -140,7 +140,7 @@ void ProfileSettings::updateItemsForProfile(const Profile::Ptr profile, const QL
     items[FavoriteStatusColumn]->setToolTip(i18nc("@info:tooltip", "Click to toggle status"));
 
     // Shortcut
-    QString shortcut = ProfileManager::instance()->shortcut(profile).toString();
+    const auto shortcut = ProfileManager::instance()->shortcut(profile).toString();
     items[ShortcutColumn]->setText(shortcut);
     items[ShortcutColumn]->setData(QVariant::fromValue(profile), ShortcutRole);
     items[ShortcutColumn]->setToolTip(i18nc("@info:tooltip", "Double click to change shortcut"));
@@ -282,22 +282,17 @@ void ProfileSettings::createProfile()
 {
     // setup a temporary profile which is a clone of the selected profile
     // or the default if no profile is selected
-    Profile::Ptr sourceProfile;
-
-    Profile::Ptr selectedProfile = currentProfile();
-    if (!selectedProfile)
-        sourceProfile = ProfileManager::instance()->defaultProfile();
-    else
-        sourceProfile = selectedProfile;
+    Profile::Ptr sourceProfile = currentProfile() ? currentProfile() : ProfileManager::instance()->defaultProfile();
 
     Q_ASSERT(sourceProfile);
 
-    Profile::Ptr newProfile = Profile::Ptr(new Profile(ProfileManager::instance()->fallbackProfile()));
+    auto newProfile = Profile::Ptr(new Profile(ProfileManager::instance()->fallbackProfile()));
     newProfile->clone(sourceProfile, true);
     newProfile->setProperty(Profile::Name, i18nc("@item This will be used as part of the file name", "New Profile"));
     newProfile->setProperty(Profile::UntranslatedName, QStringLiteral("New Profile"));
     newProfile->setProperty(Profile::MenuIndex, QStringLiteral("0"));
 
+    // Consider https://blogs.kde.org/2009/03/26/how-crash-almost-every-qtkde-application-and-how-fix-it-0 before changing the below
     QWeakPointer<EditProfileDialog> dialog = new EditProfileDialog(this);
     dialog.data()->setProfile(newProfile);
     dialog.data()->selectProfileName();
