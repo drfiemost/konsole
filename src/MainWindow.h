@@ -122,17 +122,18 @@ signals:
 
 protected:
     // Reimplemented for internal reasons.
-    virtual void showEvent(QShowEvent* event);
+    void showEvent(QShowEvent* event) override;
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
     // reimplemented from KMainWindow
-    virtual bool queryClose();
-    virtual void saveProperties(KConfigGroup& group);
-    virtual void readProperties(const KConfigGroup& group);
-    virtual void saveGlobalProperties(KConfig* config);
-    virtual void readGlobalProperties(KConfig* config);
+    bool queryClose() override;
+    void saveProperties(KConfigGroup& group) override;
+    void readProperties(const KConfigGroup& group) override;
+    void saveGlobalProperties(KConfig* config) override;
+    void readGlobalProperties(KConfig* config) override;
 
     // reimplemented from QWidget
-    virtual bool focusNextPrevChild(bool next);
+    bool focusNextPrevChild(bool next) override;
 
 private slots:
     void newTab();
@@ -170,6 +171,7 @@ private:
     void restoreMenuAccelerators();
     void setupActions();
     QString activeSessionDir() const;
+    void triggerAction(const QString &name) const;
 
     /**
      * Returns the bookmark handler associated with this window.

@@ -308,6 +308,9 @@ public:
     /** Decreases the font size */
     void decreaseFontSize();
 
+    /** Reset the font size */
+    void resetFontSize();
+
     /**
      * Sets the terminal screen section which is displayed in this widget.
      * When updateImage() is called, the display fetches the latest character image from the

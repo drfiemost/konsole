@@ -318,6 +318,18 @@ void TerminalDisplay::decreaseFontSize()
     setVTFont(font);
 }
 
+void TerminalDisplay::resetFontSize()
+{
+    const qreal MinimumFontSize = 6;
+
+    QFont font = getVTFont();
+    Profile::Ptr currentProfile = SessionManager::instance()->sessionProfile(_sessionController->session());
+    const qreal defaultFontSize = currentProfile->font().pointSizeF();
+
+    font.setPointSizeF(std::max(defaultFontSize, MinimumFontSize));
+    setVTFont(font);
+}
+
 uint TerminalDisplay::lineSpacing() const
 {
     return _lineSpacing;
@@ -2706,7 +2718,7 @@ void TerminalDisplay::viewScrolledByUser()
 }
 
 /* Moving left/up from the line containing pnt, return the starting 
-   offset point which the given line is continiously wrapped
+   offset point which the given line is continuously wrapped
    (top left corner = 0,0; previous line not visible = 0,-1).
 */
 QPoint TerminalDisplay::findLineStart(const QPoint &pnt)
@@ -2739,7 +2751,7 @@ QPoint TerminalDisplay::findLineStart(const QPoint &pnt)
 }
 
 /* Moving right/down from the line containing pnt, return the ending 
-   offset point which the given line is continiously wrapped.
+   offset point which the given line is continuously wrapped.
 */
 QPoint TerminalDisplay::findLineEnd(const QPoint &pnt)
 {
@@ -3298,6 +3310,10 @@ void TerminalDisplay::keyPressEvent(QKeyEvent* event)
             blinkCursorEvent();
         }
         Q_ASSERT(!_cursorBlinking);
+    }
+
+    if (_searchBar->isVisible() && (event->key() & Qt::Key_Escape)) {
+        _searchBar->hide();
     }
 
     emit keyPressedSignal(event);

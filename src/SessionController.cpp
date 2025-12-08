@@ -682,6 +682,10 @@ void SessionController::setupExtraActions()
     action->setIcon(KIcon("format-font-size-less"));
     action->setShortcut(KShortcut(Qt::CTRL | Qt::Key_Minus));
 
+    action = collection->addAction(QStringLiteral("reset-font-size"), this, SLOT(resetFontSize()));
+    action->setText(i18n("Reset Font Size"));
+    action->setShortcut(KShortcut(Qt::ALT + Qt::Key_0));
+
     // Send signal
     KSelectAction* sendSignalActions = collection->add<KSelectAction>(QStringLiteral("send-signal"));
     sendSignalActions->setText(i18n("Send Signal"));
@@ -1416,6 +1420,11 @@ void SessionController::decreaseFontSize()
     _view->decreaseFontSize();
 }
 
+void SessionController::resetFontSize()
+{
+    _view->resetFontSize();
+}
+
 void SessionController::monitorActivity(bool monitor)
 {
     _session->setMonitorActivity(monitor);
@@ -1959,4 +1968,3 @@ QString SessionController::userTitle() const
 }
 
 #include "SessionController.moc"
-

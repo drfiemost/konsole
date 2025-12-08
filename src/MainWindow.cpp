@@ -22,6 +22,7 @@
 
 // Qt
 #include <QVBoxLayout>
+#include <QMouseEvent>
 
 // KDE
 #include <KAcceleratorManager>
@@ -52,6 +53,7 @@
 #include "SessionManager.h"
 #include "ProfileManager.h"
 #include "KonsoleSettings.h"
+#include "TerminalDisplay.h"
 #include "settings/GeneralSettings.h"
 #include "settings/ProfileSettings.h"
 #include "settings/TabBarSettings.h"
@@ -211,6 +213,10 @@ void MainWindow::disconnectController(SessionController* controller)
     disconnect(controller, &Konsole::SessionController::iconChanged,
                this, &Konsole::MainWindow::updateWindowIcon);
 
+    if (auto view = controller->view()) {
+        view->removeEventFilter(this);
+    }
+
     // KXmlGuiFactory::removeClient() will try to access actions associated
     // with the controller internally, which may not be valid after the controller
     // itself is no longer valid (after the associated session and or view have
@@ -232,6 +238,7 @@ void MainWindow::activeViewChanged(SessionController* controller)
 
     Q_ASSERT(controller);
     _pluggedController = controller;
+    _pluggedController->view()->installEventFilter(this);
 
     // listen for title changes from the current session
     connect(controller, &Konsole::SessionController::titleChanged,
@@ -805,6 +812,37 @@ void MainWindow::showEvent(QShowEvent* event)
 
     // Call parent method
     KXmlGuiWindow::showEvent(event);
+}
+
+void MainWindow::triggerAction(const QString &name) const
+{
+    if (auto action = actionCollection()->action(name)) {
+        if (action->isEnabled()) {
+            action->trigger();
+        }
+    }
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == _pluggedController->view()) {
+        switch(event->type()) {
+        case QEvent::MouseButtonPress:
+        case QEvent::MouseButtonDblClick:
+            switch(static_cast<QMouseEvent*>(event)->button()) {
+            case Qt::ForwardButton:
+                triggerAction(QStringLiteral("next-view"));
+                break;
+            case Qt::BackButton:
+                triggerAction(QStringLiteral("previous-view"));
+                break;
+            default: ;
+            }
+        default: ;
+        }
+    }
+
+    return KXmlGuiWindow::eventFilter(obj, event);
 }
 
 bool MainWindow::focusNextPrevChild(bool)

@@ -211,6 +211,9 @@ public slots:
     /**  Decrease font size */
     void decreaseFontSize();
 
+    /** Reset font size */
+    void resetFontSize();
+
 private slots:
     // menu item handlers
     void openBrowser();
