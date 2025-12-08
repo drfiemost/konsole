@@ -81,8 +81,8 @@ KeyBindingEditor::KeyBindingEditor(QWidget* parent)
     _ui->keyBindingTable->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     // add and remove buttons
-    _ui->addEntryButton->setIcon(KIcon("list-add"));
-    _ui->removeEntryButton->setIcon(KIcon("list-remove"));
+    _ui->addEntryButton->setIcon(KIcon(QStringLiteral("list-add")));
+    _ui->removeEntryButton->setIcon(KIcon(QStringLiteral("list-remove")));
 
     connect(_ui->removeEntryButton , &QPushButton::clicked , this , &Konsole::KeyBindingEditor::removeSelectedEntry);
     connect(_ui->addEntryButton , &QPushButton::clicked , this , &Konsole::KeyBindingEditor::addNewEntry);

@@ -118,7 +118,7 @@ bool ColorSchemeManager::loadColorScheme(const QString& filePath)
 QStringList ColorSchemeManager::listColorSchemes()
 {
     return KGlobal::dirs()->findAllResources("data",
-            "konsole/*.colorscheme",
+            QStringLiteral("konsole/*.colorscheme"),
             KStandardDirs::NoDuplicates);
 }
 
@@ -139,7 +139,7 @@ void ColorSchemeManager::addColorScheme(ColorScheme* scheme)
     _colorSchemes.insert(scheme->name(), scheme);
 
     // save changes to disk
-    QString path = KGlobal::dirs()->saveLocation("data", "konsole/") + scheme->name() + ".colorscheme";
+    QString path = KGlobal::dirs()->saveLocation("data", QStringLiteral("konsole/")) + scheme->name() + QStringLiteral(".colorscheme");
     KConfig config(path , KConfig::NoGlobals);
 
     scheme->write(config);

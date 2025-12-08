@@ -423,7 +423,7 @@ void SessionController::updateWebSearchMenu()
             _webSearchMenu->addSeparator();
 
             action = new KAction(i18n("Configure Web Shortcuts..."), _webSearchMenu);
-            action->setIcon(KIcon("configure"));
+            action->setIcon(KIcon(QStringLiteral("configure")));
             connect(action, &KAction::triggered, this, &Konsole::SessionController::configureWebShortcuts);
             _webSearchMenu->addAction(action);
 
@@ -527,13 +527,13 @@ void SessionController::setupCommonActions()
     else
         action->setText(i18n("&Close Tab"));
 
-    action->setIcon(KIcon("tab-close"));
+    action->setIcon(KIcon(QStringLiteral("tab-close")));
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_W));
 
     // Open Browser
     action = collection->addAction(QStringLiteral("open-browser"), this, SLOT(openBrowser()));
     action->setText(i18n("Open File Manager"));
-    action->setIcon(KIcon("system-file-manager"));
+    action->setIcon(KIcon(QStringLiteral("system-file-manager")));
 
     // Copy and Paste
     action = KStandardAction::copy(this, SLOT(copy()), collection);
@@ -552,14 +552,14 @@ void SessionController::setupCommonActions()
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Insert));
 
     _webSearchMenu = new KActionMenu(i18n("Web Search"), this);
-    _webSearchMenu->setIcon(KIcon("preferences-web-browser-shortcuts"));
+    _webSearchMenu->setIcon(KIcon(QStringLiteral("preferences-web-browser-shortcuts")));
     _webSearchMenu->setVisible(false);
     collection->addAction(QStringLiteral("web-search"), _webSearchMenu);
 
 
     action = collection->addAction(QStringLiteral("select-all"), this, SLOT(selectAll()));
     action->setText(i18n("&Select All"));
-    action->setIcon(KIcon("edit-select-all"));
+    action->setIcon(KIcon(QStringLiteral("edit-select-all")));
 
     action = collection->addAction(QStringLiteral("select-line"), this, SLOT(selectLine()));
     action->setText(i18n("Select &Line"));
@@ -573,7 +573,7 @@ void SessionController::setupCommonActions()
 
     action = collection->addAction(QStringLiteral("adjust-history"), this, SLOT(showHistoryOptions()));
     action->setText(i18n("Adjust Scrollback..."));
-    action->setIcon(KIcon("configure"));
+    action->setIcon(KIcon(QStringLiteral("configure")));
 
     action = collection->addAction(QStringLiteral("clear-history"), this, SLOT(clearHistory()));
     action->setText(i18n("Clear Scrollback"));
@@ -581,13 +581,13 @@ void SessionController::setupCommonActions()
 
     action = collection->addAction(QStringLiteral("clear-history-and-reset"), this, SLOT(clearHistoryAndReset()));
     action->setText(i18n("Clear Scrollback and Reset"));
-    action->setIcon(KIcon("edit-clear-history"));
+    action->setIcon(KIcon(QStringLiteral("edit-clear-history")));
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_K));
 
     // Profile Options
     action = collection->addAction(QStringLiteral("edit-current-profile"), this, SLOT(editCurrentProfile()));
     action->setText(i18n("Edit Current Profile..."));
-    action->setIcon(KIcon("document-properties"));
+    action->setIcon(KIcon(QStringLiteral("document-properties")));
 
     _switchProfileMenu = new KActionMenu(i18n("Switch Profile"), this);
     collection->addAction(QStringLiteral("switch-profile"), _switchProfileMenu);
@@ -654,7 +654,7 @@ void SessionController::setupExtraActions()
 
     action = collection->addAction(QStringLiteral("zmodem-upload"), this, SLOT(zmodemUpload()));
     action->setText(i18n("&ZModem Upload..."));
-    action->setIcon(KIcon("document-open"));
+    action->setIcon(KIcon(QStringLiteral("document-open")));
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::ALT + Qt::Key_U));
 
     // Monitor
@@ -671,7 +671,7 @@ void SessionController::setupExtraActions()
     // Text Size
     action = collection->addAction(QStringLiteral("enlarge-font"), this, SLOT(increaseFontSize()));
     action->setText(i18n("Enlarge Font"));
-    action->setIcon(KIcon("format-font-size-more"));
+    action->setIcon(KIcon(QStringLiteral("format-font-size-more")));
     KShortcut enlargeFontShortcut = action->shortcut();
     enlargeFontShortcut.setPrimary(QKeySequence(Qt::CTRL + Qt::Key_Plus));
     enlargeFontShortcut.setAlternate(QKeySequence(Qt::CTRL + Qt::Key_Equal));
@@ -679,7 +679,7 @@ void SessionController::setupExtraActions()
 
     action = collection->addAction(QStringLiteral("shrink-font"), this, SLOT(decreaseFontSize()));
     action->setText(i18n("Shrink Font"));
-    action->setIcon(KIcon("format-font-size-less"));
+    action->setIcon(KIcon(QStringLiteral("format-font-size-less")));
     action->setShortcut(KShortcut(Qt::CTRL | Qt::Key_Minus));
 
     action = collection->addAction(QStringLiteral("reset-font-size"), this, SLOT(resetFontSize()));

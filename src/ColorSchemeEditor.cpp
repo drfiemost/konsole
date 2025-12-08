@@ -81,7 +81,7 @@ ColorSchemeEditor::ColorSchemeEditor(QWidget* aParent)
     fileCompletion->setParent(this);
     _ui->wallpaperPath->setCompletionObject(fileCompletion);
     _ui->wallpaperPath->setClearButtonShown(true);
-    _ui->wallpaperSelectButton->setIcon(KIcon("image-x-generic"));
+    _ui->wallpaperSelectButton->setIcon(KIcon(QStringLiteral("image-x-generic")));
 
     connect(_ui->wallpaperSelectButton, &QToolButton::clicked,
             this, &Konsole::ColorSchemeEditor::selectWallpaper);

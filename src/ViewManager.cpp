@@ -139,21 +139,21 @@ void ViewManager::setupActions()
     QList<QAction*> multiViewOnlyActions;
     multiViewOnlyActions << nextContainerAction;
 
-    KAction* splitLeftRightAction = new KAction(KIcon("view-split-left-right"),
+    KAction* splitLeftRightAction = new KAction(KIcon(QStringLiteral("view-split-left-right")),
             i18nc("@action:inmenu", "Split View Left/Right"),
             this);
     splitLeftRightAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_ParenLeft));
     collection->addAction(QStringLiteral("split-view-left-right"), splitLeftRightAction);
     connect(splitLeftRightAction , &KAction::triggered , this , &Konsole::ViewManager::splitLeftRight);
 
-    KAction* splitTopBottomAction = new KAction(KIcon("view-split-top-bottom") ,
+    KAction* splitTopBottomAction = new KAction(KIcon(QStringLiteral("view-split-top-bottom")) ,
             i18nc("@action:inmenu", "Split View Top/Bottom"), this);
     splitTopBottomAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_ParenRight));
     collection->addAction(QStringLiteral("split-view-top-bottom"), splitTopBottomAction);
     connect(splitTopBottomAction , &KAction::triggered , this , &Konsole::ViewManager::splitTopBottom);
 
     KAction* closeActiveAction = new KAction(i18nc("@action:inmenu Close Active View", "Close Active") , this);
-    closeActiveAction->setIcon(KIcon("view-close"));
+    closeActiveAction->setIcon(KIcon(QStringLiteral("view-close")));
     closeActiveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_X));
     closeActiveAction->setEnabled(false);
     collection->addAction("close-active-view", closeActiveAction);
@@ -188,7 +188,7 @@ void ViewManager::setupActions()
 
 #if defined(ENABLE_DETACHING)
     KAction* detachViewAction = collection->addAction(QStringLiteral("detach-view"));
-    detachViewAction->setIcon(KIcon("tab-detach"));
+    detachViewAction->setIcon(KIcon(QStringLiteral("tab-detach")));
     detachViewAction->setText(i18nc("@action:inmenu", "D&etach Current Tab"));
     // Ctrl+Shift+D is not used as a shortcut by default because it is too close
     // to Ctrl+D - which will terminate the session in many cases

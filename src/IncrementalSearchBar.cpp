@@ -58,7 +58,7 @@ IncrementalSearchBar::IncrementalSearchBar(QWidget* aParent)
     closeButton->setObjectName(QLatin1String("close-button"));
     closeButton->setToolTip(i18nc("@info:tooltip", "Close the search bar"));
     closeButton->setAutoRaise(true);
-    closeButton->setIcon(KIcon("dialog-close"));
+    closeButton->setIcon(KIcon(QStringLiteral("dialog-close")));
     connect(closeButton , &QToolButton::clicked , this , &Konsole::IncrementalSearchBar::closeClicked);
 
     _searchEdit = new KLineEdit(this);
