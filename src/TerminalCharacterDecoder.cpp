@@ -137,7 +137,7 @@ void PlainTextDecoder::decodeLine(const Character* const characters, int count, 
             if (chars) {
                 const QString s = QString::fromUcs4(chars, extendedCharLength);
                 plainText.append(s);
-                i += std::max(1, characters[i].width());
+                i += std::max(1, Character::stringWidth(s));
             } else {
                 ++i;
             }
@@ -151,7 +151,7 @@ void PlainTextDecoder::decodeLine(const Character* const characters, int count, 
             // of `dialog --infobox "qwe" 10 10` .
             if (characters[i].isRealCharacter || i <= realCharacterGuard) {
                 plainText.append(QString::fromUcs4(&characters[i].character, 1));
-                i += std::max(1, konsole_wcwidth(characters[i].character));
+                i += std::max(1, characters[i].width());
             } else {
                 ++i;  // should we 'break' directly here?
             }

@@ -232,7 +232,7 @@ void TerminalDisplay::setVTFont(const QFont& f)
 
     // This check seems extreme and semi-random
     // TODO: research if these checks are still needed to prevent
-    // enorgous fonts from being used; consider usage on big TV
+    // enormous fonts from being used; consider usage on big TV
     // screens.
     if ((fontMetrics.height() > height()) || (fontMetrics.maxWidth() > width())) {
         // return here will cause the "general" non-fixed width font
@@ -700,6 +700,9 @@ static void drawOtherChar(QPainter& paint, int x, int y, int w, int h, uchar cod
 void TerminalDisplay::drawLineCharString(QPainter& painter, int x, int y, const QString& str,
         const Character* attributes)
 {
+    painter.save();
+    painter.setRenderHint(QPainter::Antialiasing);
+
     const QPen& originalPen = painter.pen();
 
     if ((attributes->rendition & RE_BOLD) && _boldIntense) {
@@ -716,7 +719,7 @@ void TerminalDisplay::drawLineCharString(QPainter& painter, int x, int y, const 
             drawOtherChar(painter, x + (_fontWidth * i), y, _fontWidth, _fontHeight, code);
     }
 
-    painter.setPen(originalPen);
+    painter.restore();
 }
 
 void TerminalDisplay::setKeyboardCursorShape(Enum::CursorShapeEnum shape)
@@ -2824,9 +2827,8 @@ QPoint TerminalDisplay::findWordStart(const QPoint &pnt)
         j = loc(x, i);
     }
 out:
-    if (tmp_image) {
-        delete[] tmp_image;
-    }
+    delete[] tmp_image;
+
     return QPoint(x, y - curLine);
 }
 
@@ -2894,9 +2896,8 @@ out:
             y--;
         }
     }
-    if (tmp_image) {
-        delete[] tmp_image;
-    }
+    delete[] tmp_image;
+
     return QPoint(x, y);
 }
 
@@ -3190,7 +3191,7 @@ QVariant TerminalDisplay::inputMethodQuery(Qt::InputMethodQuery query) const
 
 QRect TerminalDisplay::preeditRect() const
 {
-    const int preeditLength = string_width(_inputMethodData.preeditString);
+    const int preeditLength = Character::stringWidth(_inputMethodData.preeditString);
 
     if (preeditLength == 0)
         return QRect();

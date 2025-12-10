@@ -373,7 +373,7 @@ CompactHistoryLine::CompactHistoryLine(const TextLine& line, CompactHistoryBlock
 {
     _length = line.size();
 
-    if (line.size() > 0) {
+    if (!line.isEmpty()) {
         _formatLength = 1;
         int k = 1;
 
