@@ -1357,9 +1357,13 @@ void TerminalDisplay::paintEvent(QPaintEvent* pe)
 {
     QPainter paint(this);
 
-    foreach(const QRect & rect, (pe->region() & contentsRect()).rects()) {
-        drawBackground(paint, rect, palette().background().color(),
-                       true /* use opacity setting */);
+    // Determine which characters should be repainted (1 region unit = 1 character)
+    QRegion dirtyImageRegion;
+    for(const QRect & rect: (pe->region() & contentsRect()).rects()) {
+        dirtyImageRegion += widgetToImage(rect);
+        drawBackground(paint, rect, palette().background().color(), true /* use opacity setting */);
+    }
+    for(const QRect & rect: dirtyImageRegion.rects()) {
         drawContents(paint, rect);
     }
     drawCurrentResultRect(paint);
@@ -1376,7 +1380,7 @@ void TerminalDisplay::printContent(QPainter& painter, bool friendly)
     painter.setFont(font);
     setVTFont(font);
 
-    QRect rect(0, 0, size().width(), size().height());
+    QRect rect(0, 0, _usedColumns, _usedLines);
 
     _printerFriendly = friendly;
     if (!friendly) {
@@ -1548,23 +1552,15 @@ inline static bool isRtl(const Character &chr) {
 
 void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
 {
-    const QPoint tL  = contentsRect().topLeft();
-    const int    tLx = tL.x();
-    const int    tLy = tL.y();
-
-    const int lux = std::min(_usedColumns - 1, std::max(0, (rect.left()   - tLx - _contentRect.left()) / _fontWidth));
-    const int luy = std::min(_usedLines - 1,  std::max(0, (rect.top()    - tLy - _contentRect.top()) / _fontHeight));
-    const int rlx = std::min(_usedColumns - 1, std::max(0, (rect.right()  - tLx - _contentRect.left()) / _fontWidth));
-    const int rly = std::min(_usedLines - 1,  std::max(0, (rect.bottom() - tLy - _contentRect.top()) / _fontHeight));
-
     const int numberOfColumns = _usedColumns;
     QVector<uint> univec;
     univec.reserve(numberOfColumns);
-    for (int y = luy; y <= rly; y++) {
-        int x = lux;
-        if (!_image[loc(lux, y)].character && x)
+    for (int y = rect.y(); y <= rect.bottom(); y++) {
+        int x = rect.x();
+        if ((_image[loc(rect.x(), y)].character == 0u) && (x != 0)) {
             x--; // Search for start of multi-column character
-        for (; x <= rlx; x++) {
+        }
+        for (; x <= rect.right(); x++) {
             int len = 1;
             int p = 0;
 
@@ -1605,7 +1601,7 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
             const bool rtl = isRtl(_image[loc(x, y)]);
 
             if(_image[loc(x, y)].character <= 0x7e || rtl) {
-                while (x + len <= rlx &&
+                while (x + len <= rect.right() &&
                         _image[loc(x + len, y)].foregroundColor == currentForeground &&
                         _image[loc(x + len, y)].backgroundColor == currentBackground &&
                         (_image[loc(x + len, y)].rendition & ~RE_EXTENDED_CHAR) == (currentRendition & ~RE_EXTENDED_CHAR) &&
@@ -1666,7 +1662,10 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
             paint.setWorldMatrix(textScale, true);
 
             //calculate the area in which the text will be drawn
-            QRect textArea = QRect(_contentRect.left() + tLx + _fontWidth * x , _contentRect.top() + tLy + _fontHeight * y , _fontWidth * len , _fontHeight);
+            QRect textArea = QRect(_contentRect.left() + contentsRect().left() + _fontWidth * x,
+                                   _contentRect.top() + contentsRect().top() + _fontHeight * y,
+                                   _fontWidth * len,
+                                   _fontHeight);
 
             //move the calculated area to take account of scaling applied to the painter.
             //the position of the area from the origin (0,0) is scaled
@@ -1730,6 +1729,16 @@ QRect TerminalDisplay::imageToWidget(const QRect& imageArea) const
     result.setWidth(_fontWidth * imageArea.width());
     result.setHeight(_fontHeight * imageArea.height());
 
+    return result;
+}
+
+QRect TerminalDisplay::widgetToImage(const QRect &widgetArea) const
+{
+    QRect result;
+    result.setLeft(  std::min(_usedColumns - 1, std::max(0, (widgetArea.left()   - contentsRect().left() - _contentRect.left()) / _fontWidth )));
+    result.setTop(   std::min(_usedLines   - 1, std::max(0, (widgetArea.top()    - contentsRect().top()  - _contentRect.top() ) / _fontHeight)));
+    result.setRight( std::min(_usedColumns - 1, std::max(0, (widgetArea.right()  - contentsRect().left() - _contentRect.left()) / _fontWidth )));
+    result.setBottom(std::min(_usedLines   - 1, std::max(0, (widgetArea.bottom() - contentsRect().top()  - _contentRect.top() ) / _fontHeight)));
     return result;
 }
 
@@ -2337,51 +2346,20 @@ void TerminalDisplay::extendSelection(const QPoint& position)
 
     if (_wordSelectionMode) {
         // Extend to word boundaries
-        int i;
-        QChar selClass;
-
         const bool left_not_right = (here.y() < _iPntSelCorr.y() ||
                                      (here.y() == _iPntSelCorr.y() && here.x() < _iPntSelCorr.x()));
         const bool old_left_not_right = (_pntSelCorr.y() < _iPntSelCorr.y() ||
                                          (_pntSelCorr.y() == _iPntSelCorr.y() && _pntSelCorr.x() < _iPntSelCorr.x()));
         swapping = left_not_right != old_left_not_right;
 
-        // Find left (left_not_right ? from here : from start)
+        // Find left (left_not_right ? from here : from start of word)
         QPoint left = left_not_right ? here : _iPntSelCorr;
-        Q_ASSERT(_columns>0);
-        Q_ASSERT(_lines>0);
-        i = loc(std::clamp(left.x(), 0, _columns - 1), std::clamp(left.y(), 0, _lines - 1));
-        if (i >= 0 && i < _imageSize) {
-            selClass = charClass(_image[std::min(i, _imageSize - 1)]);
-            while (((left.x() > 0) || (left.y() > 0 && ((_lineProperties[left.y() - 1] & LINE_WRAPPED) != 0)))
-                    && charClass(_image[i - 1]) == selClass) {
-                i--;
-                if (left.x() > 0) {
-                    left.rx()--;
-                } else {
-                    left.rx() = _usedColumns - 1;
-                    left.ry()--;
-                }
-            }
-        }
 
-        // Find left (left_not_right ? from start : from here)
+        // Find left (left_not_right ? from end of word : from here)
         QPoint right = left_not_right ? _iPntSelCorr : here;
-        i = loc(std::clamp(right.x(), 0, _columns - 1), std::clamp(right.y(), 0, _lines - 1));
-        if (i >= 0 && i < _imageSize) {
-            selClass = charClass(_image[std::min(i, _imageSize - 1)]);
-            selClass = charClass(_image[i]);
-            while (((right.x() < _usedColumns - 1) || (right.y() < _usedLines - 1 && ((_lineProperties[right.y()] & LINE_WRAPPED) != 0)))
-                    && charClass(_image[i + 1]) == selClass) {
-                i++;
-                if (right.x() < _usedColumns - 1) {
-                    right.rx()++;
-                } else {
-                    right.rx() = 0;
-                    right.ry()++;
-                }
-            }
-        }
+
+        left = findWordStart(left);
+        right = findWordEnd(right);
 
         // Pick which is start (ohere) and which is extension (here)
         if (left_not_right) {
@@ -2581,8 +2559,6 @@ void TerminalDisplay::mouseDoubleClickEvent(QMouseEvent* ev)
 
     _screenWindow->clearSelection();
     QPoint bgnSel = pos;
-    QPoint endSel = pos;
-    int i = loc(bgnSel.x(), bgnSel.y());
     _iPntSel = bgnSel;
     _iPntSel.ry() += _scrollBar->value();
 
@@ -2590,50 +2566,14 @@ void TerminalDisplay::mouseDoubleClickEvent(QMouseEvent* ev)
     _actSel = 2; // within selection
 
     // find word boundaries...
-    const QChar selClass = charClass(_image[i]);
     {
         // find the start of the word
-        int x = bgnSel.x();
-        while (((x > 0) || (bgnSel.y() > 0 && ((_lineProperties[bgnSel.y() - 1] & LINE_WRAPPED) != 0)))
-                && charClass(_image[i - 1]) == selClass) {
-            i--;
-            if (x > 0) {
-                x--;
-            } else {
-                x = _usedColumns - 1;
-                bgnSel.ry()--;
-            }
-        }
-
-
-        bgnSel.setX(x);
-        _screenWindow->setSelectionStart(bgnSel.x() , bgnSel.y() , false);
-
-        // find the end of the word
-        i = loc(endSel.x(), endSel.y());
-        x = endSel.x();
-        while (((x < _usedColumns - 1) || (endSel.y() < _usedLines - 1 && ((_lineProperties[endSel.y()] & LINE_WRAPPED) != 0)))
-                && charClass(_image[i + 1]) == selClass) {
-            i++;
-            if (x < _usedColumns - 1) {
-                x++;
-            } else {
-                x = 0;
-                endSel.ry()++;
-            }
-        }
-
-        endSel.setX(x);
-
-        // In word selection mode don't select @ (64) if at end of word.
-        if (((_image[i].rendition & RE_EXTENDED_CHAR) == 0) &&
-                (QChar(_image[i].character) == QLatin1Char('@')) &&
-                ((endSel.x() - bgnSel.x()) > 0)) {
-            endSel.setX(x - 1);
-        }
+        const QPoint bgnSel = findWordStart(pos);
+        const QPoint endSel = findWordEnd(pos);
 
         _actSel = 2; // within selection
 
+        _screenWindow->setSelectionStart(bgnSel.x() , bgnSel.y() , false);
         _screenWindow->setSelectionEnd(endSel.x() , endSel.y());
 
         copyToX11Selection();
@@ -2783,53 +2723,73 @@ QPoint TerminalDisplay::findLineEnd(const QPoint &pnt)
 QPoint TerminalDisplay::findWordStart(const QPoint &pnt)
 {
     const int regSize = std::max(_screenWindow->windowLines(), 10);
-    const int curLine = _screenWindow->currentLine();
-    int i = pnt.y();
-    int x = pnt.x();
-    int y = i + curLine;
-    int j = loc(x, i);
-    QVector<LineProperty> lineProperties = _lineProperties;
+    const int firstVisibleLine = _screenWindow->currentLine();
+
     Screen *screen = _screenWindow->screen();
     Character *image = _image;
     Character *tmp_image = nullptr;
-    const QChar selClass = charClass(image[j]);
+
+    int imgLine = pnt.y();
+    int x = pnt.x();
+    int y = imgLine + firstVisibleLine;
+    int imgLoc = loc(x, imgLine);
+    QVector<LineProperty> lineProperties = _lineProperties;
+    const QChar selClass = charClass(image[imgLoc]);
     const int imageSize = regSize * _columns;
 
     while (true) {
-        for (;;j--, x--) {
+        for (;;imgLoc--, x--) {
+            if (imgLoc < 1) {
+                // no more chars in this region
+                break;
+            }
             if (x > 0) {
-                if (charClass(image[j - 1]) == selClass)
+                // has previous char on this line
+                if (charClass(image[imgLoc - 1]) == selClass)
                     continue;
                 goto out;
-            } else if (i > 0) {
-                if (lineProperties[i - 1] & LINE_WRAPPED &&
-                    charClass(image[j - 1]) == selClass) {
-                    x = _columns;
-                    i--;
-                    y--;
-                    continue;
+            } else if (imgLine > 0) {
+                // not the first line in the session
+                if ((lineProperties[imgLine - 1] & LINE_WRAPPED) != 0) {
+                    // have continuation on prev line
+                    if (charClass(image[imgLoc - 1]) == selClass) {
+                        x = _columns;
+                        imgLine--;
+                        y--;
+                        continue;
+                    }
                 }
                 goto out;
             } else if (y > 0) {
+                // want more data, but need to fetch new region
                 break;
             } else {
                 goto out;
             }
         }
-        int newRegStart = std::max(0, y - regSize);
-        lineProperties = screen->getLineProperties(newRegStart, y - 1);
-        i = y - newRegStart;
-        if (!tmp_image) {
-            tmp_image = new Character[imageSize];
-            image = tmp_image;
+        if (y <= 0) {
+            // No more data
+            goto out;
         }
+        int newRegStart = std::max(0, y - regSize + 1);
+        lineProperties = screen->getLineProperties(newRegStart, y - 1);
+        imgLine = y - newRegStart;
+
+        delete[] tmp_image;
+        tmp_image = new Character[imageSize];
+        image = tmp_image;
+
         screen->getImage(tmp_image, imageSize, newRegStart, y - 1);
-        j = loc(x, i);
+        imgLoc = loc(x, imgLine);
+        if (imgLoc < 1) {
+            // Reached the start of the session
+            break;
+        }
     }
 out:
     delete[] tmp_image;
 
-    return QPoint(x, y - curLine);
+    return QPoint(x, y - firstVisibleLine);
 }
 
 QPoint TerminalDisplay::findWordEnd(const QPoint &pnt)
