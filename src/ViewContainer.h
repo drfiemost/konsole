@@ -344,6 +344,8 @@ private slots:
 private:
     Q_DISABLE_COPY(ViewContainer)
 
+    void forgetView(QWidget* view);
+
     NavigationVisibility _navigationVisibility;
     NavigationPosition _navigationPosition;
     QList<QWidget*> _views;
@@ -421,6 +423,7 @@ private:
     void setTabActivity(int index, bool activity);
     void renameTab(int index);
     void updateVisibilityOfQuickButtons();
+    void widgetRemoved(int index);
 
     ViewContainerTabBar* _tabBar;
     QPointer<QStackedWidget> _stackWidget;
