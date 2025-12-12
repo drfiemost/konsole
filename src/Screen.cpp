@@ -462,7 +462,7 @@ void Screen::getImage(Character* dest, int size, int startLine, int endLine) con
     Q_ASSERT(size >= mergedLines * _columns);
     Q_UNUSED(size);
 
-    const int linesInHistoryBuffer = std::clamp(_history->getLines() - startLine, 0, mergedLines);
+    const int linesInHistoryBuffer = bound(_history->getLines() - startLine, 0, mergedLines);
     const int linesInScreenBuffer = mergedLines - linesInHistoryBuffer;
 
     // copy _lines from history buffer
@@ -494,7 +494,7 @@ QVector<LineProperty> Screen::getLineProperties(int startLine , int endLine) con
     Q_ASSERT(endLine >= startLine && endLine < _history->getLines() + _lines);
 
     const int mergedLines = endLine - startLine + 1;
-    const int linesInHistory = std::clamp(_history->getLines() - startLine, 0, mergedLines);
+    const int linesInHistory = bound(_history->getLines() - startLine, 0, mergedLines);
     const int linesInScreen = mergedLines - linesInHistory;
 
     QVector<LineProperty> result(mergedLines);
@@ -1258,7 +1258,7 @@ int Screen::copyLineToStream(int line ,
         }
 
         // count cannot be any greater than length
-        count = std::clamp(count, 0, length - start);
+        count = bound(count, 0, length - start);
 
         Q_ASSERT(screenLine < _lineProperties.count());
         currentLineProperties |= _lineProperties[screenLine];

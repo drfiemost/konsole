@@ -2320,8 +2320,8 @@ void TerminalDisplay::extendSelection(const QPoint& position)
     // Adjust position within text area bounds.
     const QPoint oldpos = pos;
 
-    pos.setX(std::clamp(pos.x(), textBounds.left(), textBounds.right()));
-    pos.setY(std::clamp(pos.y(), textBounds.top(), textBounds.bottom()));
+    pos.setX(bound(pos.x(), textBounds.left(), textBounds.right()));
+    pos.setY(bound(pos.y(), textBounds.top(), textBounds.bottom()));
 
     if (oldpos.y() > textBounds.bottom()) {
         linesBeyondWidget = (oldpos.y() - textBounds.bottom()) / _fontHeight;

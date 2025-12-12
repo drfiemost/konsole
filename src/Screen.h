@@ -49,6 +49,12 @@ class TerminalDisplay;
 class HistoryType;
 class HistoryScroll;
 
+template<typename T>
+const T &bound(const T &val, const T &min, const T &max)
+{
+    return std::max(min, std::min(max, val));
+}
+
 /**
     \brief An image of characters with associated attributes.
 
