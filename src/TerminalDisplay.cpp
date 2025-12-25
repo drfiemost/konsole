@@ -3627,7 +3627,7 @@ void TerminalDisplay::applyProfile(const Profile::Ptr &profile)
 {
     // load color scheme
     ColorEntry table[TABLE_COLORS];
-    _colorScheme = profile->colorScheme();
+    _colorScheme = ViewManager::colorSchemeForProfile(profile);
     _colorScheme->getColorTable(table, sessionController()->session()->sessionId());
     setColorTable(table);
     setOpacity(_colorScheme->opacity());

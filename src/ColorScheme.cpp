@@ -316,10 +316,7 @@ void ColorScheme::setRandomizationRange(int index , quint16 hue , quint8 saturat
 
 const ColorEntry* ColorScheme::colorTable() const
 {
-    if (_table)
-        return _table;
-    else
-        return defaultTable;
+    return _table ? _table : defaultTable;
 }
 QColor ColorScheme::foregroundColor() const
 {
@@ -363,7 +360,7 @@ void ColorScheme::readColorEntry(const KConfig& config , int index)
 {
     KConfigGroup configGroup = config.group(colorNameForIndex(index));
 
-    if (!configGroup.hasKey("Color") && _table != 0) {
+    if (!configGroup.hasKey("Color") && _table != nullptr) {
         setColorTableEntry(index, _table[index%BASE_COLORS]);
         return;
     }

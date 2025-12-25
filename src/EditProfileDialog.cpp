@@ -251,7 +251,8 @@ const Profile::Ptr EditProfileDialog::lookupProfile() const
 
 const QString EditProfileDialog::currentColorSchemeName() const
 {
-    return lookupProfile()->colorSchemeName();
+    const QString &currentColorSchemeName = lookupProfile()->colorScheme();
+    return currentColorSchemeName;
 }
 
 void EditProfileDialog::preparePage(int page)
@@ -661,10 +662,10 @@ void EditProfileDialog::updateKeyBindingsList(const QString &selectKeyBindingsNa
 bool EditProfileDialog::eventFilter(QObject* watched , QEvent* event)
 {
     if (watched == _ui->colorSchemeList && event->type() == QEvent::Leave) {
-        if (_tempProfile->isPropertySet(Profile::ColorSchemeName))
-            preview(Profile::ColorSchemeName, _tempProfile->colorSchemeName());
+        if (_tempProfile->isPropertySet(Profile::ColorScheme))
+            preview(Profile::ColorScheme, _tempProfile->colorScheme());
         else
-            unpreview(Profile::ColorSchemeName);
+            unpreview(Profile::ColorScheme);
     }
     if (watched == _ui->fontPreviewLabel && event->type() == QEvent::FontChange) {
         const QFont& labelFont = _ui->fontPreviewLabel->font();
@@ -749,7 +750,7 @@ void EditProfileDialog::previewColorScheme(const QModelIndex& index)
 {
     const QString& name = index.data(Qt::UserRole + 1).value<const ColorScheme*>()->name();
 
-    delayedPreview(Profile::ColorSchemeName , name);
+    delayedPreview(Profile::ColorScheme , name);
 }
 void EditProfileDialog::removeColorScheme()
 {
@@ -834,7 +835,7 @@ void EditProfileDialog::saveColorScheme(const ColorScheme& scheme, bool isNewSch
     // select the edited or the new colorScheme after saving the changes
     updateColorSchemeList(selectedColorSchemeName);
 
-    preview(Profile::ColorSchemeName, newScheme->name());
+    preview(Profile::ColorScheme, newScheme->name());
 }
 void EditProfileDialog::colorSchemeSelected()
 {
@@ -844,7 +845,7 @@ void EditProfileDialog::colorSchemeSelected()
         QAbstractItemModel* model = _ui->colorSchemeList->model();
         const ColorScheme* colors = model->data(selected.first(), Qt::UserRole + 1).value<const ColorScheme*>();
         if (colors) {
-            updateTempProfileProperty(Profile::ColorSchemeName, colors->name());
+            updateTempProfileProperty(Profile::ColorScheme, colors->name());
             previewColorScheme(selected.first());
 
             updateTransparencyWarning();
