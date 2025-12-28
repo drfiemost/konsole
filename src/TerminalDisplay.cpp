@@ -2558,8 +2558,7 @@ void TerminalDisplay::mouseDoubleClickEvent(QMouseEvent* ev)
     }
 
     _screenWindow->clearSelection();
-    QPoint bgnSel = pos;
-    _iPntSel = bgnSel;
+    _iPntSel = pos;
     _iPntSel.ry() += _scrollBar->value();
 
     _wordSelectionMode = true;
@@ -2581,7 +2580,7 @@ void TerminalDisplay::mouseDoubleClickEvent(QMouseEvent* ev)
 
     _possibleTripleClick = true;
 
-    QTimer::singleShot(QApplication::doubleClickInterval(), [this]() {
+    QTimer::singleShot(QApplication::doubleClickInterval(), this, [this]() {
         _possibleTripleClick = false;
     });
 }
@@ -3401,7 +3400,7 @@ void TerminalDisplay::bell(const QString& message)
     // ...mainly for sound effects where rapid bells in sequence
     // produce a horrible noise.
     _bellMasked = true;
-    QTimer::singleShot(500, [this]() {
+    QTimer::singleShot(500, this, [this]() {
         _bellMasked = false;
     });
 }
