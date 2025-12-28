@@ -84,12 +84,15 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         Pty.cpp
                         RenameTabDialog.cpp
                         RenameTabWidget.cpp
+                        SaveHistoryTask.cpp
+                        SearchHistoryTask.cpp
                         Screen.cpp
                         ScreenWindow.cpp
                         Session.cpp
                         SessionController.cpp
                         SessionManager.cpp
                         SessionListModel.cpp
+                        SessionTask.cpp
                         ShellCommand.cpp
                         TabTitleFormatButton.cpp
                         TerminalCharacterDecoder.cpp
