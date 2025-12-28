@@ -427,6 +427,7 @@ TerminalDisplay::TerminalDisplay(QWidget* parent)
     , _centerContents(false)
     , _opacity(1.0)
     , _searchBar(new IncrementalSearchBar(this))
+    , _searchResultRect(QRect())
 {
     // terminal applications are not designed with Right-To-Left in mind,
     // so the layout is forced to Left-To-Right
@@ -1160,7 +1161,6 @@ void TerminalDisplay::updateImage()
     if (_wallpaper->isNull() && !_searchBar->isVisible()) {
         scrollImage(_screenWindow->scrollCount() ,
                     _screenWindow->scrollRegion());
-        _screenWindow->resetScrollCount();
     }
 
     if (!_image) {
@@ -1307,6 +1307,15 @@ void TerminalDisplay::updateImage()
     _usedColumns = columnsToUpdate;
 
     dirtyRegion |= _inputMethodData.previousPreeditRect;
+
+    if ((_screenWindow->currentResultLine() != -1) && (_screenWindow->scrollCount() > 0)) {
+        // De-highlight previous result region
+        dirtyRegion |= _searchResultRect;
+        // Highlight new result region
+        dirtyRegion |= QRect(0, _contentRect.top() + (_screenWindow->currentResultLine() - _screenWindow->currentLine()) * _fontHeight,
+                             _columns * _fontWidth, _fontHeight);
+    }
+    _screenWindow->resetScrollCount();
 
     // update the parts of the display which have changed
     update(dirtyRegion);
@@ -1716,9 +1725,9 @@ void TerminalDisplay::drawCurrentResultRect(QPainter& painter)
         return;
     }
 
-    QRect r(0, _contentRect.top() + (_screenWindow->currentResultLine() - _screenWindow->currentLine()) * _fontHeight,
-            _columns * _fontWidth, _fontHeight);
-    painter.fillRect(r, QColor(0, 0, 255, 80));
+    _searchResultRect.setRect(0, _contentRect.top() + (_screenWindow->currentResultLine() - _screenWindow->currentLine()) * _fontHeight,
+                              _columns * _fontWidth, _fontHeight);
+    painter.fillRect(_searchResultRect, QColor(0, 0, 255, 80));
 }
 
 QRect TerminalDisplay::imageToWidget(const QRect& imageArea) const
@@ -2112,8 +2121,10 @@ void TerminalDisplay::mousePressEvent(QMouseEvent* ev)
             }
         }
 
-        _lineSelectionMode = false;
-        _wordSelectionMode = false;
+        if (!ev->modifiers()) {
+            _lineSelectionMode = false;
+            _wordSelectionMode = false;
+        }
 
         // The user clicked inside selected text
         bool selected =  _screenWindow->isSelected(pos.x(), pos.y());
