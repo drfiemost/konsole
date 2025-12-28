@@ -40,8 +40,8 @@
 
 using namespace Konsole;
 
-IncrementalSearchBar::IncrementalSearchBar(QWidget* aParent)
-    : QWidget(aParent)
+IncrementalSearchBar::IncrementalSearchBar(QWidget* parent)
+    : QWidget(parent)
     , _searchEdit(nullptr)
     , _caseSensitive(nullptr)
     , _regExpression(nullptr)

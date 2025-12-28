@@ -55,8 +55,8 @@
 
 using namespace Konsole;
 
-EditProfileDialog::EditProfileDialog(QWidget* aParent)
-    : KDialog(aParent)
+EditProfileDialog::EditProfileDialog(QWidget* parent)
+    : KDialog(parent)
     , _ui(nullptr)
     , _tempProfile(nullptr)
     , _profile(nullptr)

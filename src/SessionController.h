@@ -214,6 +214,9 @@ public slots:
     /** Reset font size */
     void resetFontSize();
 
+    /** Close the incremental search */
+    void searchClosed(); // called when the user clicks on the
+
 private slots:
     // menu item handlers
     void openBrowser();
@@ -259,8 +262,6 @@ private slots:
     void sessionAttributeChanged();
     void searchTextChanged(const QString& text);
     void searchCompleted(bool success);
-    void searchClosed(); // called when the user clicks on the
-    // history search bar's close button
 
     void interactionHandler();
     void snapshot(); // called periodically as the user types
@@ -516,14 +517,12 @@ private:
     using ScreenWindowPtr = QPointer<ScreenWindow>;
 
     void executeOnScreenWindow(SessionPtr session , ScreenWindowPtr window);
-    void highlightResult(ScreenWindowPtr window , int position);
+    void highlightResult(ScreenWindowPtr window , int findPos);
 
     QMap< SessionPtr , ScreenWindowPtr > _windows;
     QRegExp _regExp;
     Enum::SearchDirection _direction;
     int _startLine;
-
-    //static QPointer<SearchHistoryThread> _thread;
 };
 }
 

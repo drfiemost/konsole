@@ -46,8 +46,8 @@ const int COLOR_COLUMN = 1;          // column 1 : actual colors
 const int INTENSE_COLOR_COLUMN = 2;  // column 2 : intense colors
 const int FAINT_COLOR_COLUMN = 3;    // column 2 : faint colors
 
-ColorSchemeEditor::ColorSchemeEditor(QWidget* aParent)
-    : KDialog(aParent)
+ColorSchemeEditor::ColorSchemeEditor(QWidget* parent)
+    : KDialog(parent)
     , _isNewScheme(false)
     , _ui(nullptr)
     , _colors(nullptr)

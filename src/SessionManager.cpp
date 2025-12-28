@@ -94,7 +94,7 @@ Session* SessionManager::createSession(Profile::Ptr profile)
     Q_ASSERT(session);
     applyProfile(session, profile, false);
 
-    connect(session , &Konsole::Session::profileChangeCommandReceived , this ,
+    connect(session , &Konsole::Session::profileChangeCommandReceived , this,
             &Konsole::SessionManager::sessionProfileCommandReceived);
 
     //ask for notification when session dies
