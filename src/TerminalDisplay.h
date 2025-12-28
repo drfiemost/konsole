@@ -285,12 +285,6 @@ public:
     /** Play a visual bell for prompt or warning. */
     void visualBell();
 
-    /**
-     * Reimplemented.  Has no effect.  Use setVTFont() to change the font
-     * used to draw characters in the display.
-     */
-    virtual void setFont(const QFont &);
-
     /** Returns the font used to draw characters in the display */
     QFont getVTFont() {
         return font();
@@ -520,33 +514,34 @@ signals:
     void sendStringToEmu(const QByteArray& local8BitString);
 
 protected:
-    virtual bool event(QEvent* event);
+    // events
+    bool event(QEvent* event) override;
 
-    virtual void paintEvent(QPaintEvent* event);
+    void paintEvent(QPaintEvent* event) override;
 
-    virtual void showEvent(QShowEvent* event);
-    virtual void hideEvent(QHideEvent* event);
-    virtual void resizeEvent(QResizeEvent* event);
+    void showEvent(QShowEvent* event) override;
+    void hideEvent(QHideEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
 
-    virtual void contextMenuEvent(QContextMenuEvent* event);
+    void contextMenuEvent(QContextMenuEvent* event) override;
 
-    virtual void fontChange(const QFont&);
-    virtual void focusInEvent(QFocusEvent* event);
-    virtual void focusOutEvent(QFocusEvent* event);
-    virtual void keyPressEvent(QKeyEvent* event);
-    virtual void leaveEvent(QEvent* event);
-    virtual void mouseDoubleClickEvent(QMouseEvent* event);
-    virtual void mousePressEvent(QMouseEvent* event);
-    virtual void mouseReleaseEvent(QMouseEvent* event);
-    virtual void mouseMoveEvent(QMouseEvent* event);
-    virtual void extendSelection(const QPoint& pos);
-    virtual void wheelEvent(QWheelEvent* event);
+    void focusInEvent(QFocusEvent* event) override;
+    void focusOutEvent(QFocusEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
+    void leaveEvent(QEvent* event) override;
+    void mouseDoubleClickEvent(QMouseEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void wheelEvent(QWheelEvent* event) override;
+    bool focusNextPrevChild(bool next) override;
 
-    virtual bool focusNextPrevChild(bool next);
+    void fontChange(const QFont&);
+    void extendSelection(const QPoint& pos);
 
     // drag and drop
-    virtual void dragEnterEvent(QDragEnterEvent* event);
-    virtual void dropEvent(QDropEvent* event);
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
     void doDrag();
     enum DragState { diNone, diPending, diDragging };
 

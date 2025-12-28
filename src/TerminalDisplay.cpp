@@ -296,11 +296,6 @@ void TerminalDisplay::setVTFont(const QFont& f)
     fontChange(newFont);
 }
 
-void TerminalDisplay::setFont(const QFont &)
-{
-    // ignore font change request if not coming from konsole itself
-}
-
 void TerminalDisplay::increaseFontSize()
 {
     QFont font = getVTFont();
@@ -556,7 +551,7 @@ static void drawLineChar(QPainter& paint, int x, int y, int w, int h, uchar code
 {
     //Calculate cell midpoints, end points.
     const int cx = x + w / 2;
-    const int cy = y + h / 2;
+    const int cy = y + h / 2. - 0.5;
     const int ex = x + w - 1;
     const int ey = y + h - 1;
 
@@ -596,32 +591,32 @@ static void drawLineChar(QPainter& paint, int x, int y, int w, int h, uchar code
 
     //Intersection points.
     if (toDraw & Int11)
-        paint.drawPoint(cx - 1, cy - 1);
+        paint.drawPoint(cx - 2, cy - 2);
     if (toDraw & Int12)
-        paint.drawPoint(cx, cy - 1);
+        paint.drawPoint(cx - 1, cy - 2);
     if (toDraw & Int13)
-        paint.drawPoint(cx + 1, cy - 1);
+        paint.drawPoint(cx - 0, cy - 2);
 
     if (toDraw & Int21)
-        paint.drawPoint(cx - 1, cy);
+        paint.drawPoint(cx - 2, cy - 1);
     if (toDraw & Int22)
-        paint.drawPoint(cx, cy);
+        paint.drawPoint(cx - 1, cy - 1);
     if (toDraw & Int23)
-        paint.drawPoint(cx + 1, cy);
+        paint.drawPoint(cx - 0, cy - 1);
 
     if (toDraw & Int31)
-        paint.drawPoint(cx - 1, cy + 1);
+        paint.drawPoint(cx - 2, cy);
     if (toDraw & Int32)
-        paint.drawPoint(cx, cy + 1);
+        paint.drawPoint(cx - 1, cy);
     if (toDraw & Int33)
-        paint.drawPoint(cx + 1, cy + 1);
+        paint.drawPoint(cx - 0, cy);
 }
 
 static void drawOtherChar(QPainter& paint, int x, int y, int w, int h, uchar code)
 {
     //Calculate cell midpoints, end points.
     const int cx = x + w / 2;
-    const int cy = y + h / 2;
+    const int cy = y + h / 2. - 0.5; // Compensate for the translation, to match fonts
     const int ex = x + w - 1;
     const int ey = y + h - 1;
 
@@ -702,13 +697,13 @@ void TerminalDisplay::drawLineCharString(QPainter& painter, int x, int y, const 
         const Character* attributes)
 {
     painter.save();
-    painter.setRenderHint(QPainter::Antialiasing);
 
-    const QPen& originalPen = painter.pen();
+    // For antialiasing, we need to shift it so the single pixel width is in the middle
+    painter.translate(0.5, 0.5);
 
     if ((attributes->rendition & RE_BOLD) && _boldIntense) {
-        QPen boldPen(originalPen);
-        boldPen.setWidth(3);
+        QPen boldPen(painter.pen());
+        boldPen.setWidth(4);
         painter.setPen(boldPen);
     }
 
@@ -817,10 +812,10 @@ void TerminalDisplay::drawBackground(QPainter& painter, const QRect& rect, const
         QColor color(backgroundColor);
         color.setAlpha(qAlpha(_blendColor));
 
-        painter.save();
+        const QPainter::CompositionMode originalMode = painter.compositionMode();
         painter.setCompositionMode(QPainter::CompositionMode_Source);
         painter.fillRect(rect, color);
-        painter.restore();
+        painter.setCompositionMode(originalMode);
 #endif
     } else {
         painter.fillRect(rect, backgroundColor);
@@ -946,8 +941,6 @@ void TerminalDisplay::drawTextFragment(QPainter& painter ,
                                        const QString& text,
                                        const Character* style)
 {
-    painter.save();
-
     // setup painter
     const QColor foregroundColor = style->foregroundColor.color(_colorTable);
     const QColor backgroundColor = style->backgroundColor.color(_colorTable);
@@ -965,8 +958,6 @@ void TerminalDisplay::drawTextFragment(QPainter& painter ,
 
     // draw text
     drawCharacters(painter, rect, text, style, invertCharacterColor);
-
-    painter.restore();
 }
 
 void TerminalDisplay::drawPrinterFriendlyTextFragment(QPainter& painter,
@@ -974,8 +965,6 @@ void TerminalDisplay::drawPrinterFriendlyTextFragment(QPainter& painter,
         const QString& text,
         const Character* style)
 {
-    painter.save();
-
     // Set the colors used to draw to black foreground and white
     // background for printer friendly output when printing
     Character print_style = *style;
@@ -984,8 +973,6 @@ void TerminalDisplay::drawPrinterFriendlyTextFragment(QPainter& painter,
 
     // draw text
     drawCharacters(painter, rect, text, &print_style, false);
-
-    painter.restore();
 }
 
 // scrolls the image by 'lines', down if lines > 0 or up otherwise.
@@ -1372,6 +1359,9 @@ void TerminalDisplay::paintEvent(QPaintEvent* pe)
         dirtyImageRegion += widgetToImage(rect);
         drawBackground(paint, rect, palette().background().color(), true /* use opacity setting */);
     }
+
+    paint.setRenderHint(QPainter::Antialiasing, _antialiasText);
+
     for(const QRect & rect: dirtyImageRegion.rects()) {
         drawContents(paint, rect);
     }
@@ -1771,7 +1761,8 @@ void TerminalDisplay::setBlinkingCursorEnabled(bool blink)
         _blinkCursorTimer->stop();
         if (_cursorBlinking) {
             // if cursor is blinking(hidden), blink it again to make it show
-            blinkCursorEvent();
+            _cursorBlinking = false;
+            updateCursor();
         }
         Q_ASSERT(!_cursorBlinking);
     }
