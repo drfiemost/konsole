@@ -32,6 +32,7 @@ class KeyboardTranslatorTest : public QObject
 private slots:
     void testEntryTextWildcards();
     void testEntryTextWildcards_data();
+    void testFallback();
 };
 
 }

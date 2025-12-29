@@ -372,16 +372,16 @@ public:
      * are NavigationPositionTop and NavigationPositionBottom.
      */
     TabbedViewContainer(NavigationPosition position, ViewManager* connectedViewManager, QObject* parent);
-    virtual ~TabbedViewContainer();
+    ~TabbedViewContainer() override;
 
-    virtual QWidget* containerWidget() const;
-    virtual QWidget* activeView() const;
-    virtual void setActiveView(QWidget* view);
-    virtual QList<NavigationPosition> supportedNavigationPositions() const;
-    virtual void setFeatures(Features features);
-    virtual Features supportedFeatures() const;
-    virtual void setNewViewMenu(QMenu* menu);
-    virtual void setStyleSheet(const QString& styleSheet);
+    QWidget* containerWidget() const override;
+    QWidget* activeView() const override;
+    void setActiveView(QWidget* view) override;
+    QList<NavigationPosition> supportedNavigationPositions() const override;
+    void setFeatures(Features features) override;
+    Features supportedFeatures() const override;
+    void setNewViewMenu(QMenu* menu) override;
+    void setStyleSheet(const QString& styleSheet) override;
     void setTabBarVisible(bool visible);
 
     // return associated view manager

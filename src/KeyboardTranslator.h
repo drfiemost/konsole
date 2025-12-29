@@ -317,7 +317,7 @@ private:
 Q_DECLARE_OPERATORS_FOR_FLAGS(KeyboardTranslator::States)
 Q_DECLARE_OPERATORS_FOR_FLAGS(KeyboardTranslator::Commands)
 
-class FallbackKeyboardTranslator : public KeyboardTranslator
+class KONSOLEPRIVATE_EXPORT FallbackKeyboardTranslator : public KeyboardTranslator
 {
 public:
     FallbackKeyboardTranslator();

@@ -1,5 +1,5 @@
 /*
-    Copyright 2013 by Kurt Hindenburg <kurt.hindenburg@gmail.com>
+    Copyright 2013, 2018 by Kurt Hindenburg <kurt.hindenburg@gmail.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -93,6 +93,31 @@ void KeyboardTranslatorTest::testEntryTextWildcards()
     entry.setText(text);
 
     QCOMPARE(entry.text(wildcards, keyboardModifiers), result);
+}
+
+// Use FallbackKeyboardTranslator to test basic functionality
+void KeyboardTranslatorTest::testFallback()
+{
+    auto fallback = new FallbackKeyboardTranslator();
+
+    QCOMPARE(QStringLiteral("fallback"), fallback->name());
+    QCOMPARE(QStringLiteral("Fallback Keyboard Translator"), fallback->description());
+
+    auto entries = fallback->entries();
+    QCOMPARE(1, entries.size());
+    auto entry = fallback->findEntry(Qt::Key_Tab, nullptr);
+    QVERIFY(!entry.isNull());
+    QCOMPARE(FallbackKeyboardTranslator::Command::NoCommand, entry.command());
+    QCOMPARE(static_cast<int>(Qt::Key_Tab), entry.keyCode());
+    QCOMPARE(QByteArray("\t"), entry.text());
+    QCOMPARE(QByteArray("\\t"), entry.escapedText());
+    QCOMPARE(static_cast<quint64>(Qt::NoModifier), static_cast<quint64>(entry.modifiers()));
+    QCOMPARE(static_cast<quint64>(Qt::NoModifier), static_cast<quint64>(entry.modifierMask()));
+    QCOMPARE(static_cast<quint64>(KeyboardTranslator::NoState), static_cast<quint64>(entry.state()));
+    QCOMPARE(QStringLiteral("Tab"), entry.conditionToString());
+    QCOMPARE(QStringLiteral("\\t"), entry.resultToString());
+    QVERIFY(entry.matches(Qt::Key_Tab, Qt::NoModifier, KeyboardTranslator::NoState));
+    QVERIFY(entry == fallback->findEntry(Qt::Key_Tab, nullptr));
 }
 
 QTEST_KDEMAIN_CORE(KeyboardTranslatorTest)
