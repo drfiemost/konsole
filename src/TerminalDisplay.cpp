@@ -909,17 +909,6 @@ void TerminalDisplay::setOpacity(qreal opacity)
     color.setAlphaF(opacity);
     _opacity = opacity;
 
-    // enable automatic background filling to prevent the display
-    // flickering if there is no transparency
-    /*if ( color.alpha() == 255 )
-    {
-        setAutoFillBackground(true);
-    }
-    else
-    {
-        setAutoFillBackground(false);
-    }*/
-
     _blendColor = color.rgba();
 }
 
@@ -1214,31 +1203,27 @@ void TerminalDisplay::scrollImage(int lines , const QRect& screenWindowRegion)
 QRegion TerminalDisplay::hotSpotRegion() const
 {
     QRegion region;
-    foreach(Filter::HotSpot * hotSpot , _filterChain->hotSpots()) {
+    for (const Filter::HotSpot *hotSpot : _filterChain->hotSpots()) {
         QRect r;
+        r.setLeft(hotSpot->startColumn());
+        r.setTop(hotSpot->startLine());
         if (hotSpot->startLine() == hotSpot->endLine()) {
-            r.setLeft(hotSpot->startColumn());
-            r.setTop(hotSpot->startLine());
             r.setRight(hotSpot->endColumn());
             r.setBottom(hotSpot->endLine());
             region |= imageToWidget(r);
         } else {
-            r.setLeft(hotSpot->startColumn());
-            r.setTop(hotSpot->startLine());
             r.setRight(_columns);
             r.setBottom(hotSpot->startLine());
             region |= imageToWidget(r);
-            for (int line = hotSpot->startLine() + 1 ; line < hotSpot->endLine() ; line++) {
-                r.setLeft(0);
-                r.setTop(line);
-                r.setRight(_columns);
-                r.setBottom(line);
+
+            r.setLeft(0);
+
+            for (int line = hotSpot->startLine() + 1 ; line < hotSpot->endLine(); line++) {
+                r.moveTop(line);
                 region |= imageToWidget(r);
             }
-            r.setLeft(0);
-            r.setTop(hotSpot->endLine());
+            r.moveTop(hotSpot->endLine());
             r.setRight(hotSpot->endColumn());
-            r.setBottom(hotSpot->endLine());
             region |= imageToWidget(r);
         }
     }
@@ -1736,14 +1721,27 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
             const RenditionFlags currentRendition = _image[loc(x, y)].rendition;
             const bool rtl = isRtl(_image[loc(x, y)]);
 
-            if(_image[loc(x, y)].character <= 0x7e || rtl) {
-                while (x + len <= rect.right() &&
-                        _image[loc(x + len, y)].foregroundColor == currentForeground &&
-                        _image[loc(x + len, y)].backgroundColor == currentBackground &&
-                        (_image[loc(x + len, y)].rendition & ~RE_EXTENDED_CHAR) == (currentRendition & ~RE_EXTENDED_CHAR) &&
-                        (_image[ std::min(loc(x + len, y) + 1, _imageSize - 1) ].character == 0) == doubleWidth &&
-                        _image[loc(x + len, y)].isLineChar() == lineDraw &&
-                        (_image[loc(x + len, y)].character <= 0x7e || rtl)) {
+            const auto isInsideDrawArea = [&](int column) { return column <= rect.right(); };
+            const auto hasSameColors = [&](int column) {
+                return _image[loc(column, y)].foregroundColor == currentForeground
+                    && _image[loc(column, y)].backgroundColor == currentBackground;
+            };
+            const auto hasSameRendition = [&](int column) {
+                return (_image[loc(column, y)].rendition & ~RE_EXTENDED_CHAR)
+                    == (currentRendition & ~RE_EXTENDED_CHAR);
+            };
+            const auto hasSameWidth = [&](int column) {
+                const int characterLoc = std::min(loc(column, y) + 1, _imageSize - 1);
+                return (_image[characterLoc].character == 0) == doubleWidth;
+            };
+            const auto canBeGrouped = [&](int column) {
+                return _image[loc(column, y)].character <= 0x7e || rtl;
+            };
+
+            if (canBeGrouped(x)) {
+                while (isInsideDrawArea(x + len) && hasSameColors(x + len)
+                        && hasSameRendition(x + len) && hasSameWidth(x + len)
+                        && canBeGrouped(x + len)) {
                     const uint c = _image[loc(x + len, y)].character;
                     if ((_image[loc(x + len, y)].rendition & RE_EXTENDED_CHAR) != 0) {
                         // sequence of characters
@@ -1770,6 +1768,15 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
                     if (doubleWidth) { // assert((_image[loc(x+len,y)+1].character == 0)), see above if condition
                         len++; // Skip trailing part of multi-column character
                     }
+                    len++;
+                }
+            } else {
+                // Group spaces following any non-wide character with the character. This allows for
+                // rendering ambiguous characters with wide glyphs without clipping them.
+                while (!doubleWidth && isInsideDrawArea(x + len)
+                        && _image[loc(x + len, y)].character == ' ' && hasSameColors(x + len)
+                        && hasSameRendition(x + len)) {
+                    // disstrU intentionally not modified - trailing spaces are meaningless
                     len++;
                 }
             }
@@ -2497,8 +2504,16 @@ void TerminalDisplay::extendSelection(const QPoint& position)
         // Find left (left_not_right ? from end of word : from here)
         QPoint right = left_not_right ? _iPntSelCorr : here;
 
-        left = findWordStart(left);
-        right = findWordEnd(right);
+        if (left.y() < 0 || left.y() >= _lines || left.x() < 0 || left.x() >= _columns) {
+            left = _pntSelCorr;
+        } else {
+            left = findWordStart(left);
+        }
+        if (right.y() < 0 || right.y() >= _lines || right.x() < 0 || right.x() >= _columns) {
+            right = _pntSelCorr;
+        } else {
+            right = findWordEnd(right);
+        }
 
         // Pick which is start (ohere) and which is extension (here)
         if (left_not_right) {
