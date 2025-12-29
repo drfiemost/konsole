@@ -30,9 +30,11 @@
 #include <KConfig>
 #include <KLocalizedString>
 #include <KConfigGroup>
+#include <KDebug>
 
 // STL
 #include <random>
+
 
 namespace
 {
@@ -229,7 +231,12 @@ void ColorScheme::setColorTableEntry(int index , const ColorEntry& entry)
             _table[i] = defaultTable[i];
     }
 
-    _table[index] = entry;
+    if (entry.isValid()) {
+        _table[index] = entry;
+    } else {
+        _table[index] = defaultTable[index];
+        kDebug()<<"ColorScheme"<<name()<<"has an invalid color index"<<index<<", using default table color";
+    }
 }
 ColorEntry ColorScheme::colorEntry(int index , uint sessionId) const
 {
@@ -342,6 +349,10 @@ bool ColorScheme::hasDarkBackground() const
 }
 void ColorScheme::setOpacity(qreal opacity)
 {
+    if (opacity < 0.0 || opacity > 1.0) {
+        kDebug()<<"ColorScheme"<<name()<<"has an invalid opacity"<<opacity<<"using 1";
+        opacity = 1.0;
+    }
     _opacity = opacity;
 }
 qreal ColorScheme::opacity() const
@@ -376,12 +387,16 @@ void ColorScheme::readColorEntry(const KConfig& config , int index)
     ColorEntry entry;
 
     entry = configGroup.readEntry("Color", QColor());
-
     setColorTableEntry(index , entry);
 
-    const quint16 hue = static_cast<quint16>(configGroup.readEntry("MaxRandomHue", 0));
+    quint16 hue = static_cast<quint16>(configGroup.readEntry("MaxRandomHue", 0));
     const quint8 value = static_cast<quint8>(configGroup.readEntry("MaxRandomValue", 0));
     const quint8 saturation = static_cast<quint8>(configGroup.readEntry("MaxRandomSaturation", 0));
+
+    if (hue > MAX_HUE) {
+        kDebug()<<"ColorScheme"<<name()<<"has an invalid MaxRandomHue"<<hue<<"for index"<< index<<", using"<<MAX_HUE;
+        hue = MAX_HUE;
+    }
 
     if (hue != 0 || value != 0 || saturation != 0)
         setRandomizationRange(index , hue , saturation , value);

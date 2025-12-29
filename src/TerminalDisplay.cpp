@@ -2473,20 +2473,14 @@ void TerminalDisplay::extendSelection(const QPoint& position)
 
     int charColumn = 0;
     int charLine = 0;
-    getCharacterPosition(pos, charLine, charColumn, !_wordSelectionMode && !_lineSelectionMode);
+    getCharacterPosition(pos, charLine, charColumn, true);
 
     QPoint here = QPoint(charColumn, charLine);
-    here.rx() = bound(0, here.x(), _columns - 1);
-    here.ry() = bound(0, here.y(), _lines - 1);
     QPoint ohere;
     QPoint _iPntSelCorr = _iPntSel;
     _iPntSelCorr.ry() -= _scrollBar->value();
-    _iPntSelCorr.rx() = bound(0, _iPntSelCorr.x(), _columns - 1);
-    _iPntSelCorr.ry() = bound(0, _iPntSelCorr.y(), _lines - 1);
     QPoint _pntSelCorr = _pntSel;
     _pntSelCorr.ry() -= _scrollBar->value();
-    _pntSelCorr.rx() = bound(0, _pntSelCorr.x(), _columns - 1);
-    _pntSelCorr.ry() = bound(0, _pntSelCorr.y(), _lines - 1); 
     bool swapping = false;
 
     if (_wordSelectionMode) {
@@ -3206,7 +3200,7 @@ void TerminalDisplay::doPaste(QString text, bool appendReturn)
                 description = i18n("ESC: Used for special commands to the current process");
                 break;
             default:
-                description = i18n("Other unprintable character (\\x%1)").arg(QString::number(c.unicode(), 16));
+                description = i18n("Other unprintable character (\\x%1)", QString::number(c.unicode(), 16));
                 break;
             }
             unsafeCharacters.append(description);
