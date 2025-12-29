@@ -23,6 +23,7 @@
 
 // Qt
 #include <QApplication>
+#include <QList>
 #include <QMenu>
 #include <QKeyEvent>
 #include <QPrinter>

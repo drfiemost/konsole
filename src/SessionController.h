@@ -22,11 +22,9 @@
 #define SESSIONCONTROLLER_H
 
 // Qt
-#include <QList>
 #include <QSet>
 #include <QPointer>
 #include <QString>
-#include <QHash>
 
 // KDE
 #include <KIcon>
