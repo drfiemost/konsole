@@ -28,10 +28,11 @@
 #include "ViewContainer.h"
 
 using Konsole::ViewSplitter;
-using Konsole::ViewContainer;
+using Konsole::TabbedViewContainer;
 
 ViewSplitter::ViewSplitter(QWidget* parent)
     : QSplitter(parent)
+    , _containers(QList<TabbedViewContainer *>())
     , _recursiveSplitting(true)
 {
 }
@@ -44,9 +45,9 @@ void ViewSplitter::childEmpty(ViewSplitter* splitter)
         emit empty(this);
 }
 
-void ViewSplitter::adjustContainerSize(ViewContainer* container , int percentage)
+void ViewSplitter::adjustContainerSize(TabbedViewContainer* container , int percentage)
 {
-    int containerIndex = indexOf(container->containerWidget());
+    int containerIndex = indexOf(container);
 
     Q_ASSERT(containerIndex != -1);
 
@@ -82,7 +83,7 @@ ViewSplitter* ViewSplitter::activeSplitter()
     return splitter;
 }
 
-void ViewSplitter::registerContainer(ViewContainer* container)
+void ViewSplitter::registerContainer(TabbedViewContainer* container)
 {
     _containers << container;
      // Connecting to container::destroyed() using the new-style connection
@@ -90,11 +91,11 @@ void ViewSplitter::registerContainer(ViewContainer* container)
     // syntax works.
     //connect(container , static_cast<void(ViewContainer::*)(ViewContainer*)>(&Konsole::ViewContainer::destroyed) , this , &Konsole::ViewSplitter::containerDestroyed);
     //connect(container , &Konsole::ViewContainer::empty , this , &Konsole::ViewSplitter::containerEmpty);
-    connect(container , SIGNAL(destroyed(ViewContainer*)) , this , SLOT(containerDestroyed(ViewContainer*)));
-    connect(container , SIGNAL(empty(ViewContainer*)) , this , SLOT(containerEmpty(ViewContainer*)));
+    connect(container , SIGNAL(destroyed(TabbedViewContainer*)) , this , SLOT(containerDestroyed(TabbedViewContainer*)));
+    connect(container , SIGNAL(empty(TabbedViewContainer*)) , this , SLOT(containerEmpty(TabbedViewContainer*)));
 }
 
-void ViewSplitter::unregisterContainer(ViewContainer* container)
+void ViewSplitter::unregisterContainer(TabbedViewContainer* container)
 {
     _containers.removeAll(container);
     disconnect(container , nullptr , this , nullptr);
@@ -129,14 +130,14 @@ bool ViewSplitter::recursiveSplitting() const
     return _recursiveSplitting;
 }
 
-void ViewSplitter::removeContainer(ViewContainer* container)
+void ViewSplitter::removeContainer(TabbedViewContainer* container)
 {
     Q_ASSERT(containers().contains(container));
 
     unregisterContainer(container);
 }
 
-void ViewSplitter::addContainer(ViewContainer* container ,
+void ViewSplitter::addContainer(TabbedViewContainer* container ,
                                 Qt::Orientation containerOrientation)
 {
     ViewSplitter* splitter = activeSplitter();
@@ -145,7 +146,7 @@ void ViewSplitter::addContainer(ViewContainer* container ,
             containerOrientation == splitter->orientation() ||
             !_recursiveSplitting) {
         splitter->registerContainer(container);
-        splitter->addWidget(container->containerWidget());
+        splitter->addWidget(container);
 
         if (splitter->orientation() != containerOrientation)
             splitter->setOrientation(containerOrientation);
@@ -155,16 +156,16 @@ void ViewSplitter::addContainer(ViewContainer* container ,
         ViewSplitter* newSplitter = new ViewSplitter(this);
         connect(newSplitter , &Konsole::ViewSplitter::empty , splitter , &Konsole::ViewSplitter::childEmpty);
 
-        ViewContainer* oldContainer = splitter->activeContainer();
-        const int oldContainerIndex = splitter->indexOf(oldContainer->containerWidget());
+        TabbedViewContainer* oldContainer = splitter->activeContainer();
+        const int oldContainerIndex = splitter->indexOf(oldContainer);
 
         splitter->unregisterContainer(oldContainer);
 
         newSplitter->registerContainer(oldContainer);
         newSplitter->registerContainer(container);
 
-        newSplitter->addWidget(oldContainer->containerWidget());
-        newSplitter->addWidget(container->containerWidget());
+        newSplitter->addWidget(oldContainer);
+        newSplitter->addWidget(container);
         newSplitter->setOrientation(containerOrientation);
         newSplitter->updateSizes();
         newSplitter->show();
@@ -173,18 +174,18 @@ void ViewSplitter::addContainer(ViewContainer* container ,
     }
 }
 
-void ViewSplitter::containerEmpty(ViewContainer* /*container*/)
+void ViewSplitter::containerEmpty(TabbedViewContainer* /*container*/)
 {
     int children = 0;
-    for(ViewContainer* container: _containers) {
-        children += container->views().count();
+    for(TabbedViewContainer* container: _containers) {
+        children += container->count();
     }
 
     if (children == 0)
         emit allContainersEmpty();
 }
 
-void ViewSplitter::containerDestroyed(ViewContainer* container)
+void ViewSplitter::containerDestroyed(TabbedViewContainer* container)
 {
     Q_ASSERT(_containers.contains(container));
 
@@ -197,7 +198,7 @@ void ViewSplitter::containerDestroyed(ViewContainer* container)
 
 void ViewSplitter::activateNextContainer()
 {
-    ViewContainer* active = activeContainer();
+    TabbedViewContainer* active = activeContainer();
 
     int index = _containers.indexOf(active);
 
@@ -214,7 +215,7 @@ void ViewSplitter::activateNextContainer()
 
 void ViewSplitter::activatePreviousContainer()
 {
-    ViewContainer* active = activeContainer();
+    TabbedViewContainer* active = activeContainer();
 
     int index = _containers.indexOf(active);
 
@@ -226,22 +227,22 @@ void ViewSplitter::activatePreviousContainer()
     setActiveContainer(_containers.at(index));
 }
 
-void ViewSplitter::setActiveContainer(ViewContainer* container)
+void ViewSplitter::setActiveContainer(TabbedViewContainer* container)
 {
-    QWidget* activeView = container->activeView();
+    QWidget* activeView = container->currentWidget();
 
     if (activeView)
         activeView->setFocus(Qt::OtherFocusReason);
 }
 
-ViewContainer* ViewSplitter::activeContainer() const
+TabbedViewContainer* ViewSplitter::activeContainer() const
 {
     if (QWidget* focusW = focusWidget()) {
-        ViewContainer* focusContainer = nullptr;
+        TabbedViewContainer* focusContainer = nullptr;
 
         while (focusW != nullptr) {
-            for(ViewContainer* container: _containers) {
-                if (container->containerWidget() == focusW) {
+            for(TabbedViewContainer* container: _containers) {
+                if (container == focusW) {
                     focusContainer = container;
                     break;
                 }

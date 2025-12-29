@@ -727,10 +727,7 @@ void MainWindow::applyKonsoleSettings()
         removeMenuAccelerators();
     }
 
-    _viewManager->setNavigationVisibility(KonsoleSettings::tabBarVisibility());
     _viewManager->setNavigationPosition(KonsoleSettings::tabBarPosition());
-    _viewManager->setNavigationBehavior(KonsoleSettings::newTabBehavior());
-    _viewManager->setShowQuickButtons(KonsoleSettings::showQuickButtons());
 
     if (KonsoleSettings::tabBarUseUserStyleSheet()) {
         setNavigationStyleSheetFromFile(KonsoleSettings::tabBarUserStyleSheetFile());

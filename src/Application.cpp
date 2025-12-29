@@ -334,18 +334,6 @@ MainWindow* Application::processWindowArgs(KCmdLineArgs* args, bool &createdNewM
         if (args->isSet("fullscreen")) {
             window->viewFullScreen(true);
         }
-
-        // override default tabbbar visibility
-        // FIXME: remove those magic number
-        // see ViewContainer::NavigationVisibility
-        if (args->isSet("show-tabbar")) {
-            // always show
-            window->viewManager()->setNavigationVisibility(0);
-        }
-        if (args->isSet("hide-tabbar")) {
-            // never show
-            window->viewManager()->setNavigationVisibility(2);
-        }
     }
     return window;
 }
