@@ -577,7 +577,7 @@ void SessionController::setupCommonActions()
 
     action = collection->addAction(QStringLiteral("clear-history"), this, SLOT(clearHistory()));
     action->setText(i18n("Clear Scrollback"));
-    action->setIcon(KIcon("edit-clear-history"));
+    action->setIcon(KIcon(QStringLiteral("edit-clear-history")));
 
     action = collection->addAction(QStringLiteral("clear-history-and-reset"), this, SLOT(clearHistoryAndReset()));
     action->setText(i18n("Clear Scrollback and Reset"));
@@ -607,7 +607,7 @@ void SessionController::setupCommonActions()
 
     // Character Encoding
     _codecAction = new KCodecAction(i18n("Set &Encoding"), this);
-    _codecAction->setIcon(KIcon("character-set"));
+    _codecAction->setIcon(KIcon(QStringLiteral("character-set")));
     collection->addAction(QStringLiteral("set-encoding"), _codecAction);
     connect(_codecAction->menu(), &QMenu::aboutToShow, this, &Konsole::SessionController::updateCodecAction);
     connect(_codecAction, static_cast<void(KCodecAction::*)(QTextCodec*)>(&KCodecAction::triggered), this, &Konsole::SessionController::changeCodec);
@@ -620,24 +620,24 @@ void SessionController::setupExtraActions()
     // Rename Session
     KAction* action = collection->addAction(QStringLiteral("rename-session"), this, SLOT(renameSession()));
     action->setText(i18n("&Rename Tab..."));
-    action->setIcon(KIcon("edit-rename"));
+    action->setIcon(KIcon(QStringLiteral("edit-rename")));
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::ALT + Qt::Key_S));
 
     // Copy input to ==> all tabs
-    KToggleAction* copyInputToAllTabsAction = collection->add<KToggleAction>("copy-input-to-all-tabs");
+    KToggleAction* copyInputToAllTabsAction = collection->add<KToggleAction>(QStringLiteral("copy-input-to-all-tabs"));
     copyInputToAllTabsAction->setText(i18n("&All Tabs in Current Window"));
     copyInputToAllTabsAction->setData(CopyInputToAllTabsMode);
     // this action is also used in other place, so remember it
     _copyInputToAllTabsAction = copyInputToAllTabsAction;
 
     // Copy input to ==> selected tabs
-    KToggleAction* copyInputToSelectedTabsAction = collection->add<KToggleAction>("copy-input-to-selected-tabs");
+    KToggleAction* copyInputToSelectedTabsAction = collection->add<KToggleAction>(QStringLiteral("copy-input-to-selected-tabs"));
     copyInputToSelectedTabsAction->setText(i18n("&Select Tabs..."));
     copyInputToSelectedTabsAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Period));
     copyInputToSelectedTabsAction->setData(CopyInputToSelectedTabsMode);
 
     // Copy input to ==> none
-    KToggleAction* copyInputToNoneAction = collection->add<KToggleAction>("copy-input-to-none");
+    KToggleAction* copyInputToNoneAction = collection->add<KToggleAction>(QStringLiteral("copy-input-to-none"));
     copyInputToNoneAction->setText(i18nc("@action:inmenu Do not select any tabs", "&None"));
     copyInputToNoneAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Slash));
     copyInputToNoneAction->setData(CopyInputToNoneMode);
@@ -645,7 +645,7 @@ void SessionController::setupExtraActions()
 
     // The "Copy Input To" submenu
     // The above three choices are represented as combo boxes
-    KSelectAction* copyInputActions = collection->add<KSelectAction>("copy-input-to");
+    KSelectAction* copyInputActions = collection->add<KSelectAction>(QStringLiteral("copy-input-to"));
     copyInputActions->setText(i18n("Copy Input To"));
     copyInputActions->addAction(copyInputToAllTabsAction);
     copyInputActions->addAction(copyInputToSelectedTabsAction);

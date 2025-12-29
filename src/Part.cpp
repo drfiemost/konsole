@@ -58,9 +58,9 @@ Part::Part(QWidget* parentWidget , QObject* parent, const QVariantList&)
     , _pluggedController(nullptr)
 {
     // make sure the konsole catalog is loaded
-    KGlobal::locale()->insertCatalog("konsole");
+    KGlobal::locale()->insertCatalog(QStringLiteral("konsole"));
     // make sure the libkonq catalog is loaded( needed for drag & drop )
-    KGlobal::locale()->insertCatalog("libkonq");
+    KGlobal::locale()->insertCatalog(QStringLiteral("libkonq"));
 
     // create view widget
     _viewManager = new ViewManager(this, actionCollection());

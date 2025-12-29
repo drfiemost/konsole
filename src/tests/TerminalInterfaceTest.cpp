@@ -82,7 +82,7 @@ void TerminalInterfaceTest::testTerminalInterface()
     int foregroundProcessId  = terminal->foregroundProcessId();
     QCOMPARE(foregroundProcessId, -1);
     QString foregroundProcessName  = terminal->foregroundProcessName();
-    QCOMPARE(foregroundProcessName, QString(""));
+    QCOMPARE(foregroundProcessName, QStringLiteral(""));
 
     // terminalProcessId() is the user's default shell
     // FIXME: find a way to verify this

@@ -47,7 +47,7 @@ void SaveHistoryTask::execute()
     // TODO - show a warning ( preferably passive ) if saving the history output fails
     //
 
-    KFileDialog* dialog = new KFileDialog(QString(":konsole") /* check this */,
+    KFileDialog* dialog = new KFileDialog(QStringLiteral(":konsole") /* check this */,
                                           QString(), QApplication::activeWindow());
     dialog->setOperationMode(KFileDialog::Saving);
     dialog->setConfirmOverwrite(true);

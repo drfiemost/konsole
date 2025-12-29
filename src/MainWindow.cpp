@@ -304,7 +304,7 @@ void MainWindow::setupActions()
     KActionCollection* collection = actionCollection();
 
     // File Menu
-    _newTabMenuAction = new KActionMenu(KIcon("tab-new"), i18nc("@action:inmenu", "&New Tab"), collection);
+    _newTabMenuAction = new KActionMenu(KIcon(QStringLiteral("tab-new")), i18nc("@action:inmenu", "&New Tab"), collection);
     _newTabMenuAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_T));
     _newTabMenuAction->setShortcutConfigurable(true);
     _newTabMenuAction->setAutoRepeat(false);
@@ -312,21 +312,21 @@ void MainWindow::setupActions()
     collection->addAction(QStringLiteral("new-tab"), _newTabMenuAction);
 
     KAction* menuAction = collection->addAction(QStringLiteral("clone-tab"));
-    menuAction->setIcon(KIcon("tab-duplicate"));
+    menuAction->setIcon(KIcon(QStringLiteral("tab-duplicate")));
     menuAction->setText(i18nc("@action:inmenu", "&Clone Tab"));
     menuAction->setShortcut(QKeySequence());
     menuAction->setAutoRepeat(false);
     connect(menuAction, &QAction::triggered, this, &Konsole::MainWindow::cloneTab);
 
-    menuAction = collection->addAction(QStringLiteral("new-window"));
-    menuAction->setIcon(KIcon("window-new"));
+    menuAction = collection->addAction(QStringLiteral("new)-window"));
+    menuAction->setIcon(KIcon(QStringLiteral("window-new")));
     menuAction->setText(i18nc("@action:inmenu", "New &Window"));
     menuAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_N));
     menuAction->setAutoRepeat(false);
     connect(menuAction, &QAction::triggered, this, &Konsole::MainWindow::newWindow);
 
     menuAction = collection->addAction(QStringLiteral("close-window"));
-    menuAction->setIcon(KIcon("window-close"));
+    menuAction->setIcon(KIcon(QStringLiteral("window-close")));
     menuAction->setText(i18nc("@action:inmenu", "Close Window"));
     menuAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Q));
     connect(menuAction, &QAction::triggered, this, &Konsole::MainWindow::close);
@@ -351,7 +351,7 @@ void MainWindow::setupActions()
 
     menuAction = collection->addAction(QStringLiteral("manage-profiles"));
     menuAction->setText(i18nc("@action:inmenu", "Manage Profiles..."));
-    menuAction->setIcon(KIcon("configure"));
+    menuAction->setIcon(KIcon(QStringLiteral("configure")));
     connect(menuAction, &QAction::triggered, this, &Konsole::MainWindow::showManageProfilesDialog);
 
     // Set up an shortcut-only action for activating menu bar.

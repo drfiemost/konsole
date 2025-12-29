@@ -380,7 +380,7 @@ void ProfileSettings::updateFavoriteStatus(Profile::Ptr profile, bool favorite)
     for (int i = 0; i < rowCount; i++) {
         QModelIndex index = _sessionModel->index(i, FavoriteStatusColumn);
         if (index.data(ProfileKeyRole).value<Profile::Ptr>() == profile) {
-            const KIcon icon = favorite ? KIcon("dialog-ok-apply") : KIcon();
+            const KIcon icon = favorite ? KIcon(QStringLiteral("dialog-ok-apply")) : KIcon();
             _sessionModel->setData(index, icon, Qt::DecorationRole);
         }
     }

@@ -174,15 +174,15 @@ void HTMLDecoder::begin(QTextStream* output)
 
     QString text;
 
-    text.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n");
-    text.append("\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
-    text.append("<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">\n");
-    text.append("<head>\n");
-    text.append("<title>Konsole output</title>\n");
-    text.append("<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\" />\n");
-    text.append("</head>\n");
-    text.append("<body>\n");
-    text.append("<div>\n");
+    text.append(QStringLiteral("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n"));
+    text.append(QStringLiteral("\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n"));
+    text.append(QStringLiteral("<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">\n"));
+    text.append(QStringLiteral("<head>\n"));
+    text.append(QStringLiteral("<title>Konsole output</title>\n"));
+    text.append(QStringLiteral("<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\" />\n"));
+    text.append(QStringLiteral("</head>\n"));
+    text.append(QStringLiteral("<body>\n"));
+    text.append(QStringLiteral("<div>\n"));
 
     //open monospace span
     openSpan(text, QStringLiteral("font-family:monospace"));
@@ -197,9 +197,9 @@ void HTMLDecoder::end()
     QString text;
 
     closeSpan(text);
-    text.append("</div>\n");
-    text.append("</body>\n");
-    text.append("</html>\n");
+    text.append(QStringLiteral("</div>\n"));
+    text.append(QStringLiteral("</body>\n"));
+    text.append(QStringLiteral("</html>\n"));
 
     *_output << text;
 

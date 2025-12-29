@@ -52,9 +52,9 @@ BookmarkHandler::BookmarkHandler(KActionCollection* collection,
 {
     setObjectName(QLatin1String("BookmarkHandler"));
 
-    _file = KStandardDirs::locate("data", "konsole/bookmarks.xml");
+    _file = KStandardDirs::locate("data", QStringLiteral("konsole/bookmarks.xml"));
     if (_file.isEmpty())
-        _file = KStandardDirs::locateLocal("data", "konsole/bookmarks.xml");
+        _file = KStandardDirs::locateLocal("data", QStringLiteral("konsole/bookmarks.xml"));
 
     KBookmarkManager* manager = KBookmarkManager::managerForFile(_file, QStringLiteral("konsole"));
 
