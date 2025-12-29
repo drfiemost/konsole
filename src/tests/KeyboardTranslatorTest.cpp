@@ -108,12 +108,12 @@ void KeyboardTranslatorTest::testFallback()
     auto entry = fallback->findEntry(Qt::Key_Tab, nullptr);
     QVERIFY(!entry.isNull());
     QCOMPARE(FallbackKeyboardTranslator::Command::NoCommand, entry.command());
-    QCOMPARE(static_cast<int>(Qt::Key_Tab), entry.keyCode());
+    QCOMPARE(int(Qt::Key_Tab), entry.keyCode());
     QCOMPARE(QByteArray("\t"), entry.text());
     QCOMPARE(QByteArray("\\t"), entry.escapedText());
-    QCOMPARE(static_cast<quint64>(Qt::NoModifier), static_cast<quint64>(entry.modifiers()));
-    QCOMPARE(static_cast<quint64>(Qt::NoModifier), static_cast<quint64>(entry.modifierMask()));
-    QCOMPARE(static_cast<quint64>(KeyboardTranslator::NoState), static_cast<quint64>(entry.state()));
+    QCOMPARE(Qt::KeyboardModifiers(Qt::NoModifier), entry.modifiers());
+    QCOMPARE(Qt::KeyboardModifiers(Qt::NoModifier), entry.modifierMask());
+    QCOMPARE(KeyboardTranslator::States(KeyboardTranslator::NoState), entry.state());
     QCOMPARE(QStringLiteral("Tab"), entry.conditionToString());
     QCOMPARE(QStringLiteral("\\t"), entry.resultToString());
     QVERIFY(entry.matches(Qt::Key_Tab, Qt::NoModifier, KeyboardTranslator::NoState));

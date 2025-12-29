@@ -273,7 +273,7 @@ void TerminalDisplay::setVTFont(const QFont& f)
     // QFontInfo::fixedPitch() appears to not match QFont::fixedPitch() - do not test it.
     // related?  https://bugreports.qt.io/browse/QTBUG-34082
     if (fontInfo.family() != newFont.family()
-            || fontInfo.pointSizeF() != newFont.pointSizeF()
+            || !qFuzzyCompare(fontInfo.pointSizeF(), newFont.pointSizeF())
             || fontInfo.styleHint()  != newFont.styleHint()
             || fontInfo.weight()     != newFont.weight()
             || fontInfo.style()      != newFont.style()
@@ -649,16 +649,18 @@ void TerminalDisplay::drawCursor(QPainter& painter,
             }
         }
     } else if (_cursorShape == Enum::UnderlineCursor) {
-        painter.drawLine(cursorRect.left(),
-                         cursorRect.bottom(),
-                         cursorRect.right(),
-                         cursorRect.bottom());
+        QLineF line(cursorRect.left() + 0.5,
+                    cursorRect.bottom() - 0.5,
+                    cursorRect.right() - 0.5,
+                    cursorRect.bottom() - 0.5);
+        painter.drawLine(line);
 
     } else if (_cursorShape == Enum::IBeamCursor) {
-        painter.drawLine(cursorRect.left(),
-                         cursorRect.top(),
-                         cursorRect.left(),
-                         cursorRect.bottom());
+        QLineF line(cursorRect.left() + 0.5,
+                    cursorRect.top() + 0.5,
+                    cursorRect.left() + 0.5,
+                    cursorRect.bottom() - 0.5);
+        painter.drawLine(line);
     }
 }
 
@@ -1837,11 +1839,7 @@ void TerminalDisplay::setScrollBarPosition(Enum::ScrollBarPositionEnum position)
     if (_scrollbarLocation == position)
         return;
 
-    if (position == Enum::ScrollBarHidden)
-        _scrollBar->hide();
-    else
-        _scrollBar->show();
-
+    _scrollBar->setHidden(position == Enum::ScrollBarHidden);
     _scrollbarLocation = position;
 
     propagateSize();
