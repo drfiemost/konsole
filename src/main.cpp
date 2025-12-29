@@ -46,26 +46,6 @@ bool shouldUseNewProcess();
 // restore sessions saved by KDE.
 void restoreSession(Application& app);
 
-
- void myMessageOutput(QtMsgType type, const char *msg)
- {
-     switch (type) {
-     case QtDebugMsg:
-         fprintf(stderr, "Debug: %s\n", msg);
-         break;
-     case QtWarningMsg:
-         fprintf(stderr, "Warning: %s\n", msg);
-         break;
-     case QtCriticalMsg:
-         fprintf(stderr, "Critical: %s\n", msg);
-         break;
-     case QtFatalMsg:
-         fprintf(stderr, "Fatal: %s\n", msg);
-         abort();
-     }
- }
-
-
 // ***
 // Entry point into the Konsole terminal application.
 // ***
@@ -96,8 +76,6 @@ extern "C" int KDE_EXPORT kdemain(int argc, char** argv)
     if (!KUniqueApplication::start(startFlags)) {
         exit(0);
     }
-
-    qInstallMsgHandler(myMessageOutput);
 
     Application app;
 
