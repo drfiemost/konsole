@@ -63,7 +63,6 @@
 #include "Filter.h"
 #include "TerminalCharacterDecoder.h"
 #include "Screen.h"
-#include "LineFont.h"
 #include "SessionController.h"
 #include "ExtendedCharTable.h"
 #include "TerminalDisplayAccessible.h"
@@ -72,6 +71,7 @@
 #include "Profile.h"
 #include "ViewManager.h" // for colorSchemeForProfile. // TODO: Rewrite this.
 #include "IncrementalSearchBar.h"
+#include "LineBlockCharacters.h"
 
 #define MAX_LINE_WIDTH 1024
 
@@ -184,7 +184,7 @@ static inline bool isLineCharString(const QString& string)
     if (string.length() == 0)
         return false;
 
-    return isSupportedLineChar(string.at(0).unicode());
+    return LineBlockCharacters::canDraw(string.at(0).unicode());
 }
 
 void TerminalDisplay::fontChange(const QFont&)
@@ -228,18 +228,6 @@ void TerminalDisplay::setVTFont(const QFont& f)
     // fall back to a Monospace fonts.
     newFont.setStyleHint(QFont::TypeWriter);
 
-    QFontMetrics fontMetrics(newFont);
-
-    // This check seems extreme and semi-random
-    // TODO: research if these checks are still needed to prevent
-    // enormous fonts from being used; consider usage on big TV
-    // screens.
-    if ((fontMetrics.height() > height()) || (fontMetrics.maxWidth() > width())) {
-        // return here will cause the "general" non-fixed width font
-        // to be selected
-        return;
-    }
-
     // hint that text should be drawn without anti-aliasing.
     // depending on the user's font configuration, this may not be respected
     if (!_antialiasText)
@@ -249,6 +237,11 @@ void TerminalDisplay::setVTFont(const QFont& f)
     // mono-spaced font, in which case kerning information should have an effect.
     // Disabling kerning saves some computation when rendering text.
     newFont.setKerning(false);
+
+    // "Draw intense colors in bold font" feature needs to use different font weights. StyleName
+    // property, when set, doesn't allow weight changes. Since all properties (weight, stretch,
+    // italic, etc) are stored in QFont independently, in almost all cases styleName is not needed.
+    newFont.setStyleName(QString());
 
     // Konsole cannot handle non-integer font metrics
     newFont.setStyleStrategy(QFont::StyleStrategy(newFont.styleStrategy() | QFont::ForceIntegerMetrics));
@@ -266,30 +259,43 @@ void TerminalDisplay::setVTFont(const QFont& f)
         kDebug()<<"Font changed to "<<newFont.toString();
     }
 
+    if (newFont == font()) {
+        // Do not process the same font again
+        return;
+    }
+
     QFontInfo fontInfo(newFont);
 
     if (!fontInfo.fixedPitch()) {
         qWarning() << "Using a variable-width font - this might cause display problems";
     }
 
-    // QFontInfo::fixedPitch() appears to not match QFont::fixedPitch()
+    // QFontInfo::fixedPitch() appears to not match QFont::fixedPitch() - do not test it.
     // related?  https://bugreports.qt.io/browse/QTBUG-34082
-    if (!fontInfo.exactMatch()) {
-        const QChar comma(QLatin1Char(','));
-        QString nonMatching = fontInfo.family() % comma %
-            QString::number(fontInfo.pointSizeF()) % comma %
-            QString::number(fontInfo.pixelSize()) % comma %
-            QString::number(static_cast<int>(fontInfo.styleHint())) % comma %
-            QString::number(fontInfo.weight()) % comma %
-            QString::number(static_cast<int>(fontInfo.style())) % comma %
-            QString::number(static_cast<int>(fontInfo.underline())) % comma %
-            QString::number(static_cast<int>(fontInfo.strikeOut())) % comma %
-            QString::number(static_cast<int>(fontInfo.fixedPitch())) % comma %
-            QString::number(static_cast<int>(fontInfo.rawMode()));
+    if (fontInfo.family() != newFont.family()
+            || fontInfo.pointSizeF() != newFont.pointSizeF()
+            || fontInfo.styleHint()  != newFont.styleHint()
+            || fontInfo.weight()     != newFont.weight()
+            || fontInfo.style()      != newFont.style()
+            || fontInfo.underline()  != newFont.underline()
+            || fontInfo.strikeOut()  != newFont.strikeOut()
+            || fontInfo.rawMode()    != newFont.rawMode()) {
+        const QString nonMatching = QString::asprintf("%s,%g,%d,%d,%d,%d,%d,%d,%d,%d",
+                qPrintable(fontInfo.family()),
+                fontInfo.pointSizeF(),
+                -1, // pixelSize is not used
+                static_cast<int>(fontInfo.styleHint()),
+                fontInfo.weight(),
+                static_cast<int>(fontInfo.style()),
+                static_cast<int>(fontInfo.underline()),
+                static_cast<int>(fontInfo.strikeOut()),
+                // Intentional newFont use - fixedPitch is bugged, see comment above
+                static_cast<int>(newFont.fixedPitch()),
+                static_cast<int>(fontInfo.rawMode()));
 
         qWarning() << "The font to use in the terminal can not be matched exactly on your system.";
-        qWarning()<<" Selected: "<<newFont.toString();
-        qWarning()<<" System  : "<<nonMatching;
+        qWarning() << " Selected: " << newFont.toString();
+        qWarning() << " System  : " << nonMatching;
     }
 
     QWidget::setFont(newFont);
@@ -332,7 +338,7 @@ uint TerminalDisplay::lineSpacing() const
 void TerminalDisplay::setLineSpacing(uint i)
 {
     _lineSpacing = i;
-    setVTFont(font()); // Trigger an update.
+    fontChange(font()); // Trigger an update.
 }
 
 
@@ -501,358 +507,16 @@ TerminalDisplay::~TerminalDisplay()
 /*                                                                           */
 /* ------------------------------------------------------------------------- */
 
-/**
- A table for emulating the simple (single width) unicode drawing chars.
- It represents the 250x - 257x glyphs. If it's zero, we can't use it.
- if it's not, it's encoded as follows: imagine a 5x5 grid where the points are numbered
- 0 to 24 left to top, top to bottom. Each point is represented by the corresponding bit.
-
- Then, the pixels basically have the following interpretation:
- _|||_
- -...-
- -...-
- -...-
- _|||_
-
-where _ = none
-      | = vertical line.
-      - = horizontal line.
- */
-
-enum LineEncode {
-    TopL  = (1 << 1),
-    TopC  = (1 << 2),
-    TopR  = (1 << 3),
-
-    LeftT = (1 << 5),
-    Int11 = (1 << 6),
-    Int12 = (1 << 7),
-    Int13 = (1 << 8),
-    RightT = (1 << 9),
-
-    LeftC = (1 << 10),
-    Int21 = (1 << 11),
-    Int22 = (1 << 12),
-    Int23 = (1 << 13),
-    RightC = (1 << 14),
-
-    LeftB = (1 << 15),
-    Int31 = (1 << 16),
-    Int32 = (1 << 17),
-    Int33 = (1 << 18),
-    RightB = (1 << 19),
-
-    BotL  = (1 << 21),
-    BotC  = (1 << 22),
-    BotR  = (1 << 23)
-};
-
-static void drawLineChar(QPainter& paint, int x, int y, int w, int h, uchar code)
-{
-    //Calculate cell midpoints, end points.
-    const int cx = x + w / 2;
-    const int cy = y + h / 2. - 0.5;
-    const int ex = x + w - 1;
-    const int ey = y + h - 1;
-
-    const quint32 toDraw = LineChars[code];
-
-    //Top _lines:
-    if (toDraw & TopL)
-        paint.drawLine(cx - 1, y, cx - 1, cy - 2);
-    if (toDraw & TopC)
-        paint.drawLine(cx, y, cx, cy - 2);
-    if (toDraw & TopR)
-        paint.drawLine(cx + 1, y, cx + 1, cy - 2);
-
-    //Bot _lines:
-    if (toDraw & BotL)
-        paint.drawLine(cx - 1, cy + 2, cx - 1, ey);
-    if (toDraw & BotC)
-        paint.drawLine(cx, cy + 2, cx, ey);
-    if (toDraw & BotR)
-        paint.drawLine(cx + 1, cy + 2, cx + 1, ey);
-
-    //Left _lines:
-    if (toDraw & LeftT)
-        paint.drawLine(x, cy - 1, cx - 2, cy - 1);
-    if (toDraw & LeftC)
-        paint.drawLine(x, cy, cx - 2, cy);
-    if (toDraw & LeftB)
-        paint.drawLine(x, cy + 1, cx - 2, cy + 1);
-
-    //Right _lines:
-    if (toDraw & RightT)
-        paint.drawLine(cx + 2, cy - 1, ex, cy - 1);
-    if (toDraw & RightC)
-        paint.drawLine(cx + 2, cy, ex, cy);
-    if (toDraw & RightB)
-        paint.drawLine(cx + 2, cy + 1, ex, cy + 1);
-
-    //Intersection points.
-    if (toDraw & Int11)
-        paint.drawPoint(cx - 2, cy - 2);
-    if (toDraw & Int12)
-        paint.drawPoint(cx - 1, cy - 2);
-    if (toDraw & Int13)
-        paint.drawPoint(cx - 0, cy - 2);
-
-    if (toDraw & Int21)
-        paint.drawPoint(cx - 2, cy - 1);
-    if (toDraw & Int22)
-        paint.drawPoint(cx - 1, cy - 1);
-    if (toDraw & Int23)
-        paint.drawPoint(cx - 0, cy - 1);
-
-    if (toDraw & Int31)
-        paint.drawPoint(cx - 2, cy);
-    if (toDraw & Int32)
-        paint.drawPoint(cx - 1, cy);
-    if (toDraw & Int33)
-        paint.drawPoint(cx - 0, cy);
-}
-
-static void drawOtherChar(QPainter& paint, int x, int y, int w, int h, uchar code)
-{
-    //Calculate cell midpoints, end points.
-    const int cx = x + w / 2;
-    const int cy = y + h / 2. - 0.5; // Compensate for the translation, to match fonts
-    const int ex = x + w - 1;
-    const int ey = y + h - 1;
-
-    // Double dashes
-    if (0x4C <= code && code <= 0x4F) {
-        const int xHalfGap = std::max(w / 15, 1);
-        const int yHalfGap = std::max(h / 15, 1);
-        switch (code) {
-        case 0x4D: // BOX DRAWINGS HEAVY DOUBLE DASH HORIZONTAL
-            paint.drawLine(x, cy - 1, cx - xHalfGap - 1, cy - 1);
-            paint.drawLine(x, cy + 1, cx - xHalfGap - 1, cy + 1);
-            paint.drawLine(cx + xHalfGap, cy - 1, ex, cy - 1);
-            paint.drawLine(cx + xHalfGap, cy + 1, ex, cy + 1);
-            [[fallthrough]];
-        case 0x4C: // BOX DRAWINGS LIGHT DOUBLE DASH HORIZONTAL
-            paint.drawLine(x, cy, cx - xHalfGap - 1, cy);
-            paint.drawLine(cx + xHalfGap, cy, ex, cy);
-            break;
-        case 0x4F: // BOX DRAWINGS HEAVY DOUBLE DASH VERTICAL
-            paint.drawLine(cx - 1, y, cx - 1, cy - yHalfGap - 1);
-            paint.drawLine(cx + 1, y, cx + 1, cy - yHalfGap - 1);
-            paint.drawLine(cx - 1, cy + yHalfGap, cx - 1, ey);
-            paint.drawLine(cx + 1, cy + yHalfGap, cx + 1, ey);
-            [[fallthrough]];
-        case 0x4E: // BOX DRAWINGS LIGHT DOUBLE DASH VERTICAL
-            paint.drawLine(cx, y, cx, cy - yHalfGap - 1);
-            paint.drawLine(cx, cy + yHalfGap, cx, ey);
-            break;
-        }
-    }
-
-    // Rounded corner characters
-    else if (0x6D <= code && code <= 0x70) {
-        const int r = w * 3 / 8;
-        const int d = 2 * r;
-        switch (code) {
-        case 0x6D: // BOX DRAWINGS LIGHT ARC DOWN AND RIGHT
-            paint.drawLine(cx, cy + r, cx, ey);
-            paint.drawLine(cx + r, cy, ex, cy);
-            paint.drawArc(cx, cy, d, d, 90 * 16, 90 * 16);
-            break;
-        case 0x6E: // BOX DRAWINGS LIGHT ARC DOWN AND LEFT
-            paint.drawLine(cx, cy + r, cx, ey);
-            paint.drawLine(x, cy, cx - r, cy);
-            paint.drawArc(cx - d, cy, d, d, 0 * 16, 90 * 16);
-            break;
-        case 0x6F: // BOX DRAWINGS LIGHT ARC UP AND LEFT
-            paint.drawLine(cx, y, cx, cy - r);
-            paint.drawLine(x, cy, cx - r, cy);
-            paint.drawArc(cx - d, cy - d, d, d, 270 * 16, 90 * 16);
-            break;
-        case 0x70: // BOX DRAWINGS LIGHT ARC UP AND RIGHT
-            paint.drawLine(cx, y, cx, cy - r);
-            paint.drawLine(cx + r, cy, ex, cy);
-            paint.drawArc(cx, cy - d, d, d, 180 * 16, 90 * 16);
-            break;
-        }
-    }
-
-    // Diagonals
-    else if (0x71 <= code && code <= 0x73) {
-        switch (code) {
-        case 0x71: // BOX DRAWINGS LIGHT DIAGONAL UPPER RIGHT TO LOWER LEFT
-            paint.drawLine(ex, y, x, ey);
-            break;
-        case 0x72: // BOX DRAWINGS LIGHT DIAGONAL UPPER LEFT TO LOWER RIGHT
-            paint.drawLine(x, y, ex, ey);
-            break;
-        case 0x73: // BOX DRAWINGS LIGHT DIAGONAL CROSS
-            paint.drawLine(ex, y, x, ey);
-            paint.drawLine(x, y, ex, ey);
-            break;
-        }
-    }
-}
-
-static void drawBlockChar(QPainter& paint, int x, int y, int w, int h, uchar code)
-{
-    const QColor color = paint.pen().color();
-
-    const float left = x - 0.5;
-    const float top = y - 0.5;
-
-    const float cx = left + w / 2;
-    const float cy = top + h / 2;
-    const float right = x + w - 0.5;
-    const float bottom = y + h - 0.5;
-
-    // Default rect fills entire cell
-    QRectF rect(left, top, w, h);
-
-    // LOWER ONE EIGHTH BLOCK to LEFT ONE EIGHTH BLOCK
-    if (code >= 0x81 && code <= 0x8f) {
-        if (code < 0x88) { // Horizontal
-            const int height = h * (0x88 - code) / 8;
-            rect.setY(top + height);
-            rect.setHeight(h - height);
-        } else if (code > 0x88) { // Vertical
-            const int width = w * (0x90 - code) / 8;
-            rect.setWidth(width);
-        }
-
-        paint.fillRect(rect, color);
-
-        return;
-    }
-
-    // Combinations of quarter squares
-    // LEFT ONE EIGHTH BLOCK to QUADRANT UPPER RIGHT AND LOWER LEFT AND LOWER RIGHT
-    if (code >= 0x96 && code <= 0x9F) {
-        bool upperLeft = false, upperRight = false,
-             lowerLeft = false, lowerRight = false;
-
-        switch(code) {
-        case 0x96:
-            lowerLeft = true;
-            break;
-        case 0x97:
-            lowerRight = true;
-            break;
-        case 0x98:
-            upperLeft = true;
-            break;
-        case 0x99:
-            upperLeft = true;
-            lowerLeft = true;
-            lowerRight = true;
-            break;
-        case 0x9a:
-            upperLeft = true;
-            lowerRight = true;
-            break;
-        case 0x9b:
-            upperLeft = true;
-            upperRight = true;
-            lowerLeft = true;
-            break;
-        case 0x9c:
-            upperLeft = true;
-            upperRight = true;
-            lowerRight = true;
-            break;
-        case 0x9d:
-            upperRight = true;
-            break;
-        case 0x9e:
-            upperRight = true;
-            lowerLeft = true;
-            break;
-        case 0x9f:
-            upperRight = true;
-            lowerLeft = true;
-            lowerRight = true;
-            break;
-        default:
-            break;
-        }
-
-        if (upperLeft) {
-            paint.fillRect(QRectF(QPointF(left, top), QPointF(cx, cy)), color);
-        }
-        if (upperRight) {
-            paint.fillRect(QRectF(QPointF(cx, top), QPointF(right, cy)), color);
-        }
-        if (lowerLeft) {
-            paint.fillRect(QRectF(QPointF(left, cy), QPointF(cx, bottom)), color);
-        }
-        if (lowerRight) {
-            paint.fillRect(QRectF(QPointF(cx, cy), QPointF(right, bottom)), color);
-        }
-
-        return;
-    }
-
-    // And the random stuff
-    switch(code) {
-    case 0x80: // Top half block
-        rect.setHeight(h / 2);
-        paint.fillRect(rect, color);
-        return;
-    case 0x90: // Right half block
-        paint.fillRect(QRectF(QPointF(cx, top), QPointF(right, bottom)), color);
-        return;
-    case 0x94: // Top one eighth block
-        rect.setHeight(h / 8);
-        paint.fillRect(rect, color);
-        return;
-    case 0x95: { // Right one eighth block
-        const float width = 7 * w / 8;
-        rect.setX(left + width);
-        rect.setWidth(w - width);
-        paint.fillRect(rect, color);
-        return;
-    }
-    case 0x91: // Light shade
-        paint.fillRect(rect, QBrush(color, Qt::Dense6Pattern));
-        return;
-    case 0x92: // Medium shade
-        paint.fillRect(rect, QBrush(color, Qt::Dense4Pattern));
-        return;
-    case 0x93: // Dark shade
-        paint.fillRect(rect, QBrush(color, Qt::Dense2Pattern));
-        return;
-
-    default:
-        break;
-    }
-}
-
 void TerminalDisplay::drawLineCharString(QPainter& painter, int x, int y, const QString& str,
         const Character* attributes)
 {
-    painter.save();
+    const bool useBoldPen = (attributes->rendition & RE_BOLD) != 0 && _boldIntense;
 
-    // For antialiasing, we need to shift it so the single pixel width is in the middle
-    painter.translate(0.5, 0.5);
-
-    if ((attributes->rendition & RE_BOLD) && _boldIntense) {
-        QPen boldPen(painter.pen());
-        boldPen.setWidth(4);
-        painter.setPen(boldPen);
-    }
-
+    QRect cellRect = {x, y, _fontWidth, _fontHeight};
     for (int i = 0 ; i < str.length(); i++) {
-        const uchar code = str[i].cell();
-
-        if (code >= 0x80 && code <= 0x9F) { // UPPER HALF BLOCK to QUADRANT UPPER RIGHT AND LOWER LEFT AND LOWER RIGHT
-            drawBlockChar(painter, x + (_fontWidth * i), y, _fontWidth, _fontHeight, code);
-        } else if (LineChars[code] != 0u) {
-            drawLineChar(painter, x + (_fontWidth * i), y, _fontWidth, _fontHeight, code);
-        } else {
-            drawOtherChar(painter, x + (_fontWidth * i), y, _fontWidth, _fontHeight, code);
-        }
+        LineBlockCharacters::draw(painter, cellRect.translated(i * _fontWidth, 0), str[i],
+                                        useBoldPen);
     }
-
-    painter.restore();
 }
 
 void TerminalDisplay::setKeyboardCursorShape(Enum::CursorShapeEnum shape)
@@ -1012,25 +676,32 @@ void TerminalDisplay::drawCharacters(QPainter& painter,
     if (style->rendition & RE_CONCEAL)
         return;
 
-    // setup bold and underline
-    bool useBold = ((style->rendition & RE_BOLD) && _boldIntense) || font().bold();
+    const int normalWeight = font().weight();
+    // +26 makes "bold" from "normal", "normal" from "light", etc. It is 26 instead of not 25 to prefer
+    // bolder weight when 25 falls in the middle between two weights. See QFont::Weight
+    const int boldWeight = normalWeight + 26;
+
+    const auto isBold = [boldWeight](const QFont &font) { return font.weight() >= boldWeight; };
+
+    const bool useBold = (((style->rendition & RE_BOLD) != 0) && _boldIntense);
     const bool useUnderline = style->rendition & RE_UNDERLINE || font().underline();
     const bool useItalic = style->rendition & RE_ITALIC || font().italic();
     const bool useStrikeOut = style->rendition & RE_STRIKEOUT || font().strikeOut();
     const bool useOverline = style->rendition & RE_OVERLINE || font().overline();
 
-    QFont font = painter.font();
-    if (font.bold() != useBold
-            || font.underline() != useUnderline
-            || font.italic() != useItalic
-            || font.strikeOut() != useStrikeOut
-            || font.overline() != useOverline) {
-        font.setBold(useBold);
-        font.setUnderline(useUnderline);
-        font.setItalic(useItalic);
-        font.setStrikeOut(useStrikeOut);
-        font.setOverline(useOverline);
-        painter.setFont(font);
+    QFont currentFont = painter.font();
+
+    if (isBold(currentFont) != useBold
+            || currentFont.underline() != useUnderline
+            || currentFont.italic() != useItalic
+            || currentFont.strikeOut() != useStrikeOut
+            || currentFont.overline() != useOverline) {
+        currentFont.setWeight(useBold ? boldWeight : normalWeight);
+        currentFont.setUnderline(useUnderline);
+        currentFont.setItalic(useItalic);
+        currentFont.setStrikeOut(useStrikeOut);
+        currentFont.setOverline(useOverline);
+        painter.setFont(currentFont);
     }
 
     // setup pen
@@ -1042,6 +713,9 @@ void TerminalDisplay::drawCharacters(QPainter& painter,
         painter.setPen(pen);
     }
 
+    const bool origClipping = painter.hasClipping();
+    const auto origClipRegion = painter.clipRegion();
+    painter.setClipRect(rect);
     // draw text
     if (isLineCharString(text) && !_useFontLineCharacters) {
         drawLineCharString(painter, rect.x(), rect.y(), text, style);
@@ -1052,14 +726,14 @@ void TerminalDisplay::drawCharacters(QPainter& painter,
         // This still allows RTL characters to be rendered in the RTL way.
         painter.setLayoutDirection(Qt::LeftToRight);
 
-        painter.setClipRect(rect);
         if (_bidiEnabled) {
             painter.drawText(rect.x(), rect.y() + _fontAscent + _lineSpacing, text);
         } else {
             painter.drawText(rect.x(), rect.y() + _fontAscent + _lineSpacing, LTR_OVERRIDE_CHAR + text);
         }
-        painter.setClipping(false);
     }
+    painter.setClipRegion(origClipRegion);
+    painter.setClipping(origClipping);
 }
 
 void TerminalDisplay::drawTextFragment(QPainter& painter ,
@@ -1334,7 +1008,7 @@ void TerminalDisplay::updateImage()
                 if (dirtyMask[x]) {
                     if (!newLine[x + 0].character)
                         continue;
-                    const bool lineDraw = newLine[x + 0].isLineChar();
+                    const bool lineDraw = LineBlockCharacters::canDraw(newLine[x + 0].character);
                     const bool doubleWidth = (x + 1 == columnsToUpdate) ? false : (newLine[x + 1].character == 0);
                     const RenditionFlags cr = newLine[x].rendition;
                     const CharacterColor clipboard = newLine[x].backgroundColor;
@@ -1352,7 +1026,7 @@ void TerminalDisplay::updateImage()
                                 ch.backgroundColor != clipboard ||
                                 (ch.rendition & ~RE_EXTENDED_CHAR) != (cr & ~RE_EXTENDED_CHAR) ||
                                 !dirtyMask[x + len] ||
-                                ch.isLineChar() != lineDraw ||
+                                LineBlockCharacters::canDraw(ch.character) != lineDraw ||
                                 nextIsDoubleWidth != doubleWidth)
                             break;
                     }
@@ -1714,7 +1388,7 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
                 }
             }
 
-            const bool lineDraw = _image[loc(x, y)].isLineChar();
+            const bool lineDraw = LineBlockCharacters::canDraw(_image[loc(x, y)].character);
             const bool doubleWidth = (_image[std::min(loc(x, y) + 1, _imageSize - 1)].character == 0);
             const CharacterColor currentForeground = _image[loc(x, y)].foregroundColor;
             const CharacterColor currentBackground = _image[loc(x, y)].backgroundColor;

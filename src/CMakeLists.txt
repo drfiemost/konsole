@@ -37,10 +37,6 @@ macro_optional_add_subdirectory(tests)
 ### Security concerns about sendText and runCommand dbus methods being public
 option(REMOVE_SENDTEXT_RUNCOMMAND_DBUS_METHODS "Konsole: remove sendText and runCommand dbus methods" OFF)
 
-### Font Embedder and LineFont.h
-option(KONSOLE_BUILD_FONTEMBEDDER "Konsole: build fontembedder executable" OFF)
-option(KONSOLE_GENERATE_LINEFONT "Konsole: regenerate LineFont file" OFF)
-
 ### Konsole source files shared between embedded terminal and main application
 # qdbuscpp2xml -m  Session.h -o org.kde.konsole.Session.xml
 # qdbuscpp2xml -M -s ViewManager.h -o org.kde.konsole.Konsole.xml
@@ -99,6 +95,7 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         ExtendedCharTable.cpp
                         TerminalDisplay.cpp
                         TerminalDisplayAccessible.cpp
+                        LineBlockCharacters.cpp
                         ViewContainer.cpp
                         ViewContainerTabBar.cpp
                         ViewManager.cpp
