@@ -103,11 +103,6 @@ void HistoryFile::unmap()
     Q_ASSERT(_fileMap == nullptr);
 }
 
-bool HistoryFile::isMapped() const
-{
-    return (_fileMap != nullptr);
-}
-
 void HistoryFile::add(const char* buffer, qint64 count)
 {
     if (_fileMap)

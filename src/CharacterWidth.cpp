@@ -47,7 +47,7 @@ struct RangeLut {
 };
 
 enum {
-    InvalidWidth = INT8_MIN,
+    InvalidWidth = INT8_MIN
 };
 
 

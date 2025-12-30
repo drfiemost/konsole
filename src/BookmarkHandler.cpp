@@ -60,10 +60,7 @@ BookmarkHandler::BookmarkHandler(KActionCollection* collection,
 
     manager->setUpdate(true);
 
-    if (toplevel)
-        _bookmarkMenu = new KBookmarkMenu(manager, this, _menu, collection);
-    else
-        _bookmarkMenu = new KBookmarkMenu(manager, this, _menu, nullptr);
+    _bookmarkMenu = new KBookmarkMenu(manager, this, _menu, toplevel ? collection : nullptr);
 }
 
 BookmarkHandler::~BookmarkHandler()
@@ -83,8 +80,8 @@ bool BookmarkHandler::enableOption(BookmarkOption option) const
 {
     if (option == ShowAddBookmark || option == ShowEditBookmark)
         return _toplevel;
-    else
-        return KBookmarkOwner::enableOption(option);
+
+    return KBookmarkOwner::enableOption(option);
 }
 
 QString BookmarkHandler::currentUrl() const
@@ -96,8 +93,8 @@ QString BookmarkHandler::urlForView(ViewProperties* view) const
 {
     if (view)
         return view->url().prettyUrl();
-    else
-        return QString();
+
+    return QString();
 }
 
 QString BookmarkHandler::currentTitle() const
@@ -115,11 +112,13 @@ QString BookmarkHandler::titleForView(ViewProperties* view) const
         path = QFileInfo(path).completeBaseName();
 
         return path;
-    } else if (url.hasHost()) {
+    }
+
+    if (url.hasHost()) {
         if (url.hasUser())
             return i18nc("@item:inmenu The user's name and host they are connected to via ssh", "%1 on %2", url.user(), url.host());
-        else
-            return i18nc("@item:inmenu The host the user is connected to via ssh", "%1", url.host());
+
+        return i18nc("@item:inmenu The host the user is connected to via ssh", "%1", url.host());
     }
 
     return url.prettyUrl();

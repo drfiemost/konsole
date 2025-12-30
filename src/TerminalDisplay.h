@@ -579,13 +579,6 @@ private slots:
     void swapFGBGColors();
     void viewScrolledByUser();
 
-    /**
-     * Called from the drag-and-drop popup. Causes the dropped URLs to be pasted as text.
-     */
-    void dropMenuPasteActionTriggered();
-
-    void dropMenuCdActionTriggered();
-
     void dismissOutputSuspendedMessage();
 
 private:

@@ -309,9 +309,8 @@ void ColorScheme::setRandomizedBackgroundColor(bool randomize)
         }
 
         setRandomizationRange(BGCOLOR_INDEX, MAX_HUE, 255, maxValue);
-    } else {
-        if (_randomTable)
-            setRandomizationRange(BGCOLOR_INDEX , 0 , 0 , 0);
+    } else if (_randomTable) {
+        setRandomizationRange(BGCOLOR_INDEX , 0 , 0 , 0);
     }
 }
 

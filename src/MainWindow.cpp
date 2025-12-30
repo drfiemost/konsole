@@ -697,7 +697,7 @@ void MainWindow::showSettingsDialog(const bool showProfilePage)
         return;
 
     KConfigDialog* settingsDialog = new KConfigDialog(this, QStringLiteral("settings"), KonsoleSettings::self());
-    settingsDialog->setFaceType(KPageDialog::Tabbed);
+    settingsDialog->setFaceType(KPageDialog::List);
 
     GeneralSettings* generalSettings = new GeneralSettings(settingsDialog);
     settingsDialog->addPage(generalSettings,

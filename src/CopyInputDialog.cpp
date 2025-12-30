@@ -115,10 +115,7 @@ void CopyInputDialog::setRowChecked(int row, bool checked)
 {
     QAbstractItemModel* model = _ui->sessionList->model();
     QModelIndex index = model->index(row, _model->checkColumn());
-    if (checked)
-        model->setData(index, static_cast<int>(Qt::Checked), Qt::CheckStateRole);
-    else
-        model->setData(index, static_cast<int>(Qt::Unchecked), Qt::CheckStateRole);
+    model->setData(index, static_cast<int>( checked ? Qt::Checked : Qt::Unchecked), Qt::CheckStateRole);
 }
 CheckableSessionModel::CheckableSessionModel(QObject* parent)
     : SessionListModel(parent)
@@ -138,21 +135,20 @@ Qt::ItemFlags CheckableSessionModel::flags(const QModelIndex& index) const
 
     if (_fixedSessions.contains(session))
         return SessionListModel::flags(index) & ~Qt::ItemIsEnabled;
-    else
-        return SessionListModel::flags(index) | Qt::ItemIsUserCheckable;
+
+    return SessionListModel::flags(index) | Qt::ItemIsUserCheckable;
 }
 QVariant CheckableSessionModel::data(const QModelIndex& index, int role) const
 {
     if (role == Qt::CheckStateRole && index.column() == _checkColumn) {
         Session* session = static_cast<Session*>(index.internalPointer());
 
-        if (_checkedSessions.contains(session))
-            return QVariant::fromValue(static_cast<int>(Qt::Checked));
-        else
-            return QVariant::fromValue(static_cast<int>(Qt::Unchecked));
-    } else {
-        return SessionListModel::data(index, role);
+        return QVariant::fromValue(static_cast<int>(
+            _checkedSessions.contains(session) ? Qt::Checked : Qt::Unchecked)
+        );
     }
+
+    return SessionListModel::data(index, role);
 }
 bool CheckableSessionModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
@@ -162,16 +158,16 @@ bool CheckableSessionModel::setData(const QModelIndex& index, const QVariant& va
         if (_fixedSessions.contains(session))
             return false;
 
-        if (value.value<int>() == Qt::Checked)
+        if (value.toInt() == Qt::Checked)
             _checkedSessions.insert(session);
         else
             _checkedSessions.remove(session);
 
         emit dataChanged(index, index);
         return true;
-    } else {
-        return SessionListModel::setData(index, value, role);
     }
+
+    return SessionListModel::setData(index, value, role);
 }
 void CheckableSessionModel::setCheckedSessions(const QSet<Session*>& sessions)
 {

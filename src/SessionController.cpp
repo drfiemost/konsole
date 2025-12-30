@@ -453,7 +453,7 @@ void SessionController::configureWebShortcuts()
 
 void SessionController::sendSignal(QAction* action)
 {
-    const int signal = action->data().value<int>();
+    const int signal = action->data().toInt();
     _session->sendSignal(signal);
 }
 
@@ -958,7 +958,7 @@ static bool hasTerminalDisplayInSameWindow(const Session* session, const KXmlGui
 
 void SessionController::copyInputActionsTriggered(QAction* action)
 {
-    const int mode = action->data().value<int>();
+    const int mode = action->data().toInt();
 
     switch (mode) {
     case CopyInputToAllTabsMode:
