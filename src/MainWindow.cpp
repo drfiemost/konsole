@@ -241,6 +241,9 @@ void MainWindow::activeViewChanged(SessionController* controller)
 
     Q_ASSERT(controller);
     _pluggedController = controller;
+
+    // Causes crashes and a suspicious warning:
+    // QCoreApplication: Object event filter cannot be in a different thread.
     //_pluggedController->view()->installEventFilter(this);
 
     // listen for title changes from the current session

@@ -29,10 +29,10 @@
 
 // KDE
 #include <KShell>
-#include <KBookmarkMenu>
 #include <KStandardDirs>
 
 // Konsole
+#include "BookmarkMenu.h"
 #include "ViewProperties.h"
 
 using namespace Konsole;
@@ -44,7 +44,6 @@ BookmarkHandler::BookmarkHandler(KActionCollection* collection,
     :  QObject(parent)
     , KBookmarkOwner()
     , _menu(menu)
-    , _bookmarkMenu(nullptr)
     , _file(QString())
     , _toplevel(toplevel)
     , _activeView(nullptr)
@@ -57,15 +56,14 @@ BookmarkHandler::BookmarkHandler(KActionCollection* collection,
         _file = KStandardDirs::locateLocal("data", QStringLiteral("konsole/bookmarks.xml"));
 
     KBookmarkManager* manager = KBookmarkManager::managerForFile(_file, QStringLiteral("konsole"));
-
     manager->setUpdate(true);
 
-    _bookmarkMenu = new KBookmarkMenu(manager, this, _menu, toplevel ? collection : nullptr);
+    BookmarkMenu *bookmarkMenu = new BookmarkMenu(manager, this, _menu, toplevel ? collection : nullptr);
+    bookmarkMenu->setParent(this);
 }
 
 BookmarkHandler::~BookmarkHandler()
 {
-    delete _bookmarkMenu;
 }
 
 void BookmarkHandler::openBookmark(const KBookmark& bm, Qt::MouseButtons, Qt::KeyboardModifiers)
@@ -122,23 +120,6 @@ QString BookmarkHandler::titleForView(ViewProperties* view) const
     }
 
     return url.prettyUrl();
-}
-
-bool BookmarkHandler::supportsTabs() const
-{
-    return true;
-}
-
-QList<QPair<QString, QString> > BookmarkHandler::currentBookmarkList() const
-{
-    QList<QPair<QString, QString> > list;
-    list.reserve(_views.size());
-
-    for(ViewProperties* view: _views) {
-        list << QPair<QString, QString>(titleForView(view) , urlForView(view));
-    }
-
-    return list;
 }
 
 void BookmarkHandler::setViews(const QList<ViewProperties*>& views)

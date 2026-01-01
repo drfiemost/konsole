@@ -22,7 +22,7 @@
 // Own
 #include "ViewContainer.h"
 
-#include <config-konsole.h>
+#include "config-konsole.h"
 
 // Qt
 #include <QStackedWidget>

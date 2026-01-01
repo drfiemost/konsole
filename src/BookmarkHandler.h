@@ -31,7 +31,6 @@
 #include "konsole_export.h"
 
 class KMenu;
-class KBookmarkMenu;
 class KActionCollection;
 
 namespace Konsole
@@ -65,12 +64,10 @@ public:
     BookmarkHandler(KActionCollection* collection , KMenu* menu, bool toplevel , QObject* parent);
     ~BookmarkHandler();
 
-    virtual QString currentUrl() const;
-    virtual QString currentTitle() const;
-    virtual bool enableOption(BookmarkOption option) const;
-    virtual bool supportsTabs() const;
-    virtual QList<QPair<QString, QString> > currentBookmarkList() const;
-    virtual void openFolderinTabs(const KBookmarkGroup& group);
+    QString currentUrl() const override;
+    QString currentTitle() const override;
+    bool enableOption(BookmarkOption option) const override;
+    void openFolderinTabs(const KBookmarkGroup& group) override;
 
     /**
      * Returns the menu which this bookmark handler inserts its actions into.
@@ -117,7 +114,6 @@ private:
     QString urlForView(ViewProperties* view) const;
 
     KMenu* _menu;
-    KBookmarkMenu* _bookmarkMenu;
     QString _file;
     bool _toplevel;
     ViewProperties* _activeView;

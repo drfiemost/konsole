@@ -445,7 +445,7 @@ void ProfileManager::changeProfile(Profile::Ptr profile,
     emit profileChanged(newProfile);
 }
 
-void ProfileManager::addProfile(Profile::Ptr profile)
+void ProfileManager::addProfile(const Profile::Ptr &profile)
 {
     if (_profiles.isEmpty())
         _defaultProfile = profile;
@@ -594,7 +594,7 @@ void ProfileManager::saveFavorites()
     favoriteGroup.writeEntry("Favorites", paths);
 }
 
-void ProfileManager::setShortcut(Profile::Ptr profile ,
+void ProfileManager::setShortcut(Profile::Ptr profile,
                                  const QKeySequence& keySequence)
 {
     QKeySequence existingShortcut = shortcut(profile);

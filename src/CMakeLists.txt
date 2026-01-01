@@ -57,6 +57,7 @@ qt4_add_dbus_adaptor(windowadaptors_SRCS
 set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         ${windowadaptors_SRCS}
                         BookmarkHandler.cpp
+                        BookmarkMenu.cpp
                         ColorScheme.cpp
                         ColorSchemeManager.cpp
                         ColorSchemeEditor.cpp

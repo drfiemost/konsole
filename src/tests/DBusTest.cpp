@@ -20,6 +20,7 @@
 // Own
 #include "DBusTest.h"
 #include "../Session.h"
+#include <QThread>
 
 using namespace Konsole;
 
@@ -55,11 +56,7 @@ void DBusTest::initTestCase()
     }
 
     // Wait for above Konsole to finish starting
-#if defined(HAVE_USLEEP)
-    usleep(5 * 1000);
-#else
-    sleep(5);
-#endif
+    QThread::sleep(5);
 
     serviceReply = bus->registeredServiceNames();
     if (!serviceReply.isValid())
