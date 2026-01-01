@@ -1512,15 +1512,6 @@ void SessionController::showDisplayContextMenu(const QPoint& position)
 
         // check for validity of the pointer to the popup menu
         if (popup) {
-            // Remove content-specific actions
-            //
-            // If the close action was chosen, the popup menu will be partially
-            // destroyed at this point, and the rest will be destroyed later by
-            // 'chosen->trigger()'
-            foreach(QAction * action, contentActions) {
-                popup->removeAction(action);
-            }
-
             delete contentSeparator;
         }
 
@@ -1595,7 +1586,6 @@ void SessionController::zmodemUpload()
                            i18n("<p>The current session already has a ZModem file transfer in progress.</p>"));
         return;
     }
-    _session->setZModemBusy(true);
 
     QString zmodem = KStandardDirs::findExe(QStringLiteral("sz"));
     if (zmodem.isEmpty()) {

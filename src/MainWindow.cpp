@@ -828,7 +828,7 @@ void MainWindow::triggerAction(const QString &name) const
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-    if (obj == _pluggedController->view()) {
+    if (!_pluggedController.isNull() && obj == _pluggedController->view()) {
         switch(event->type()) {
         case QEvent::MouseButtonPress:
         case QEvent::MouseButtonDblClick:

@@ -794,8 +794,9 @@ QList<ViewProperties*> ViewManager::viewProperties() const
     QList<ViewProperties*> list;
 
     ViewContainer* container = _viewSplitter->activeContainer();
-
-    Q_ASSERT(container);
+    if (container == nullptr) {
+        return {};
+    }
 
     for(QWidget* view: container->views()) {
         ViewProperties* properties = container->viewProperties(view);

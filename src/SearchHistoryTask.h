@@ -88,8 +88,8 @@ public:
 private:
     using ScreenWindowPtr = QPointer<ScreenWindow>;
 
-    void executeOnScreenWindow(QPointer<Session> session , ScreenWindowPtr window);
-    void highlightResult(ScreenWindowPtr window , int findPos);
+    void executeOnScreenWindow(QPointer<Session> session, const ScreenWindowPtr& window);
+    void highlightResult(const ScreenWindowPtr& window, int findPos);
 
     QMap< QPointer<Session> , ScreenWindowPtr > _windows;
     QRegExp _regExp;

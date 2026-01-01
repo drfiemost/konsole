@@ -42,7 +42,7 @@ void SearchHistoryTask::execute()
     }
 }
 
-void SearchHistoryTask::executeOnScreenWindow(QPointer<Session> session , ScreenWindowPtr window)
+void SearchHistoryTask::executeOnScreenWindow(QPointer<Session> session, const ScreenWindowPtr& window)
 {
     Q_ASSERT(session);
     Q_ASSERT(window);
@@ -160,7 +160,7 @@ void SearchHistoryTask::executeOnScreenWindow(QPointer<Session> session , Screen
 
     emit completed(false);
 }
-void SearchHistoryTask::highlightResult(ScreenWindowPtr window , int findPos)
+void SearchHistoryTask::highlightResult(const ScreenWindowPtr& window, int findPos)
 {
     //work out how many lines into the current block of text the search result was found
     //- looks a little painful, but it only has to be done once per search.

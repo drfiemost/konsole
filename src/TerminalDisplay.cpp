@@ -633,10 +633,10 @@ void TerminalDisplay::drawCursor(QPainter& painter,
         // draw the cursor outline, adjusting the area so that
         // it is draw entirely inside 'rect'
         int penWidth = std::max(1, painter.pen().width());
-        painter.drawRect(cursorRect.adjusted(penWidth / 2 + 0.5,
-                                             penWidth / 2 + 0.5,
-                                             - penWidth / 2 - penWidth % 2 + 0.5,
-                                             - penWidth / 2 - penWidth % 2 + 0.5));
+        painter.drawRect(cursorRect.adjusted(int(penWidth / 2) + 0.5,
+                                             int(penWidth / 2) + 0.5,
+                                             - int(penWidth / 2) - penWidth % 2 + 0.5,
+                                             - int(penWidth / 2) - penWidth % 2 + 0.5));
 
         // draw the cursor body only when the widget has focus
         if (hasFocus()) {
@@ -1153,14 +1153,14 @@ void TerminalDisplay::paintEvent(QPaintEvent* pe)
 
     // Determine which characters should be repainted (1 region unit = 1 character)
     QRegion dirtyImageRegion;
-    for(const QRect & rect: (pe->region() & contentsRect()).rects()) {
+    for(const QRect & rect: (pe->region() & contentsRect())) {
         dirtyImageRegion += widgetToImage(rect);
         drawBackground(paint, rect, palette().background().color(), true /* use opacity setting */);
     }
 
     paint.setRenderHint(QPainter::Antialiasing, _antialiasText);
 
-    for(const QRect & rect: dirtyImageRegion.rects()) {
+    for(const QRect & rect: dirtyImageRegion) {
         drawContents(paint, rect);
     }
     drawCurrentResultRect(paint);
