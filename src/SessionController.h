@@ -35,11 +35,6 @@
 #include "Profile.h"
 #include "Enumeration.h"
 
-namespace KIO
-{
-class Job;
-}
-
 class QAction;
 class QTextCodec;
 class QKeyEvent;
@@ -47,7 +42,6 @@ class QTimer;
 
 class KCodecAction;
 class KUrl;
-class KJob;
 class KAction;
 class KActionMenu;
 

@@ -36,7 +36,6 @@ class KToggleAction;
 
 namespace Konsole
 {
-class IncrementalSearchBar;
 class ViewManager;
 class ViewProperties;
 class Session;

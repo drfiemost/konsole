@@ -26,8 +26,6 @@
 #include <QList>
 #include <QSplitter>
 
-class QFocusEvent;
-
 namespace Konsole
 {
 class ViewContainer;

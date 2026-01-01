@@ -20,11 +20,7 @@
 // Own
 #include "EditProfileDialog.h"
 
-// Standard
-#include <cmath>
-
 // Qt
-#include <QBrush>
 #include <QPainter>
 #include <QStandardItem>
 #include <QTextCodec>

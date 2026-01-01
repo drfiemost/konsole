@@ -27,10 +27,6 @@
 // Qt
 #include <QtCore/QVariantList>
 
-// Konsole
-#include "Profile.h"
-
-class QAction;
 class QStringList;
 class QKeyEvent;
 

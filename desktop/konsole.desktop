@@ -235,8 +235,10 @@ Name[uk]=Відкрити нове вікно
 Name[x-test]=xxOpen a New Windowxx
 Name[zh_CN]=打开新窗口
 Name[zh_TW]=開啟新視窗
+Icon=window-new
 Exec=konsole
 
 [Desktop Action NewTab]
 Name=Open a New Tab
+Icon=tab-new
 Exec=konsole --new-tab

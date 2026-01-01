@@ -118,6 +118,8 @@ void KeyboardTranslatorTest::testFallback()
     QCOMPARE(QStringLiteral("\\t"), entry.resultToString());
     QVERIFY(entry.matches(Qt::Key_Tab, Qt::NoModifier, KeyboardTranslator::NoState));
     QVERIFY(entry == fallback->findEntry(Qt::Key_Tab, nullptr));
+
+    delete fallback;
 }
 
 QTEST_KDEMAIN_CORE(KeyboardTranslatorTest)
