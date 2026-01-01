@@ -213,9 +213,9 @@ void MainWindow::disconnectController(SessionController* controller)
     disconnect(controller, &Konsole::SessionController::iconChanged,
                this, &Konsole::MainWindow::updateWindowIcon);
 
-    if (auto view = controller->view()) {
-        view->removeEventFilter(this);
-    }
+    //if (auto view = controller->view()) {
+    //    view->removeEventFilter(this);
+    //}
 
     // KXmlGuiFactory::removeClient() will try to access actions associated
     // with the controller internally, which may not be valid after the controller
@@ -241,7 +241,7 @@ void MainWindow::activeViewChanged(SessionController* controller)
 
     Q_ASSERT(controller);
     _pluggedController = controller;
-    _pluggedController->view()->installEventFilter(this);
+    //_pluggedController->view()->installEventFilter(this);
 
     // listen for title changes from the current session
     connect(controller, &Konsole::SessionController::titleChanged,
