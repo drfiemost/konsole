@@ -257,7 +257,7 @@ void Vt102Emulation::addArgument()
     argv[argc] = 0;
 }
 
-void Vt102Emulation::addToCurrentToken(int cc)
+void Vt102Emulation::addToCurrentToken(uint cc)
 {
     tokenBuffer[tokenBufferPos] = cc;
     tokenBufferPos = std::min(tokenBufferPos + 1, MAX_TOKEN_LENGTH - 1);
@@ -327,9 +327,8 @@ void Vt102Emulation::initTokenizer()
 #define egt( )     (p >=  3  && s[2] == '>')
 #define esp( )     (p >=  4  && s[2] == SP )
 #define epsp( )    (p >=  5  && s[3] == SP )
-#define Xpe        (tokenBufferPos >= 2 && tokenBuffer[1] == ']')
-#define Xte        (Xpe      &&  (cc ==  7 || cc == 27))
-#define ces(C)     (cc < 256 && (charClass[cc] & (C)) == (C) && !Xte)
+#define osc        (tokenBufferPos >= 2 && tokenBuffer[1] == ']')
+#define ces(C)     (cc < 256 && (charClass[cc] & (C)) == (C))
 #define dcs        (p >= 2   && s[0] == ESC && s[1] == 'P')
 
 #define CNTL(c) ((c)-'@')
@@ -345,28 +344,32 @@ void Vt102Emulation::receiveChar(uint cc)
 
   if (ces(CTL))
   {
-    // ignore control characters in the text part of Xpe (aka OSC) "ESC]"
+    // ignore control characters in the text part of osc (aka OSC) "ESC]"
     // escape sequences; this matches what XTERM docs say
-    if (Xpe) {
+    // Allow BEL and ESC here, it will either end the text or be removed later.
+    if (osc && cc != 0x1b && cc != 0x07) {
         return;
     }
 
-    // DEC HACK ALERT! Control Characters are allowed *within* esc sequences in VT100
-    // This means, they do neither a resetTokenizer() nor a pushToToken(). Some of them, do
-    // of course. Guess this originates from a weakly layered handling of the X-on
-    // X-off protocol, which comes really below this level.
-    if (cc == CNTL('X') || cc == CNTL('Z') || cc == ESC)
-        resetTokenizer(); //VT100: CAN or SUB
-    if (cc != ESC)
-    {
-        processToken(token_ctl(cc+'@'), 0, 0);
-        return;
+    if (!osc) {
+      // DEC HACK ALERT! Control Characters are allowed *within* esc sequences in VT100
+      // This means, they do neither a resetTokenizer() nor a pushToToken(). Some of them, do
+      // of course. Guess this originates from a weakly layered handling of the X-on
+      // X-off protocol, which comes really below this level.
+      if (cc == CNTL('X') || cc == CNTL('Z') || cc == ESC) {
+          resetTokenizer(); //VT100: CAN or SUB
+      }
+      if (cc != ESC)
+      {
+          processToken(token_ctl(cc+'@'), 0, 0);
+          return;
+      }
     }
   }
   // advance the state
   addToCurrentToken(cc);
 
-  int* s = tokenBuffer;
+  uint* s = tokenBuffer;
   const int  p = tokenBufferPos;
 
   if (getMode(MODE_Ansi))
@@ -374,8 +377,17 @@ void Vt102Emulation::receiveChar(uint cc)
     if (lec(1,0,ESC)) { return; }
     if (lec(1,0,ESC+128)) { s[0] = ESC; receiveChar('['); return; }
     if (les(2,1,GRP)) { return; }
-    if (Xte         ) { processSessionAttributeRequest(); resetTokenizer(); return; }
-    if (Xpe         ) { return; }
+    // Operating System Command
+    if (p > 2 && s[1] == ']') {
+      // <ESC> ']' ... <ESC> '\'
+      if (s[p-2] == ESC && s[p-1] == '\\') { processSessionAttributeRequest(p-1); resetTokenizer(); return; }
+      // <ESC> ']' ... <ESC> + one character for reprocessing
+      if (s[p-2] == ESC) { processSessionAttributeRequest(p-1); resetTokenizer(); receiveChar(cc); return; }
+      // <ESC> ']' ... <BEL>
+      if (s[p-1] == 0x07) { processSessionAttributeRequest(p); resetTokenizer(); return; }
+    }
+    // <ESC> ']' ...
+    if (osc         ) { return; }
     if (lec(3,2,'?')) { return; }
     if (lec(3,2,'>')) { return; }
     if (lec(3,2,'!')) { return; }
@@ -454,13 +466,18 @@ void Vt102Emulation::receiveChar(uint cc)
   }
 }
 
-void Vt102Emulation::processSessionAttributeRequest()
+void Vt102Emulation::processSessionAttributeRequest(int tokenSize)
 {
   // Describes the window or terminal session attribute to change
   // See Session::SessionAttributes for possible values
   int attribute = 0;
   int i;
-  for (i = 2; i < tokenBufferPos     &&
+
+  // ignore last character (ESC or BEL)
+  --tokenSize;
+
+  // skip first two characters (ESC, ']')
+  for (i = 2; i < tokenSize &&
               tokenBuffer[i] >= '0'  &&
               tokenBuffer[i] <= '9'; i++)
   {
@@ -472,11 +489,10 @@ void Vt102Emulation::processSessionAttributeRequest()
     reportDecodingError();
     return;
   }
+  // skip ';'
+  ++i;
 
-  QString value;
-  value.reserve(tokenBufferPos-i-2);
-  for (int j = 0; j < tokenBufferPos-i-2; j++)
-        value[j] = tokenBuffer[i+1+j];
+  const QString value = QString::fromUcs4(&tokenBuffer[i], tokenSize - i);
 
   if (value == QLatin1String("?")) {
       emit sessionAttributeRequest(attribute);
@@ -1417,7 +1433,7 @@ char Vt102Emulation::eraseChar() const
 }
 
 // return contents of the scan buffer
-static QString hexdump2(int* s, int len)
+static QString hexdump2(uint* s, int len)
 {
     int i;
     char dump[128];

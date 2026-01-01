@@ -90,13 +90,15 @@ void DBusTest::cleanupTestCase()
     // Need to take care of when user has CloseAllTabs=False otherwise
     // they will get a popup dialog when we try to close this.
 
+    // Do not use QWidget::close(), as it shows question popup when
+    // CloseAllTabs is set to false (default).
     QDBusInterface iface(_interfaceName,
-                         QLatin1String("/konsole/MainWindow_1"),
-                         QLatin1String("org.qtproject.Qt.QWidget"));
+                         QLatin1String("/MainApplication"),
+                         QLatin1String("org.qtproject.Qt.QCoreApplication"));
     if (!iface.isValid())
         kFatal() << "Unable to get a dbus interface to Konsole!";
 
-    QDBusReply<void> instanceReply = iface.call(QStringLiteral("close"));
+    QDBusReply<void> instanceReply = iface.call(QStringLiteral("quit"));
     if (!instanceReply.isValid())
         kFatal() << "Unable to close Konsole :" << instanceReply.error();
 }
@@ -202,7 +204,7 @@ void DBusTest::testSessions()
 
     //****************** Test is/set title
     // TODO: Consider checking what is in Profile
-    stringReply = iface.call(QStringLiteral("title"), Session::LocalTabTitle);
+    stringReply = iface.call(QStringLiteral("title"), Session::NameRole);
     QVERIFY(stringReply.isValid());
 
     // set title to,  what title should be
@@ -215,10 +217,10 @@ void DBusTest::testSessions()
     QMapIterator<QString, QString> i(titleMap);
     while (i.hasNext()) {
         i.next();
-        voidReply = iface.call(QStringLiteral("setTitle"), Session::LocalTabTitle, i.key());
+        voidReply = iface.call(QStringLiteral("setTitle"), Session::NameRole, i.key());
         QVERIFY(voidReply.isValid());
 
-        stringReply = iface.call(QStringLiteral("title"), Session::LocalTabTitle);
+        stringReply = iface.call(QStringLiteral("title"), Session::NameRole);
         QVERIFY(stringReply.isValid());
 
         QCOMPARE(stringReply.value(), i.value());
