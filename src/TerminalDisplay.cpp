@@ -678,10 +678,12 @@ void TerminalDisplay::drawCharacters(QPainter& painter,
     if (style->rendition & RE_CONCEAL)
         return;
 
+    static constexpr int MaxFontWeight = 99; // https://doc.qt.io/qt-5/qfont.html#Weight-enum
+
     const int normalWeight = font().weight();
     // +26 makes "bold" from "normal", "normal" from "light", etc. It is 26 instead of not 25 to prefer
     // bolder weight when 25 falls in the middle between two weights. See QFont::Weight
-    const int boldWeight = normalWeight + 26;
+    const int boldWeight = std::min(normalWeight + 26, MaxFontWeight);
 
     const auto isBold = [boldWeight](const QFont &font) { return font.weight() >= boldWeight; };
 
@@ -1158,7 +1160,9 @@ void TerminalDisplay::paintEvent(QPaintEvent* pe)
         drawBackground(paint, rect, palette().background().color(), true /* use opacity setting */);
     }
 
-    paint.setRenderHint(QPainter::Antialiasing, _antialiasText);
+    // only turn on text anti-aliasing, never turn on normal antialiasing
+    // set https://bugreports.qt.io/browse/QTBUG-66036
+    paint.setRenderHint(QPainter::TextAntialiasing, _antialiasText);
 
     for(const QRect & rect: dirtyImageRegion) {
         drawContents(paint, rect);

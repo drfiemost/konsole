@@ -357,7 +357,7 @@ void MainWindow::setupActions()
 
     menuAction = collection->addAction(QStringLiteral("manage-profiles"));
     menuAction->setText(i18nc("@action:inmenu", "Manage Profiles..."));
-    menuAction->setIcon(KIcon(QStringLiteral("configure")));
+    menuAction->setIcon(KIcon(QStringLiteral("preferences-system-profiles")));
     connect(menuAction, &QAction::triggered, this, &Konsole::MainWindow::showManageProfilesDialog);
 
     // Set up an shortcut-only action for activating menu bar.
