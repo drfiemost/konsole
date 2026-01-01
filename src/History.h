@@ -123,7 +123,7 @@ protected:
 class KONSOLEPRIVATE_EXPORT HistoryScrollFile : public HistoryScroll
 {
 public:
-    explicit HistoryScrollFile(const QString& logFileName);
+    explicit HistoryScrollFile();
     virtual ~HistoryScrollFile();
 
     virtual int  getLines();
@@ -358,15 +358,12 @@ public:
 class KONSOLEPRIVATE_EXPORT HistoryTypeFile : public HistoryType
 {
 public:
-    explicit HistoryTypeFile(const QString& fileName = QString());
+    explicit HistoryTypeFile();
 
     bool isEnabled() const override;
     int maximumLineCount() const override;
 
     HistoryScroll* scroll(HistoryScroll *) const override;
-
-protected:
-    QString _fileName;
 };
 
 class KONSOLEPRIVATE_EXPORT CompactHistoryType : public HistoryType

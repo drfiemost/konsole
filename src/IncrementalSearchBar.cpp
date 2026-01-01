@@ -54,12 +54,8 @@ IncrementalSearchBar::IncrementalSearchBar(QWidget* parent)
     setPalette(qApp->palette());
     setAutoFillBackground(true);
 
-    QToolButton* closeButton = new QToolButton(this);
-    closeButton->setObjectName(QLatin1String("close-button"));
-    closeButton->setToolTip(i18nc("@info:tooltip", "Close the search bar"));
-    closeButton->setAutoRaise(true);
-    closeButton->setIcon(KIcon(QStringLiteral("dialog-close")));
-    connect(closeButton , &QToolButton::clicked , this , &Konsole::IncrementalSearchBar::closeClicked);
+    // SubWindow flag limits tab focus switching to this widget
+    setWindowFlags(windowFlags() | Qt::SubWindow);
 
     _searchEdit = new KLineEdit(this);
     _searchEdit->setClearButtonShown(true);
@@ -70,6 +66,8 @@ IncrementalSearchBar::IncrementalSearchBar(QWidget* parent)
     _searchEdit->setCursor(Qt::IBeamCursor);
     _searchEdit->setStyleSheet(QString());
     _searchEdit->setFont(QApplication::font());
+    // When the widget focus is set, focus input box instead
+    setFocusProxy(_searchEdit);
 
     setCursor(Qt::ArrowCursor);
 
@@ -94,6 +92,7 @@ IncrementalSearchBar::IncrementalSearchBar(QWidget* parent)
     _findNextButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     _findNextButton->setAutoRaise(true);
     _findNextButton->setToolTip(i18nc("@info:tooltip", "Find the next match for the current search phrase"));
+    _findNextButton->installEventFilter(this);
     connect(_findNextButton , &QToolButton::clicked , this , &Konsole::IncrementalSearchBar::findNextClicked);
 
     _findPreviousButton = new QToolButton(this);
@@ -102,12 +101,13 @@ IncrementalSearchBar::IncrementalSearchBar(QWidget* parent)
     _findPreviousButton->setText(i18nc("@action:button Go to the previous phrase", "Previous"));
     _findPreviousButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     _findPreviousButton->setToolTip(i18nc("@info:tooltip", "Find the previous match for the current search phrase"));
+    _findPreviousButton->installEventFilter(this);
     connect(_findPreviousButton , &QToolButton::clicked , this , &Konsole::IncrementalSearchBar::findPreviousClicked);
-
 
     _searchFromButton = new QToolButton(this);
     _searchFromButton->setAutoRaise(true);
     _searchFromButton->setObjectName(QLatin1String("search-from-button"));
+    _searchFromButton->installEventFilter(this);
     connect(_searchFromButton , &QToolButton::clicked , this , &Konsole::IncrementalSearchBar::searchFromClicked);
 
     QToolButton* optionsButton = new QToolButton(this);
@@ -116,9 +116,17 @@ IncrementalSearchBar::IncrementalSearchBar(QWidget* parent)
     optionsButton->setPopupMode(QToolButton::InstantPopup);
     optionsButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     optionsButton->setToolTip(i18nc("@info:tooltip", "Display the options menu"));
-
     optionsButton->setIcon(QIcon::fromTheme(QStringLiteral("configure")));
     optionsButton->setAutoRaise(true);
+    optionsButton->installEventFilter(this);
+
+    QToolButton* closeButton = new QToolButton(this);
+    closeButton->setObjectName(QLatin1String("close-button"));
+    closeButton->setToolTip(i18nc("@info:tooltip", "Close the search bar"));
+    closeButton->setAutoRaise(true);
+    closeButton->setIcon(KIcon(QStringLiteral("dialog-close")));
+    closeButton->installEventFilter(this);
+    connect(closeButton , &QToolButton::clicked , this , &Konsole::IncrementalSearchBar::closeClicked);
 
     // Fill the options menu
     QMenu* optionsMenu = new QMenu(this);
@@ -197,42 +205,39 @@ void IncrementalSearchBar::setSearchText(const QString& text)
 
 bool IncrementalSearchBar::eventFilter(QObject* watched , QEvent* event)
 {
-    if ((event->type() != QEvent::KeyPress) || watched != _searchEdit)
-        return QWidget::eventFilter(watched, event);
+    if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease) {
+        auto *keyEvent = static_cast<QKeyEvent *>(event);
+        QToolButton *toolButton = nullptr;
 
-    if (event->type() == QEvent::KeyPress) {
-        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-
-        if (keyEvent->key() == Qt::Key_Escape) {
-            emit closeClicked();
-            return true;
-        }
-
-        if (keyEvent->key() == Qt::Key_Return && !keyEvent->modifiers()) {
-            _findNextButton->click();
-            return true;
-        }
-
-        if ((keyEvent->key() == Qt::Key_Return) && (keyEvent->modifiers() == Qt::ShiftModifier)) {
-            _findPreviousButton->click();
-            return true;
-        }
-
-        if ((keyEvent->key() == Qt::Key_Return) && (keyEvent->modifiers() == Qt::ControlModifier)) {
-            _searchFromButton->click();
-            return true;
+        if (keyEvent->key() == Qt::Key_Return) {
+            if (watched == _searchEdit && event->type() == QEvent::KeyPress) {
+                if (keyEvent->modifiers() == Qt::NoModifier) {
+                    _findNextButton->click();
+                    return true;
+                }
+                if (keyEvent->modifiers() == Qt::ShiftModifier) {
+                    _findPreviousButton->click();
+                    return true;
+                }
+                if (keyEvent->modifiers() == Qt::ControlModifier) {
+                    _searchFromButton->click();
+                    return true;
+                }
+            } else if ((toolButton = qobject_cast<QToolButton *>(watched)) != nullptr) {
+                if(event->type() == QEvent::KeyPress && !toolButton->isDown()) {
+                    toolButton->setDown(true);
+                    toolButton->pressed();
+                } else if (toolButton->isDown()) {
+                    toolButton->setDown(keyEvent->isAutoRepeat());
+                    toolButton->released();
+                    toolButton->click();
+                }
+                return true;
+            }
         }
     }
 
     return QWidget::eventFilter(watched, event);
-}
-
-void IncrementalSearchBar::correctPosition(const QSize &parentSize)
-{
-    const auto width = geometry().width();
-    const auto height = geometry().height();
-    const auto x = parentSize.width() - width;
-    setGeometry(x, 0, width, height);
 }
 
 void IncrementalSearchBar::keyPressEvent(QKeyEvent* event)
@@ -246,6 +251,10 @@ void IncrementalSearchBar::keyPressEvent(QKeyEvent* event)
     if (movementKeysToPassAlong.contains(event->key()) &&
             (event->modifiers() == Qt::ShiftModifier)) {
         emit unhandledMovementKeyPressed(event);
+    }
+
+    if (event->key() == Qt::Key_Escape) {
+        emit closeClicked();
     }
 }
 
