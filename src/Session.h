@@ -382,6 +382,8 @@ public:
 
     void sendSignal(int signal);
 
+    void reportColor(SessionAttributes r, const QColor &c);
+    void reportForegroundColor(const QColor &c);
     void reportBackgroundColor(const QColor& c);
 
     // Returns true if the current screen is the secondary/alternate one
@@ -696,6 +698,12 @@ signals:
      * making it usable for higher level component.
      */
     void selectionChanged(const QString& text);
+
+    /**
+     * Emitted when foreground request ("\033]10;?\a") terminal code received.
+     * Terminal is expected send "\033]10;rgb:RRRR/GGGG/BBBB\a" response.
+     */
+    void getForegroundColor();
 
     /**
      * Emitted when background request ("\033]11;?\a") terminal code received.

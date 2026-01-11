@@ -67,6 +67,8 @@ public:
     QString currentUrl() const override;
     QString currentTitle() const override;
     bool enableOption(BookmarkOption option) const override;
+    bool supportsTabs() const override;
+    QList<QPair<QString, QString> > currentBookmarkList() const override;
     void openFolderinTabs(const KBookmarkGroup& group) override;
 
     /**

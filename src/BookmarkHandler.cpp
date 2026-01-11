@@ -122,6 +122,23 @@ QString BookmarkHandler::titleForView(ViewProperties* view) const
     return url.prettyUrl();
 }
 
+bool BookmarkHandler::supportsTabs() const
+{
+    return true;
+}
+
+QList<QPair<QString, QString> > BookmarkHandler::currentBookmarkList() const
+{
+    QList<QPair<QString, QString> > list;
+    list.reserve(_views.size());
+
+    for(ViewProperties* view: _views) {
+        list << QPair<QString, QString>(titleForView(view) , urlForView(view));
+    }
+
+    return list;
+}
+
 void BookmarkHandler::setViews(const QList<ViewProperties*>& views)
 {
     _views = views;

@@ -259,8 +259,9 @@ void Vt102Emulation::addArgument()
 
 void Vt102Emulation::addToCurrentToken(uint cc)
 {
+    tokenBufferPos = std::min(tokenBufferPos, MAX_TOKEN_LENGTH - 1);
     tokenBuffer[tokenBufferPos] = cc;
-    tokenBufferPos = std::min(tokenBufferPos + 1, MAX_TOKEN_LENGTH - 1);
+    tokenBufferPos++;
 }
 
 // Character Class flags used while decoding

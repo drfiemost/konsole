@@ -239,6 +239,7 @@ private slots:
     void handleWebShortcutAction();
     void configureWebShortcuts();
     void sendSignal(QAction* action);
+    void sendForegroundColor();
     void sendBackgroundColor();
 
     // other
