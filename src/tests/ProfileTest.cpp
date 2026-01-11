@@ -27,6 +27,8 @@
 #include "../Profile.h"
 #include "../ProfileWriter.h"
 
+#include <array>
+
 using namespace Konsole;
 
 void ProfileTest::testProfile()
@@ -127,7 +129,7 @@ void ProfileTest::testClone()
 void ProfileTest::testProfileGroup()
 {
     // create three new profiles
-    Profile::Ptr profile[3];
+    std::array<Profile::Ptr, 3> profile;
     for (auto & i : profile) {
         i = new Profile;
         QVERIFY(!i->asGroup());

@@ -2129,10 +2129,12 @@ void TerminalDisplay::mouseMoveEvent(QMouseEvent* ev)
 
 void TerminalDisplay::leaveEvent(QEvent *)
 {
-    // remove underline from an active link when cursor leaves the widget area
+    // remove underline from an active link when cursor leaves the widget area,
+    // also restore regular mouse cursor shape
     if(!_mouseOverHotspotArea.isEmpty()) {
         update(_mouseOverHotspotArea);
         _mouseOverHotspotArea = QRegion();
+        setCursor(Qt::IBeamCursor);
     }
 }
 
@@ -2198,7 +2200,7 @@ void TerminalDisplay::extendSelection(const QPoint& position)
         // Find left (left_not_right ? from here : from start of word)
         QPoint left = left_not_right ? here : _iPntSelCorr;
 
-        // Find left (left_not_right ? from end of word : from here)
+        // Find right (left_not_right ? from end of word : from here)
         QPoint right = left_not_right ? _iPntSelCorr : here;
 
         if (left.y() < 0 || left.y() >= _lines || left.x() < 0 || left.x() >= _columns) {

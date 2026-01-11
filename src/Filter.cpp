@@ -95,9 +95,7 @@ TerminalImageFilterChain::TerminalImageFilterChain()
 {
 }
 
-TerminalImageFilterChain::~TerminalImageFilterChain()
-{
-}
+TerminalImageFilterChain::~TerminalImageFilterChain() = default;
 
 void TerminalImageFilterChain::setImage(const Character* const image , int lines , int columns, const QVector<LineProperty>& lineProperties)
 {

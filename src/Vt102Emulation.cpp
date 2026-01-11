@@ -72,7 +72,6 @@ Vt102Emulation::Vt102Emulation()
     QObject::connect(_sessionAttributesUpdateTimer , &QTimer::timeout , this , &Konsole::Vt102Emulation::updateSessionAttributes);
 
     initTokenizer();
-    reset();
 }
 
 Vt102Emulation::~Vt102Emulation() = default;

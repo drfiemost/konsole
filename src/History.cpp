@@ -455,6 +455,7 @@ CompactHistoryScroll::CompactHistoryScroll(unsigned int maxLineCount)
     : HistoryScroll(new CompactHistoryType(maxLineCount))
     , _lines()
     , _blockList()
+    ,_maxLineCount(0)
 {
     //kDebug() << "scroll of length " << maxLineCount << " created";
     setMaxNbLines(maxLineCount);

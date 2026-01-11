@@ -41,8 +41,8 @@
 
 using namespace Konsole;
 
-ProfileSettings::ProfileSettings(QWidget* aParent)
-    : QWidget(aParent)
+ProfileSettings::ProfileSettings(QWidget* parent)
+    : QWidget(parent)
     , _sessionModel(new QStandardItemModel(this))
 {
     setupUi(this);
@@ -442,8 +442,8 @@ bool FavoriteItemDelegate::editorEvent(QEvent* aEvent, QAbstractItemModel*,
 
     return true;
 }
-ShortcutItemDelegate::ShortcutItemDelegate(QObject* aParent)
-    : QStyledItemDelegate(aParent),
+ShortcutItemDelegate::ShortcutItemDelegate(QObject* parent)
+    : QStyledItemDelegate(parent),
     _modifiedEditors(QSet<QWidget *>()),
     _itemsBeingEdited(QSet<QModelIndex>())
 {

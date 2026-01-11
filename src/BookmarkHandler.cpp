@@ -62,9 +62,7 @@ BookmarkHandler::BookmarkHandler(KActionCollection* collection,
     bookmarkMenu->setParent(this);
 }
 
-BookmarkHandler::~BookmarkHandler()
-{
-}
+BookmarkHandler::~BookmarkHandler() = default;
 
 void BookmarkHandler::openBookmark(const KBookmark& bm, Qt::MouseButtons, Qt::KeyboardModifiers)
 {
