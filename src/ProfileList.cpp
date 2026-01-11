@@ -32,6 +32,8 @@
 // Konsole
 #include "ProfileManager.h"
 
+#include <utility>
+
 using Konsole::Profile;
 using Konsole::ProfileList;
 
@@ -51,9 +53,9 @@ ProfileList::ProfileList(bool addShortcuts , QObject* parent)
 
     // TODO - Handle re-sorts when user changes profile names
     ProfileManager* manager = ProfileManager::instance();
-    QList<Profile::Ptr> favoriteProfiles = manager->sortedFavorites();
+    const QList<Profile::Ptr> favoriteProfiles = manager->sortedFavorites();
 
-    for(const Profile::Ptr& profile: favoriteProfiles) {
+    for (const Profile::Ptr &profile: favoriteProfiles) {
         favoriteChanged(profile, true);
     }
 
@@ -80,7 +82,8 @@ void ProfileList::updateEmptyAction()
 }
 QAction* ProfileList::actionForProfile(Profile::Ptr profile) const
 {
-    foreach(QAction* action, _group->actions()) {
+    const QList<QAction *> actionsList = _group->actions();
+    for (QAction *action: actionsList) {
         if (action->data().value<Profile::Ptr>() == profile)
             return action;
     }
@@ -123,7 +126,7 @@ void ProfileList::syncWidgetActions(QWidget* widget, bool sync)
     _registeredWidgets.insert(widget);
 
     const QList<QAction*> currentActions = widget->actions();
-    for(QAction * currentAction: currentActions) {
+    for (QAction *currentAction: currentActions) {
         widget->removeAction(currentAction);
     }
 
@@ -142,7 +145,7 @@ void ProfileList::addShortcutAction(Profile::Ptr profile)
 
     updateAction(action, profile);
 
-    for(QWidget * widget: _registeredWidgets) {
+    for (QWidget *widget: std::as_const(_registeredWidgets)) {
         widget->addAction(action);
     }
     emit actionsChanged(_group->actions());
@@ -157,7 +160,7 @@ void ProfileList::removeShortcutAction(Profile::Ptr profile)
     if (action != nullptr) {
         _group->removeAction(action);
 
-        for(QWidget * widget: _registeredWidgets) {
+        for (QWidget *widget: std::as_const(_registeredWidgets)) {
             widget->removeAction(action);
         }
         emit actionsChanged(_group->actions());

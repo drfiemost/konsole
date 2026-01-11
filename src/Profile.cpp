@@ -378,7 +378,7 @@ void ProfileGroup::setProperty(Property p, const QVariant& value)
         return;
 
     Profile::setProperty(p, value);
-    foreach(Profile::Ptr profile, _profiles) {
+    for (Profile::Ptr profile: _profiles) {
         profile->setProperty(p, value);
     }
 }

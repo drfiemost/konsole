@@ -80,6 +80,8 @@
 // For Unix signal names
 #include <csignal>
 
+#include <utility>
+
 using namespace Konsole;
 
 // TODO - Replace the icon choices below when suitable icons for silence and
@@ -131,7 +133,8 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
     }
 
     actionCollection()->addAssociatedWidget(view);
-    for(QAction * action: actionCollection()->actions()) {
+    const QList<QAction *> actionsList = actionCollection()->actions();
+    for (QAction *action: actionsList) {
         action->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     }
 
@@ -228,6 +231,9 @@ SessionController::~SessionController()
 
     if (!_editProfileDialog.isNull()) {
         delete _editProfileDialog.data();
+    }
+    if(factory()) {
+        factory()->removeClient(this);
     }
 }
 void SessionController::trackOutput(QKeyEvent* event)
@@ -412,7 +418,7 @@ void SessionController::updateWebSearchMenu()
 
             KAction* action = nullptr;
 
-            for(const QString& searchProvider: searchProviders) {
+            for (const QString& searchProvider: searchProviders) {
                 action = new KAction(searchProvider, _webSearchMenu);
                 action->setIcon(KIcon(filterData.iconNameForPreferredSearchProvider(searchProvider)));
                 action->setData(filterData.queryForPreferredSearchProvider(searchProvider));
@@ -769,12 +775,12 @@ EditProfileDialog* SessionController::profileDialogPointer()
 void SessionController::editCurrentProfile()
 {
     // Searching for Edit profile dialog opened with the same profile
-    const QList<SessionController*> allSessionsControllers = _allControllers.values();
-    for (SessionController* session: allSessionsControllers) {
-        if (session->profileDialogPointer()
-                && session->profileDialogPointer()->isVisible()
-                && session->profileDialogPointer()->lookupProfile() == SessionManager::instance()->sessionProfile(_session)) {
-            session->profileDialogPointer()->close();
+    for (SessionController *controller: std::as_const(_allControllers)) {
+        if (controller->profileDialogPointer()
+                && controller->profileDialogPointer()->isVisible()
+                && controller->profileDialogPointer()->lookupProfile()
+                    == SessionManager::instance()->sessionProfile(_session)) {
+            controller->profileDialogPointer()->close();
         }
     }
 
@@ -946,7 +952,8 @@ static const KXmlGuiWindow* findWindow(const QObject* object)
 static bool hasTerminalDisplayInSameWindow(const Session* session, const KXmlGuiWindow* window)
 {
     // Iterate all TerminalDisplays of this Session ...
-    foreach(const TerminalDisplay* terminalDisplay, session->views()) {
+    const QList<TerminalDisplay *> views = session->views();
+    for (const TerminalDisplay *terminalDisplay: views) {
         // ... and check whether a TerminalDisplay has the same
         // window as given in the parameter
         if (window == findWindow(terminalDisplay)) {
@@ -1029,8 +1036,8 @@ void SessionController::copyInputToSelectedTabs()
         QSet<Session*> newGroup = dialog->chosenSessions();
         newGroup.remove(_session);
 
-        QSet<Session*> completeGroup = newGroup | currentGroup;
-        foreach(Session * session, completeGroup) {
+        const QSet<Session *> completeGroup = newGroup | currentGroup;
+        for (Session *session: completeGroup) {
             if (newGroup.contains(session) && !currentGroup.contains(session))
                 _copyToGroup->addSession(session);
             else if (!newGroup.contains(session) && currentGroup.contains(session))

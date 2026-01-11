@@ -75,7 +75,8 @@ Part::Part(QWidget* parentWidget , QObject* parent, const QVariantList&)
 
     setWidget(_viewManager->widget());
     actionCollection()->addAssociatedWidget(_viewManager->widget());
-    for(QAction* action: actionCollection()->actions()) {
+    const QList<QAction *> actionsList = actionCollection()->actions();
+    for (QAction* action: actionsList) {
         action->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     }
 

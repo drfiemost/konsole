@@ -559,7 +559,7 @@ private:
 
             const QStringList& argList = data.split(QLatin1Char('\0'));
 
-            for(const QString & entry: argList) {
+            for (const QString &entry: argList) {
                 if (!entry.isEmpty())
                     addArgument(entry);
             }
@@ -678,8 +678,9 @@ private:
 
         const QStringList& argumentList = QString(args).split(QChar('\0'));
 
-        for (QStringList::const_iterator it = argumentList.begin(); it != argumentList.end(); ++it) {
-            addArgument(*it);
+        for (const QString &value: argumentList) {
+            if (!value.isEmpty()) {
+                addArgument(*it);
         }
 
         return true;

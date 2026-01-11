@@ -1235,8 +1235,8 @@ void TerminalDisplay::paintFilters(QPainter& painter)
     // iterate over hotspots identified by the display's currently active filters
     // and draw appropriate visuals to indicate the presence of the hotspot
 
-    QList<Filter::HotSpot*> spots = _filterChain->hotSpots();
-    for(Filter::HotSpot* spot: spots) {
+    const QList<Filter::HotSpot*> spots = _filterChain->hotSpots();
+    for (Filter::HotSpot *spot: spots) {
         QRegion region;
         if (_underlineLinks && spot->type() == Filter::HotSpot::Link) {
             QRect r;
@@ -3021,7 +3021,27 @@ void TerminalDisplay::copyToClipboard()
 
 void TerminalDisplay::pasteFromClipboard(bool appendEnter)
 {
-    QString text = QApplication::clipboard()->text(QClipboard::Clipboard);
+    QString text;
+    const QMimeData *mimeData = QApplication::clipboard()->mimeData(QClipboard::Clipboard);
+
+    // When pasting urls of local files:
+    // - remove the scheme part, "file://"
+    // - paste the path(s) as a space-separated list of strings, which are quoted if needed
+    if (!mimeData->hasUrls()) { // fast path if there are no urls
+        text = mimeData->text();
+    } else { // handle local file urls
+        const QList<QUrl> list = mimeData->urls();
+        for (const QUrl &url : list) {
+            if (url.isLocalFile()) {
+                text += KShell::quoteArg(url.toLocalFile());
+                text += QLatin1Char(' ');
+            } else { // can users copy urls of both local and remote files at the same time?
+                text = mimeData->text();
+                break;
+            }
+        }
+    }
+
     doPaste(text, appendEnter);
 }
 

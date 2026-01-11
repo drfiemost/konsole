@@ -41,7 +41,7 @@ void SessionListModel::setSessions(const QList<Session*>& sessions)
 {
     _sessions = sessions;
 
-    for(Session * session: sessions) {
+    for (Session *session: sessions) {
         connect(session, &Konsole::Session::finished, this, &Konsole::SessionListModel::sessionFinished);
     }
 
