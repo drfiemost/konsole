@@ -390,6 +390,17 @@ public:
     // or false if it's the primary/normal buffer
     bool isPrimaryScreen();
 
+    enum Notification {
+        NoNotification = 0,
+        Activity = 1,
+        Silence = 2,
+        Bell = 4,
+    };
+    Q_DECLARE_FLAGS(Notifications, Notification)
+
+    /** Returns active notifications. */
+    Notifications activeNotifications() const { return _activeNotifications; }
+
 public slots:
 
     /**
@@ -613,14 +624,6 @@ signals:
     void sessionAttributeChanged();
 
     /**
-     * Emitted when the activity state of this session changes.
-     *
-     * @param state The new state of the session.  This may be one
-     * of NOTIFYNORMAL, NOTIFYSILENCE or NOTIFYACTIVITY
-     */
-    void stateChanged(int state);
-
-    /**
      * Emitted when the current working directory of this session changes.
      *
      * @param dir The new current working directory of the session.
@@ -629,6 +632,9 @@ signals:
 
     /** Emitted when a bell event occurs in the session. */
     void bellRequest(const QString& message);
+
+    /** Emitted when @p notification state changed to @p enabled */
+    void notificationsChanged(Notification notification, bool enabled);
 
     /**
      * Requests that the color the text for any tabs associated with
@@ -728,10 +734,9 @@ private slots:
     void onReceiveBlock(const char* buffer, int len);
     void silenceTimerDone();
     void activityTimerDone();
+    void resetNotifications();
 
     void onViewSizeChange(int height, int width);
-
-    void activityStateSet(int);
 
     //automatically detach views from sessions when view is destroyed
     void viewDestroyed(QObject* view);
@@ -786,6 +791,11 @@ private:
     int            _silenceSeconds;
     QTimer*        _silenceTimer;
     QTimer*        _activityTimer;
+
+    void setPendingNotification(Notification notification, bool enable = true);
+    void handleActivity();
+
+    Notifications _activeNotifications;
 
     bool           _autoClose;
     bool           _closePerUserRequest;

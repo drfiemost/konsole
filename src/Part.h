@@ -27,6 +27,9 @@
 // Qt
 #include <QtCore/QVariantList>
 
+// Konsole
+#include "Session.h"
+
 class QStringList;
 class QKeyEvent;
 
@@ -177,7 +180,7 @@ private slots:
     void terminalExited();
     void newTab();
     void overrideTerminalShortcut(QKeyEvent*, bool& override);
-    void sessionStateChanged(int state);
+    void notificationChanged(Session::Notification notification, bool enabled);
 
 private:
     Session* activeSession() const;

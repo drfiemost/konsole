@@ -31,6 +31,8 @@
 
 // Konsole
 #include "konsole_export.h"
+#include "Session.h"
+
 
 namespace Konsole
 {
@@ -119,6 +121,8 @@ signals:
     void titleChanged(ViewProperties* properties);
     /** Emitted when activity has occurred in this view. */
     void activity(ViewProperties* item);
+    /** Emitted when notification for a view changes */
+    void notificationChanged(ViewProperties *item, Session::Notification notification, bool enabled);
 
 public slots:
     /**

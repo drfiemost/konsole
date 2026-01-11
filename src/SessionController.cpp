@@ -88,6 +88,7 @@ using namespace Konsole;
 // activity are available
 const KIcon SessionController::_activityIcon(QLatin1String("dialog-information"));
 const KIcon SessionController::_silenceIcon(QLatin1String("dialog-information"));
+const KIcon SessionController::_bellIcon(QLatin1String("preferences-desktop-notification-bell"));
 const KIcon SessionController::_broadcastIcon(QLatin1String("emblem-important"));
 
 QSet<SessionController*> SessionController::_allControllers;
@@ -160,8 +161,8 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
             &Konsole::SessionController::trackOutput);
 
     // listen to activity / silence notifications from session
-    connect(_session.data(), &Konsole::Session::stateChanged, this,
-            &Konsole::SessionController::sessionStateChanged);
+    connect(_session.data(), &Konsole::Session::notificationsChanged, this,
+            &Konsole::SessionController::sessionNotificationsChanged);
     // listen to title and icon changes
     connect(_session.data(), &Konsole::Session::sessionAttributeChanged, this, &Konsole::SessionController::sessionAttributeChanged);
 
@@ -1548,27 +1549,26 @@ void SessionController::movementKeyFromSearchBarReceived(QKeyEvent *event)
     setSearchStartToWindowCurrentLine();
 }
 
-void SessionController::sessionStateChanged(int state)
+void SessionController::sessionNotificationsChanged(Session::Notification notification, bool enabled)
 {
-    if (state == _previousState)
-        return;
-
-    if (state == NOTIFYACTIVITY) {
+    if (notification == Session::Notification::Activity && enabled) {
         setIcon(_activityIcon);
         _keepIconUntilInteraction = true;
-    } else if (state == NOTIFYSILENCE) {
+    } else if (notification == Session::Notification::Silence && enabled) {
         setIcon(_silenceIcon);
         _keepIconUntilInteraction = true;
-    } else if (state == NOTIFYNORMAL) {
+    } else if (notification == Session::Notification::Bell && enabled) {
+        setIcon(_bellIcon);
+        _keepIconUntilInteraction = true;
+    } else {
         if (_sessionIconName != _session->iconName()) {
             _sessionIconName = _session->iconName();
             _sessionIcon = KIcon(_sessionIconName);
         }
-
         updateSessionIcon();
     }
 
-    _previousState = state;
+    emit notificationChanged(this, notification, enabled);
 }
 
 void SessionController::zmodemDownload()

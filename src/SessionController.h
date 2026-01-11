@@ -34,6 +34,7 @@
 #include "ViewProperties.h"
 #include "Profile.h"
 #include "Enumeration.h"
+#include "Session.h"
 
 class QAction;
 class QTextCodec;
@@ -248,7 +249,7 @@ private slots:
     void updateCodecAction();
     void showDisplayContextMenu(const QPoint& position);
     void movementKeyFromSearchBarReceived(QKeyEvent *event);
-    void sessionStateChanged(int state);
+    void sessionNotificationsChanged(Session::Notification notification, bool enabled);
     void sessionAttributeChanged();
     void searchTextChanged(const QString& text);
     void searchCompleted(bool success);
@@ -340,6 +341,7 @@ private:
     static int _lastControllerId;
     static const KIcon _activityIcon;
     static const KIcon _silenceIcon;
+    static const KIcon _bellIcon;
     static const KIcon _broadcastIcon;
 
     QStringList _bookmarkValidProgramsToClear;
