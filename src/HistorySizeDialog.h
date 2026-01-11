@@ -40,7 +40,7 @@ class HistorySizeDialog : public KDialog
 
 public:
     explicit HistorySizeDialog(QWidget* parent = nullptr);
-    ~HistorySizeDialog();
+    ~HistorySizeDialog() override;
 
     /** See HistorySizeWidget::setMode. */
     void setMode(Enum::HistoryModeEnum aMode);

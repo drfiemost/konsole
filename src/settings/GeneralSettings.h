@@ -32,7 +32,7 @@ class GeneralSettings : public QWidget, private Ui::GeneralSettings
 
 public:
     explicit GeneralSettings(QWidget* aParent = nullptr);
-    ~GeneralSettings();
+    ~GeneralSettings() override;
 
 public slots:
     void slotEnableAllMessages();

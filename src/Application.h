@@ -53,7 +53,7 @@ public:
     /** Constructs a new Konsole application. */
     Application();
 
-    virtual ~Application();
+    ~Application() override;
 
     /** Creates a new main window and opens a default terminal session */
     int newInstance() override;

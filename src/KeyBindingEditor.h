@@ -57,7 +57,7 @@ class KeyBindingEditor : public QDialog
 public:
     /** Constructs a new key bindings editor with the specified parent. */
     explicit KeyBindingEditor(QWidget* parent = nullptr);
-    virtual ~KeyBindingEditor();
+    ~KeyBindingEditor() override;
 
     /**
      * Initializes the dialog with the bindings and other settings
@@ -88,7 +88,7 @@ public:
     QString description() const;
 
     // reimplemented to handle test area input
-    virtual bool eventFilter(QObject* watched , QEvent* event);
+    bool eventFilter(QObject* watched , QEvent* event) override;
 
 signals:
     /**

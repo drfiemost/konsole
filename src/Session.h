@@ -99,7 +99,7 @@ public:
      * variable.
      */
     explicit Session(QObject* parent = nullptr);
-    ~Session();
+    ~Session() override;
 
     /**
      * Connect to an existing terminal.  When a new Session() is constructed it
@@ -838,7 +838,7 @@ public:
     /** Constructs an empty session group. */
     explicit SessionGroup(QObject* parent);
     /** Destroys the session group and removes all connections between master and slave sessions. */
-    ~SessionGroup();
+    ~SessionGroup() override;
 
     /** Adds a session to the group. */
     void addSession(Session* session);
@@ -857,8 +857,6 @@ public:
      * @param master True to make this session a master or false otherwise
      */
     void setMasterStatus(Session* session , bool master);
-    /** Returns the master status of a session.  See setMasterStatus() */
-    bool masterStatus(Session* session) const;
 
     /**
      * This enum describes the options for propagating certain activity or
@@ -879,19 +877,12 @@ public:
      * @param mode A bitwise OR of MasterMode flags.
      */
     void setMasterMode(int mode);
-    /**
-     * Returns a bitwise OR of the active MasterMode flags for this group.
-     * See setMasterMode()
-     */
-    int masterMode() const;
 
 private slots:
     void sessionFinished();
     void forwardData(const QByteArray& data);
 
 private:
-    QList<Session*> masters() const;
-
     // maps sessions to their master status
     QHash<Session*, bool> _sessions;
 

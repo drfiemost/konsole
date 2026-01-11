@@ -124,15 +124,15 @@ class KONSOLEPRIVATE_EXPORT HistoryScrollFile : public HistoryScroll
 {
 public:
     explicit HistoryScrollFile();
-    virtual ~HistoryScrollFile();
+    ~HistoryScrollFile() override;
 
-    virtual int  getLines();
-    virtual int  getLineLen(int lineno);
-    virtual void getCells(int lineno, int colno, int count, Character res[]);
-    virtual bool isWrappedLine(int lineno);
+    int  getLines() override;
+    int  getLineLen(int lineno) override;
+    void getCells(int lineno, int colno, int count, Character res[]) override;
+    bool isWrappedLine(int lineno) override;
 
-    virtual void addCells(const Character a[], int count);
-    virtual void addLine(bool previousWrapped = false);
+    void addCells(const Character a[], int count) override;
+    void addLine(bool previousWrapped = false) override;
 
 private:
     qint64 startOfLine(int lineno);
@@ -149,17 +149,17 @@ class KONSOLEPRIVATE_EXPORT HistoryScrollNone : public HistoryScroll
 {
 public:
     HistoryScrollNone();
-    virtual ~HistoryScrollNone();
+    ~HistoryScrollNone() override;
 
-    virtual bool hasScroll();
+    bool hasScroll() override;
 
-    virtual int  getLines();
-    virtual int  getLineLen(int lineno);
-    virtual void getCells(int lineno, int colno, int count, Character res[]);
-    virtual bool isWrappedLine(int lineno);
+    int  getLines() override;
+    int  getLineLen(int lineno) override;
+    void getCells(int lineno, int colno, int count, Character res[]) override;
+    bool isWrappedLine(int lineno) override;
 
-    virtual void addCells(const Character a[], int count);
-    virtual void addLine(bool previousWrapped = false);
+    void addCells(const Character a[], int count) override;
+    void addLine(bool previousWrapped = false) override;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -290,7 +290,7 @@ class KONSOLEPRIVATE_EXPORT CompactHistoryScroll : public HistoryScroll
 
 public:
     explicit CompactHistoryScroll(unsigned int maxLineCount = 1000);
-    virtual ~CompactHistoryScroll();
+    ~CompactHistoryScroll() override;
 
     int  getLines() override;
     int  getLineLen(int lineNumber) override;

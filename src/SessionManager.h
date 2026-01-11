@@ -53,7 +53,7 @@ public:
      * Destroys the SessionManager. All running sessions should be closed
      * (via closeAllSessions()) before the SessionManager is destroyed.
      */
-    virtual ~SessionManager();
+    ~SessionManager() override;
 
     /**
      * Returns the session manager instance.

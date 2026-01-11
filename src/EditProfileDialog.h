@@ -65,7 +65,7 @@ class KONSOLEPRIVATE_EXPORT EditProfileDialog : public KDialog
 public:
     /** Constructs a new dialog with the specified parent. */
     explicit EditProfileDialog(QWidget* parent = nullptr);
-    virtual ~EditProfileDialog();
+    ~EditProfileDialog() override;
 
     /**
      * Initializes the dialog with the settings for the specified session
@@ -96,7 +96,7 @@ public slots:
     void apply();
 
 protected:
-    virtual bool eventFilter(QObject* watched , QEvent* event);
+    bool eventFilter(QObject* watched , QEvent* event) override;
 
 private slots:
     // sets up the specified tab page if necessary

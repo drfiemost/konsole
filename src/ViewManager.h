@@ -74,7 +74,7 @@ public:
      * and added to the specified @p collection.
      */
     ViewManager(QObject* parent , KActionCollection* collection);
-    ~ViewManager();
+    ~ViewManager() override;
 
     /**
      * Creates a new view to display the output from and deliver input to @p session.

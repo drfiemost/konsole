@@ -1606,17 +1606,9 @@ SessionGroup::SessionGroup(QObject* parent)
 }
 SessionGroup::~SessionGroup() = default;
 
-int SessionGroup::masterMode() const
-{
-    return _masterMode;
-}
 QList<Session*> SessionGroup::sessions() const
 {
     return _sessions.keys();
-}
-bool SessionGroup::masterStatus(Session* session) const
-{
-    return _sessions[session];
 }
 
 void SessionGroup::addSession(Session* session)
@@ -1640,10 +1632,7 @@ void SessionGroup::setMasterMode(int mode)
 {
     _masterMode = mode;
 }
-QList<Session*> SessionGroup::masters() const
-{
-    return _sessions.keys(true);
-}
+
 void SessionGroup::setMasterStatus(Session* session , bool master)
 {
     const bool wasMaster = _sessions[session];

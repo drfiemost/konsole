@@ -415,7 +415,7 @@ public:
     }
 
 protected:
-    virtual bool readCurrentDir(int pid) {
+    bool readCurrentDir(int pid) override {
         char path_buffer[MAXPATHLEN + 1];
         path_buffer[MAXPATHLEN] = 0;
         QByteArray procCwd = QFile::encodeName(QStringLiteral("/proc/%1/cwd").arg(pid));
@@ -433,7 +433,7 @@ protected:
     }
 
 private:
-    virtual bool readProcInfo(int pid) {
+    bool readProcInfo(int pid) override {
         // indicies of various fields within the process status file which
         // contain various information about the process
         const int PARENT_PID_FIELD = 3;
@@ -547,7 +547,7 @@ private:
         return ok;
     }
 
-    virtual bool readArguments(int pid) {
+    bool readArguments(int pid) override {
         // read command-line arguments file found at /proc/<pid>/cmdline
         // the expected format is a list of strings delimited by null characters,
         // and ending in a double null character pair.
@@ -580,7 +580,7 @@ public:
     }
 
 protected:
-    virtual bool readCurrentDir(int pid) {
+    bool readCurrentDir(int pid) override {
 #if defined(HAVE_OS_DRAGONFLYBSD)
         char buf[PATH_MAX];
         int managementInfoBase[4];
@@ -622,7 +622,7 @@ protected:
     }
 
 private:
-    virtual bool readProcInfo(int pid) {
+    bool readProcInfo(int pid) override {
         int managementInfoBase[4];
         size_t mibLength;
         struct kinfo_proc* kInfoProc;
@@ -662,7 +662,7 @@ private:
         return true;
     }
 
-    virtual bool readArguments(int pid) {
+    bool readArguments(int pid) override {
         char args[ARG_MAX];
         int managementInfoBase[4];
         size_t len;
@@ -696,7 +696,7 @@ public:
     }
 
 protected:
-    virtual bool readCurrentDir(int pid) {
+    bool readCurrentDir(int pid) override {
         char    buf[PATH_MAX];
         int     managementInfoBase[3];
         size_t  len;
@@ -716,7 +716,7 @@ protected:
     }
 
 private:
-    virtual bool readProcInfo(int pid) {
+    bool readProcInfo(int pid) override {
         int      managementInfoBase[6];
         size_t   mibLength;
         struct kinfo_proc*  kInfoProc;
@@ -784,7 +784,7 @@ private:
         return (char**)buf;
     }
 
-    virtual bool readArguments(int pid) {
+    bool readArguments(int pid) override {
         char**  argv;
 
         argv = readProcArgs(pid, KERN_PROC_ARGV);
@@ -809,7 +809,7 @@ public:
     }
 
 protected:
-    virtual bool readCurrentDir(int pid) {
+    bool readCurrentDir(int pid) override {
         struct proc_vnodepathinfo vpi;
         const int nb = proc_pidinfo(pid, PROC_PIDVNODEPATHINFO, 0, &vpi, sizeof(vpi));
         if (nb == sizeof(vpi)) {
@@ -820,7 +820,7 @@ protected:
     }
 
 private:
-    virtual bool readProcInfo(int pid) {
+    bool readProcInfo(int pid) override {
         int managementInfoBase[4];
         size_t mibLength;
         struct kinfo_proc* kInfoProc;
@@ -874,7 +874,7 @@ private:
         return true;
     }
 
-    virtual bool readArguments(int pid) {
+    bool readArguments(int pid) override {
         Q_UNUSED(pid);
         return false;
     }
@@ -902,7 +902,7 @@ public:
 protected:
     // FIXME: This will have the same issues as BKO 251351; the Linux
     // version uses readlink.
-    virtual bool readCurrentDir(int pid) {
+    bool readCurrentDir(int pid) override {
         QFileInfo info(QString("/proc/%1/path/cwd").arg(pid));
         const bool readable = info.isReadable();
 
@@ -920,7 +920,7 @@ protected:
     }
 
 private:
-    virtual bool readProcInfo(int pid) {
+    bool readProcInfo(int pid) override {
         QFile psinfo(QString("/proc/%1/psinfo").arg(pid));
         if (psinfo.open(QIODevice::ReadOnly)) {
             struct psinfo info;
@@ -940,7 +940,7 @@ private:
         return true;
     }
 
-    virtual bool readArguments(int /*pid*/) {
+    bool readArguments(int /*pid*/) override {
         // Handled in readProcInfo()
         return false;
     }

@@ -70,7 +70,7 @@ class KONSOLEPRIVATE_EXPORT TerminalDisplay : public QWidget
 public:
     /** Constructs a new terminal display widget with the specified parent. */
     explicit TerminalDisplay(QWidget* parent = nullptr);
-    virtual ~TerminalDisplay();
+    ~TerminalDisplay() override;
 
     void applyProfile(const Profile::Ptr& profile);
 
@@ -175,10 +175,6 @@ public:
      * Defaults to BlockCursor
      */
     void setKeyboardCursorShape(Enum::CursorShapeEnum shape);
-    /**
-     * Returns the shape of the keyboard cursor.  See setKeyboardCursorShape()
-     */
-    Enum::CursorShapeEnum keyboardCursorShape() const;
 
     /**
      * Sets the Cursor Style (DECSCUSR) via escape sequences
@@ -206,13 +202,6 @@ public:
      * to the default behavior.
      */
     void setKeyboardCursorColor(const QColor& color);
-
-    /**
-     * Returns the color of the keyboard cursor, or an invalid color if the keyboard
-     * cursor color is set to change according to the foreground color of the character
-     * underneath it.
-     */
-    QColor keyboardCursorColor() const;
 
     /**
      * Returns the number of lines of text which can be displayed in the widget.
@@ -251,7 +240,7 @@ public:
     void setSize(int columns, int lines);
 
     // reimplemented
-    QSize sizeHint() const;
+    QSize sizeHint() const override;
 
     /**
      * Sets which characters, in addition to letters and numbers,
@@ -568,8 +557,8 @@ protected:
     void selectLine(QPoint pos, bool entireLine);
 
     // reimplemented
-    virtual void inputMethodEvent(QInputMethodEvent* event);
-    virtual QVariant inputMethodQuery(Qt::InputMethodQuery query) const;
+    void inputMethodEvent(QInputMethodEvent* event) override;
+    QVariant inputMethodQuery(Qt::InputMethodQuery query) const override;
 
 protected slots:
 

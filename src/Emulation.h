@@ -122,7 +122,7 @@ class KONSOLEPRIVATE_EXPORT Emulation : public QObject
 public:
     /** Constructs a new terminal emulation */
     Emulation();
-    ~Emulation();
+    ~Emulation() override;
 
     /**
      * Creates a new window onto the output from this emulation.  The contents

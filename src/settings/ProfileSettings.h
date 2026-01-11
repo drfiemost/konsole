@@ -52,7 +52,7 @@ class ProfileSettings : public QWidget, private Ui::ProfileSettings
 public:
     /** Constructs a new profile type with the specified parent. */
     explicit ProfileSettings(QWidget* parent = nullptr);
-    virtual ~ProfileSettings();
+    ~ProfileSettings() override;
 
     /**
      * Specifies whether the shortcut editor should be show.
@@ -138,11 +138,11 @@ class ShortcutItemDelegate : public QStyledItemDelegate
 public:
     explicit ShortcutItemDelegate(QObject* parent = nullptr);
 
-    virtual void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
-    virtual QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option,
-                                  const QModelIndex& index) const;
-    virtual void paint(QPainter* painter, const QStyleOptionViewItem& option,
-                       const QModelIndex& index) const;
+    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option,
+                          const QModelIndex& index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option,
+               const QModelIndex& index) const override;
 
 private slots:
     void editorModified(const QKeySequence& keys);

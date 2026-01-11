@@ -64,7 +64,7 @@ public:
      * between all views on a session.
      */
     explicit ScreenWindow(Screen* screen, QObject* parent = nullptr);
-    virtual ~ScreenWindow();
+    ~ScreenWindow() override;
 
     /** Sets the screen which this window looks onto */
     void setScreen(Screen* screen);

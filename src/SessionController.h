@@ -91,7 +91,7 @@ public:
      * Constructs a new SessionController which operates on @p session and @p view.
      */
     SessionController(Session* session , TerminalDisplay* view, QObject* parent);
-    ~SessionController();
+    ~SessionController() override;
 
     /** Returns the session associated with this controller */
     QPointer<Session> session() {
@@ -131,14 +131,14 @@ public:
     EditProfileDialog* profileDialogPointer();
 
     // reimplemented
-    virtual KUrl url() const;
-    virtual QString currentDir() const;
-    virtual void rename();
-    virtual bool confirmClose() const;
+    KUrl url() const override;
+    QString currentDir() const override;
+    void rename() override;
+    bool confirmClose() const override;
     virtual bool confirmForceClose() const;
 
     // Reimplemented to watch for events happening to the view
-    virtual bool eventFilter(QObject* watched , QEvent* event);
+    bool eventFilter(QObject* watched , QEvent* event) override;
 
     /** Returns the set of all controllers that exist. */
     static QSet<SessionController*> allControllers() {

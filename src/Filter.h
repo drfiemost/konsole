@@ -215,7 +215,7 @@ public:
      * If regexp matches the empty string, then process() will return immediately
      * without finding results.
      */
-    virtual void process();
+    void process() override;
 
 protected:
     /**
@@ -243,9 +243,9 @@ public:
     {
     public:
         HotSpot(int startLine, int startColumn, int endLine, int endColumn);
-        virtual ~HotSpot();
+        ~HotSpot() override;
 
-        virtual QList<QAction*> actions();
+        QList<QAction*> actions() override;
 
         /**
          * Open a web browser at the current URL.  The url itself can be determined using
@@ -267,7 +267,7 @@ public:
     UrlFilter();
 
 protected:
-    virtual RegExpFilter::HotSpot* newHotSpot(int, int, int, int);
+    RegExpFilter::HotSpot* newHotSpot(int, int, int, int) override;
 
 private:
     static const QRegExp FullUrlRegExp;

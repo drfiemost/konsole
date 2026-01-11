@@ -62,7 +62,7 @@ public:
      * @param parent The parent object
      */
     BookmarkHandler(KActionCollection* collection , KMenu* menu, bool toplevel , QObject* parent);
-    ~BookmarkHandler();
+    ~BookmarkHandler() override;
 
     QString currentUrl() const override;
     QString currentTitle() const override;
@@ -105,7 +105,7 @@ signals:
     void openUrls(const QList<KUrl>& urls);
 
 private slots:
-    void openBookmark(const KBookmark& bm, Qt::MouseButtons, Qt::KeyboardModifiers);
+    void openBookmark(const KBookmark& bm, Qt::MouseButtons, Qt::KeyboardModifiers) override;
 
 private:
     Q_DISABLE_COPY(BookmarkHandler)

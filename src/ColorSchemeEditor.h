@@ -59,7 +59,7 @@ class KONSOLEPRIVATE_EXPORT ColorSchemeEditor : public KDialog
 public:
     /** Constructs a new color scheme editor with the specified parent. */
     explicit ColorSchemeEditor(QWidget* parent = nullptr);
-    virtual ~ColorSchemeEditor();
+    ~ColorSchemeEditor() override;
 
     /** Initializes the dialog with the properties of the specified color scheme. */
     void setup(const ColorScheme* scheme, bool isNewScheme);

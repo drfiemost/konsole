@@ -47,7 +47,7 @@ class KONSOLEPRIVATE_EXPORT ViewProperties : public QObject
 
 public:
     explicit ViewProperties(QObject* parent);
-    virtual ~ViewProperties();
+    ~ViewProperties() override;
 
     /** Returns the icon associated with a view */
     QIcon icon() const;

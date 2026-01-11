@@ -41,7 +41,7 @@ class SaveHistoryTask : public SessionTask
 public:
     /** Constructs a new task to save session output to URLs */
     explicit SaveHistoryTask(QObject* parent = nullptr);
-    virtual ~SaveHistoryTask();
+    ~SaveHistoryTask() override;
 
     /**
      * Opens a save file dialog for each session in the group and begins saving
@@ -49,7 +49,7 @@ public:
      *
      * The data transfer is performed asynchronously and will continue after execute() returns.
      */
-    virtual void execute();
+    void execute() override;
 
 private slots:
     void jobDataRequested(KIO::Job* job , QByteArray& data);

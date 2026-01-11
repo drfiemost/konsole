@@ -53,7 +53,7 @@ class CopyInputDialog : public KDialog
 
 public:
     explicit CopyInputDialog(QWidget* parent = nullptr);
-    ~CopyInputDialog();
+    ~CopyInputDialog() override;
     /**
      * Sets the 'source' session whose input will be copied to
      * other sessions.  This session is displayed grayed out in the list
@@ -116,12 +116,12 @@ public:
     QSet<Session*> checkedSessions() const;
 
     // reimplemented from QAbstractItemModel
-    virtual Qt::ItemFlags flags(const QModelIndex& index) const;
-    virtual QVariant data(const QModelIndex& index, int role) const;
-    virtual bool setData(const QModelIndex& index, const QVariant& value, int role);
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
 protected:
-    virtual void sessionRemoved(Session*);
+    void sessionRemoved(Session*) override;
 
 private:
     QSet<Session*> _checkedSessions;

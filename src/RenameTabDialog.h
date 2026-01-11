@@ -36,7 +36,7 @@ class RenameTabDialog : public KDialog
 
 public:
     explicit RenameTabDialog(QWidget* parent = nullptr);
-    ~RenameTabDialog();
+    ~RenameTabDialog() override;
 
     QString tabTitleText() const;
     QString remoteTabTitleText() const;

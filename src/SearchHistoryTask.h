@@ -83,7 +83,7 @@ public:
      *
      * To continue the search looking for further matches, call execute() again.
      */
-    virtual void execute();
+    void execute() override;
 
 private:
     using ScreenWindowPtr = QPointer<ScreenWindow>;

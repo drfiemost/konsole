@@ -32,7 +32,7 @@ class TabBarSettings : public QWidget, private Ui::TabBarSettings
 
 public:
     explicit TabBarSettings(QWidget* parent = nullptr);
-    ~TabBarSettings();
+    ~TabBarSettings() override;
 
 };
 
