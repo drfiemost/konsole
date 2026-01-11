@@ -56,6 +56,7 @@
 #include <KGlobal>
 #include <KCodecAction>
 #include <KFileDialog>
+#include <KNotification>
 
 // Konsole
 #include "EditProfileDialog.h"
@@ -102,7 +103,6 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
     , _view(view)
     , _copyToGroup(nullptr)
     , _profileList(nullptr)
-    , _previousState(-1)
     , _searchFilter(nullptr)
     , _copyInputToAllTabsAction(nullptr)
     , _findAction(nullptr)
@@ -120,6 +120,7 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
     , _showMenuAction(nullptr)
     , _isSearchBarEnabled(false)
     , _searchBar(view->searchBar())
+    , _monitorProcessFinish(false)
 {
     Q_ASSERT(session);
     Q_ASSERT(view);
@@ -221,8 +222,13 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
 
     // A list of programs that accept Ctrl+C to clear command line used
     // before outputting bookmark.
-    _bookmarkValidProgramsToClear << QStringLiteral("bash") << QStringLiteral("fish") << QStringLiteral("sh");
-    _bookmarkValidProgramsToClear << QStringLiteral("tcsh") << QStringLiteral("zsh");
+    _bookmarkValidProgramsToClear = QStringList({
+        QStringLiteral("bash"),
+        QStringLiteral("fish"),
+        QStringLiteral("sh"),
+        QStringLiteral("tcsh"),
+        QStringLiteral("zsh")
+    });
     setupSearchBar();
     _searchBar->setVisible(_isSearchBarEnabled);
 }
@@ -289,6 +295,19 @@ void SessionController::snapshot()
 
     // apply new title
     _session->setTitle(Session::DisplayedTitleRole, title);
+
+    // check if foreground process ended and notify if this option was requested
+    if (_monitorProcessFinish) {
+        bool isForegroundProcessActive = _session->isForegroundProcessActive();
+        if (!_previousForegroundProcessName.isNull() && !isForegroundProcessActive) {
+            KNotification::event(_session->hasFocus() ? QStringLiteral("ProcessFinished") : QStringLiteral("ProcessFinishedHidden"),
+                                 i18n("The process '%1' has finished running in session '%2'", _previousForegroundProcessName, _session->nameTitle()),
+                                 QPixmap(),
+                                 QApplication::activeWindow(),
+                                 KNotification::CloseWhenWidgetActivated);
+        }
+        _previousForegroundProcessName = isForegroundProcessActive ? _session->foregroundProcessName() : QString();
+    }
 
     // do not forget icon
     updateSessionIcon();
@@ -451,7 +470,7 @@ void SessionController::handleWebShortcutAction()
 
     KUriFilterData filterData(action->data().toString());
 
-    if (KUriFilter::self()->filterUri(filterData, QStringList() << QStringLiteral("kurisearchfilter"))) {
+    if (KUriFilter::self()->filterUri(filterData, { QStringLiteral("kurisearchfilter") })) {
         const KUrl& url = filterData.uri();
         new KRun(url, QApplication::activeWindow());
     }
@@ -459,7 +478,7 @@ void SessionController::handleWebShortcutAction()
 
 void SessionController::configureWebShortcuts()
 {
-    KToolInvocation::kdeinitExec(QStringLiteral("kcmshell4"), QStringList() << QStringLiteral("ebrowsing"));
+    KToolInvocation::kdeinitExec(QStringLiteral("kcmshell4"), { QStringLiteral("ebrowsing") });
 }
 
 void SessionController::sendSignal(QAction* action)
@@ -685,6 +704,11 @@ void SessionController::setupExtraActions()
     action = collection->addAction(QStringLiteral("monitor-silence"), toggleAction);
     connect(action, &QAction::toggled, this, &Konsole::SessionController::monitorSilence);
 
+    toggleAction = new KToggleAction(i18n("Monitor for Process Finishing"), this);
+    action = collection->addAction(QStringLiteral("monitor-process-finish"), toggleAction);
+    connect(action, &QAction::toggled, this, &Konsole::SessionController::monitorProcessFinish);
+
+
     // Text Size
     action = collection->addAction(QStringLiteral("enlarge-font"), this, SLOT(increaseFontSize()));
     action->setText(i18n("Enlarge Font"));
@@ -900,16 +924,21 @@ void SessionController::closeSession()
     if (_preventClose)
         return;
 
-    if (confirmClose()) {
-        if (_session->closeInNormalWay()) {
+    if (!confirmClose())
+        return;
+
+    if (_session->closeInNormalWay()) {
+        if (!confirmForceClose())
             return;
-        } else if (confirmForceClose()) {
-            if (_session->closeInForceWay())
-                return;
-            else
-                kWarning() << "Konsole failed to close a session in any way.";
+
+        if (!_session->closeInForceWay()) {
+            kWarning() << "Konsole failed to close a session in any way.";
+            return;
         }
     }
+
+    if (factory())
+        factory()->removeClient(this);
 }
 
 // Trying to open a remote Url may produce unexpected results.
@@ -1381,7 +1410,7 @@ void SessionController::print_screen()
     QPointer<QPrintDialog> dialog = new QPrintDialog(&printer, _view);
     PrintOptions* options = new PrintOptions();
 
-    dialog->setOptionTabs(QList<QWidget*>() << options);
+    dialog->setOptionTabs({options});
     dialog->setWindowTitle(i18n("Print Shell"));
     connect(dialog.data(), static_cast<void(QPrintDialog::*)()>(&QPrintDialog::accepted), options, &Konsole::PrintOptions::saveSettings);
     if (dialog->exec() != QDialog::Accepted)
@@ -1451,6 +1480,10 @@ void SessionController::monitorSilence(bool monitor)
 {
     _session->setMonitorSilence(monitor);
 }
+void SessionController::monitorProcessFinish(bool monitor)
+{
+    _monitorProcessFinish = monitor;
+}
 void SessionController::updateSessionIcon()
 {
     // Visualize that the session is broadcasting to others
@@ -1495,11 +1528,13 @@ void SessionController::showDisplayContextMenu(const QPoint& position)
     if (!factory()) {
         if (!clientBuilder()) {
             setClientBuilder(new KXMLGUIBuilder(_view));
+
+            // Client builder does not get deleted automatically
+            connect(this, &QObject::destroyed, this, [this]{ delete clientBuilder(); });
         }
 
-        KXMLGUIFactory* factory = new KXMLGUIFactory(clientBuilder(), this);
+        KXMLGUIFactory* factory = new KXMLGUIFactory(clientBuilder(), _view);
         factory->addClient(this);
-        //kDebug() << "Created xmlgui factory" << factory;
     }
 
     QPointer<QMenu> popup = qobject_cast<QMenu*>(factory()->container(QStringLiteral("session-popup-menu"), this));

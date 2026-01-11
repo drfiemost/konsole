@@ -40,6 +40,10 @@ void SearchHistoryTask::execute()
         iter.next();
         executeOnScreenWindow(iter.key() , iter.value());
     }
+
+    if (autoDelete()) {
+        deleteLater();
+    }
 }
 
 void SearchHistoryTask::executeOnScreenWindow(QPointer<Session> session, const ScreenWindowPtr& window)

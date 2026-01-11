@@ -223,6 +223,12 @@ bool Session::isRunning() const
     return _shellProcess && (_shellProcess->state() == QProcess::Running);
 }
 
+bool Session::hasFocus() const
+{
+    return std::any_of(_views.constBegin(), _views.constEnd(),
+                      [](const TerminalDisplay *display) { return display-> hasFocus(); });
+}
+
 void Session::setCodec(QTextCodec* codec)
 {
     emulation()->setCodec(codec);
@@ -613,15 +619,7 @@ void Session::silenceTimerDone()
         return;
     }
 
-    bool hasFocus = false;
-    for (const TerminalDisplay *display : std::as_const(_views)) {
-        if (display->hasFocus()) {
-            hasFocus = true;
-            break;
-        }
-    }
-
-    KNotification::event(hasFocus ? QStringLiteral("Silence") : QStringLiteral("SilenceHidden"),
+    KNotification::event(hasFocus() ? QStringLiteral("Silence") : QStringLiteral("SilenceHidden"),
             i18n("Silence in session '%1'", _nameTitle), QPixmap(),
             QApplication::activeWindow(),
             KNotification::CloseWhenWidgetActivated);
@@ -1602,18 +1600,8 @@ void Session::handleActivity()
     // TODO: should this hardcoded interval be user configurable?
     const int activityMaskInSeconds = 15;
 
-    bool hasFocus = false;
-    // Don't notify if the terminal is active
-    const auto &displays = _views;
-    for (const TerminalDisplay *display: displays) {
-        if (display->hasFocus()) {
-            hasFocus = true;
-            break;
-        }
-    }
-
     if (_monitorActivity && !_notifiedActivity) {
-        KNotification::event(hasFocus ? QStringLiteral("Activity") : QStringLiteral("ActivityHidden"),
+        KNotification::event(hasFocus() ? QStringLiteral("Activity") : QStringLiteral("ActivityHidden"),
                              i18n("Activity in session '%1'", _nameTitle), QPixmap(),
                              QApplication::activeWindow(),
                              KNotification::CloseWhenWidgetActivated);
