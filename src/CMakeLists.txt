@@ -86,6 +86,7 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         Screen.cpp
                         ScreenWindow.cpp
                         Session.cpp
+                        SessionGroup.cpp
                         SessionController.cpp
                         SessionManager.cpp
                         SessionListModel.cpp

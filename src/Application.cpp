@@ -459,11 +459,7 @@ Profile::Ptr Application::processProfileChangeArgs(KCmdLineArgs* args, Profile::
         shouldUseNewProfile = true;
     }
 
-    if (shouldUseNewProfile) {
-        return newProfile;
-    } else {
-        return baseProfile;
-    }
+    return shouldUseNewProfile ? newProfile : baseProfile;
 }
 
 void Application::startBackgroundMode(MainWindow* window)

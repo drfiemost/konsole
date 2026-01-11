@@ -627,16 +627,18 @@ void TerminalDisplay::drawCursor(QPainter& painter,
     QRectF cursorRect = rect.adjusted(0, 1, 0, 0);
 
     QColor cursorColor = _cursorColor.isValid() ? _cursorColor : foregroundColor;
-    painter.setPen(cursorColor);
+    QPen pen(cursorColor);
+    // TODO: the relative pen width to draw the cursor is a bit hacky
+    // and set to 1/12 of the font width. Visually it seems to work at
+    // all scales but there must be better ways to do it
+    const qreal width = std::max(_fontWidth / 12.0, 1.0);
+    const qreal halfWidth = width / 2.0;
+    pen.setWidthF(width);
+    painter.setPen(pen);
 
     if (_cursorShape == Enum::BlockCursor) {
-        // draw the cursor outline, adjusting the area so that
-        // it is draw entirely inside 'rect'
-        int penWidth = std::max(1, painter.pen().width());
-        painter.drawRect(cursorRect.adjusted(int(penWidth / 2) + 0.5,
-                                             int(penWidth / 2) + 0.5,
-                                             - int(penWidth / 2) - penWidth % 2 + 0.5,
-                                             - int(penWidth / 2) - penWidth % 2 + 0.5));
+       // draw the cursor outline, adjusting the area so that it is draw entirely inside 'rect'
+        painter.drawRect(cursorRect.adjusted(halfWidth, halfWidth, -halfWidth, -halfWidth));
 
         // draw the cursor body only when the widget has focus
         if (hasFocus()) {
@@ -649,17 +651,17 @@ void TerminalDisplay::drawCursor(QPainter& painter,
             }
         }
     } else if (_cursorShape == Enum::UnderlineCursor) {
-        QLineF line(cursorRect.left() + 0.5,
-                    cursorRect.bottom() - 0.5,
-                    cursorRect.right() - 0.5,
-                    cursorRect.bottom() - 0.5);
+        QLineF line(cursorRect.left() + halfWidth,
+                    cursorRect.bottom() - halfWidth,
+                    cursorRect.right() - halfWidth,
+                    cursorRect.bottom() - halfWidth);
         painter.drawLine(line);
 
     } else if (_cursorShape == Enum::IBeamCursor) {
-        QLineF line(cursorRect.left() + 0.5,
-                    cursorRect.top() + 0.5,
-                    cursorRect.left() + 0.5,
-                    cursorRect.bottom() - 0.5);
+        QLineF line(cursorRect.left() + halfWidth,
+                    cursorRect.top() + halfWidth,
+                    cursorRect.left() + halfWidth,
+                    cursorRect.bottom() - halfWidth);
         painter.drawLine(line);
     }
 }
@@ -1491,7 +1493,7 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
             }
 
             //Apply text scaling matrix.
-            paint.setWorldMatrix(textScale, true);
+            paint.setWorldTransform(QTransform(textScale), true);
 
             //calculate the area in which the text will be drawn
             QRect textArea = QRect(_contentRect.left() + contentsRect().left() + _fontWidth * x,
@@ -1525,7 +1527,7 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
             _fixedFont = save__fixedFont;
 
             //reset back to single-width, single-height _lines
-            paint.setWorldMatrix(textScale.inverted(), true);
+            paint.setWorldTransform(QTransform(textScale.inverted()), true);
 
             if (y < _lineProperties.size() - 1) {
                 //double-height _lines are represented by two adjacent _lines
@@ -2244,8 +2246,6 @@ void TerminalDisplay::extendSelection(const QPoint& position)
 
     int offset = 0;
     if (!_wordSelectionMode && !_lineSelectionMode) {
-        QChar selClass;
-
         const bool left_not_right = (here.y() < _iPntSelCorr.y() ||
                                      (here.y() == _iPntSelCorr.y() && here.x() < _iPntSelCorr.x()));
         const bool old_left_not_right = (_pntSelCorr.y() < _iPntSelCorr.y() ||
@@ -2255,13 +2255,8 @@ void TerminalDisplay::extendSelection(const QPoint& position)
         // Find left (left_not_right ? from here : from start)
         const QPoint left = left_not_right ? here : _iPntSelCorr;
 
-        // Find left (left_not_right ? from start : from here)
+        // Find right (left_not_right ? from start : from here)
         QPoint right = left_not_right ? _iPntSelCorr : here;
-        if (right.x() > 0 && !_columnSelectionMode) {
-            if (right.x() - 1 < _columns && right.y() < _lines) {
-                selClass = charClass(_image[loc(right.x() - 1, right.y())]);
-            }
-        }
 
         // Pick which is start (ohere) and which is extension (here)
         if (left_not_right) {
