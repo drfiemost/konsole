@@ -1402,6 +1402,11 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
             const RenditionFlags currentRendition = _image[loc(x, y)].rendition;
             const bool rtl = isRtl(_image[loc(x, y)]);
 
+            const auto malayalam = [&](int column) {
+                return _image[loc(column, y)].character >= 0x0D00
+                        && _image[loc(column, y)].character <= 0x0D7F;
+            };
+
             const auto isInsideDrawArea = [&](int column) { return column <= rect.right(); };
             const auto hasSameColors = [&](int column) {
                 return _image[loc(column, y)].foregroundColor == currentForeground
@@ -1416,7 +1421,10 @@ void TerminalDisplay::drawContents(QPainter& paint, const QRect& rect)
                 return (_image[characterLoc].character == 0) == doubleWidth;
             };
             const auto canBeGrouped = [&](int column) {
-                return _image[loc(column, y)].character <= 0x7e || rtl;
+                return _image[loc(column, y)].character <= 0x7e
+                       || (_image[loc(column, y)].rendition & RE_EXTENDED_CHAR)
+                       || rtl
+                       || malayalam(column);
             };
 
             if (canBeGrouped(x)) {

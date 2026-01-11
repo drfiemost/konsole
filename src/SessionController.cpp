@@ -1501,7 +1501,7 @@ void SessionController::showDisplayContextMenu(const QPoint& position)
     }
 
     QPointer<QMenu> popup = qobject_cast<QMenu*>(factory()->container(QStringLiteral("session-popup-menu"), this));
-    if (popup) {
+    if (!popup.isNull()) {
         // prepend content-specific actions such as "Open Link", "Copy Email Address" etc.
         QList<QAction*> contentActions = _view->filterActions(position);
         QAction* contentSeparator = new QAction(popup);
@@ -1527,7 +1527,7 @@ void SessionController::showDisplayContextMenu(const QPoint& position)
         QAction* chosen = popup->exec(_view->mapToGlobal(position));
 
         // check for validity of the pointer to the popup menu
-        if (popup) {
+        if (!popup.isNull()) {
             delete contentSeparator;
         }
 
