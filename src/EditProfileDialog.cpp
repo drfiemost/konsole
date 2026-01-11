@@ -161,7 +161,7 @@ bool EditProfileDialog::isValidProfileName()
     const QList<Profile::Ptr> existingProfiles = ProfileManager::instance()->allProfiles();
     QStringList otherExistingProfileNames;
 
-    for(auto existingProfile: existingProfiles) {
+    for(const Profile::Ptr &existingProfile: existingProfiles) {
         if (existingProfile->name() != _profile->name()) {
             otherExistingProfileNames.append(existingProfile->name());
         }
@@ -591,7 +591,7 @@ void EditProfileDialog::updateColorSchemeList(const QString &selectedColorScheme
 
     QStandardItem* selectedItem = nullptr;
 
-    QList<const ColorScheme*> schemeList = ColorSchemeManager::instance()->allColorSchemes();
+    const QList<const ColorScheme*> schemeList = ColorSchemeManager::instance()->allColorSchemes();
 
     for(const ColorScheme* scheme: schemeList) {
         QStandardItem* item = new QStandardItem(scheme->description());
@@ -895,7 +895,8 @@ void EditProfileDialog::enableIfNonEmptySelection(QWidget* widget, QItemSelectio
 void EditProfileDialog::updateTransparencyWarning()
 {
     // zero or one indexes can be selected
-    for(const QModelIndex & index: _ui->colorSchemeList->selectionModel()->selectedIndexes()) {
+    const QModelIndexList selected = _ui->colorSchemeList->selectionModel()->selectedIndexes();
+    for (const QModelIndex & index: selected) {
         bool needTransparency = index.data(Qt::UserRole + 1).value<const ColorScheme*>()->opacity() < 1.0;
 
         if (!needTransparency) {

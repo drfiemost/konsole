@@ -382,7 +382,7 @@ bool Application::processHelpArgs(KCmdLineArgs* args)
 
 void Application::listAvailableProfiles()
 {
-    QStringList paths = ProfileManager::instance()->availableProfilePaths();
+    const QStringList paths = ProfileManager::instance()->availableProfilePaths();
 
     for(const QString& path: paths) {
         QFileInfo info(path);
@@ -418,7 +418,8 @@ Profile::Ptr Application::processProfileChangeArgs(KCmdLineArgs* args, Profile::
     }
 
     // temporary changes to profile options specified on the command line
-    for(const QString & value: args->getOptionList("p")) {
+    const QStringList profileProperties = args->getOptionList("p");
+    for (const QString & value: profileProperties) {
         ProfileCommandParser parser;
 
         QHashIterator<Profile::Property, QVariant> iter(parser.parse(value));

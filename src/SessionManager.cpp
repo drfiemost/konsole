@@ -39,6 +39,8 @@
 #include "Enumeration.h"
 #include "TerminalDisplay.h"
 
+#include <utility>
+
 using namespace Konsole;
 
 SessionManager::SessionManager()
@@ -54,7 +56,7 @@ SessionManager::~SessionManager()
         kWarning() << "Konsole SessionManager destroyed with"<< _sessions.count()<<"session(s) still alive";
         // ensure that the Session doesn't later try to call back and do things to the
         // SessionManager
-        for(Session* session: _sessions) {
+        for(Session* session: std::as_const(_sessions)) {
             disconnect(session , nullptr , this , nullptr);
         }
     }
@@ -127,7 +129,7 @@ void SessionManager::sessionTerminated(Session *session)
 
 void SessionManager::applyProfile(Profile::Ptr profile , bool modifiedPropertiesOnly)
 {
-    for(Session* session: _sessions) {
+    for(Session* session: std::as_const(_sessions)) {
         if (_sessionProfiles[session] == profile)
             applyProfile(session, profile, modifiedPropertiesOnly);
     }
@@ -250,7 +252,8 @@ void SessionManager::sessionProfileCommandReceived(const QString& text)
     // be restored after applying the new profile
     QHash<TerminalDisplay *, QFont> zoomFontSizes;
 
-    for (TerminalDisplay *view: session->views()) {
+    const QList<TerminalDisplay *> views = session->views();
+    for (TerminalDisplay *view: views) {
         const QFont &viewCurFont = view->getVTFont();
         if (viewCurFont != _sessionProfiles[session]->font()) {
             zoomFontSizes.insert(view, viewCurFont);
@@ -294,7 +297,7 @@ void SessionManager::saveSessions(KConfig* config)
     int n = 1;
     _restoreMapping.clear();
 
-    foreach(Session * session, _sessions) {
+    for (Session *session: std::as_const(_sessions)) {
         QString name = QLatin1String("Session") + QString::number(n);
         KConfigGroup group(config, name);
 
@@ -336,7 +339,7 @@ void SessionManager::restoreSessions(KConfig* config)
 
 Session* SessionManager::idToSession(int id)
 {
-    for(Session * session: _sessions) {
+    for(Session * session: std::as_const(_sessions)) {
         if (session->sessionId() == id)
             return session;
     }

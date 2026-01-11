@@ -608,7 +608,7 @@ void Session::silenceTimerDone()
     }
 
     bool hasFocus = false;
-    for (TerminalDisplay *display : _views) {
+    for (const TerminalDisplay *display : std::as_const(_views)) {
         if (display->hasFocus()) {
             hasFocus = true;
             break;
@@ -631,13 +631,13 @@ void Session::updateFlowControlState(bool suspended)
 {
     if (suspended) {
         if (flowControlEnabled()) {
-            foreach(TerminalDisplay * display, _views) {
+            for (TerminalDisplay *display: std::as_const(_views)) {
                 if (display->flowControlWarningEnabled())
                     display->outputSuspended(true);
             }
         }
     } else {
-        foreach(TerminalDisplay * display, _views) {
+        for (TerminalDisplay *display: std::as_const(_views)) {
             display->outputSuspended(false);
         }
     }
@@ -673,7 +673,7 @@ void Session::activityStateSet(int state)
     } else if (state == NOTIFYACTIVITY) {
         // Don't notify if the terminal is active
         bool hasFocus = false;
-        for (TerminalDisplay *display : _views) {
+        for (TerminalDisplay *display: std::as_const(_views)) {
             if (display->hasFocus()) {
                 hasFocus = true;
                 break;
@@ -722,7 +722,7 @@ void Session::updateTerminalSize()
     const int VIEW_COLUMNS_THRESHOLD = 2;
 
     //select largest number of lines and columns that will fit in all visible views
-    for(TerminalDisplay* view: _views) {
+    for (TerminalDisplay *view: std::as_const(_views)) {
         if (!view->isHidden() &&
                 view->lines() >= VIEW_LINES_THRESHOLD &&
                 view->columns() >= VIEW_COLUMNS_THRESHOLD) {
@@ -1675,7 +1675,7 @@ void SessionGroup::forwardData(const QByteArray& data)
 
     _inForwardData = true;
     const QList<Session*> sessionsKeys = _sessions.keys();
-    for(Session* other: sessionsKeys) {
+    for(Session *other: sessionsKeys) {
         if (!_sessions[other]) {
             other->emulation()->sendString(data);
         }

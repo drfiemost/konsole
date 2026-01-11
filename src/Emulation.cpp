@@ -31,6 +31,8 @@
 #include "Screen.h"
 #include "ScreenWindow.h"
 
+#include <utility>
+
 using namespace Konsole;
 
 Emulation::Emulation() :
@@ -109,7 +111,7 @@ void Emulation::checkSelectedText()
 
 Emulation::~Emulation()
 {
-    foreach(ScreenWindow* window, _windows) {
+    for (ScreenWindow *window: std::as_const(_windows)) {
         delete window;
     }
 
@@ -124,7 +126,7 @@ void Emulation::setScreen(int index)
     _currentScreen = _screen[index & 1];
     if (_currentScreen != oldScreen) {
         // tell all windows onto this emulation to switch to the newly active screen
-        foreach(ScreenWindow * window, _windows) {
+        for (ScreenWindow *window: std::as_const(_windows)) {
             window->setScreen(_currentScreen);
         }
 

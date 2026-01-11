@@ -355,6 +355,17 @@ void ViewManager::detachView(ViewContainer* container, QWidget* view)
     }
 }
 
+Session* ViewManager::createSession(const Profile::Ptr &profile, const QString &directory)
+{
+    Session *session = SessionManager::instance()->createSession(profile);
+    Q_ASSERT(session);
+    if (!directory.isEmpty()) {
+        session->setInitialWorkingDirectory(directory);
+    }
+    session->addEnvironmentEntry(QStringLiteral("KONSOLE_DBUS_WINDOW=/Windows/%1").arg(managerId()));
+    return session;
+}
+
 void ViewManager::sessionFinished()
 {
     // if this slot is called after the view manager's main widget
@@ -901,55 +912,29 @@ int ViewManager::currentSession()
 
 int ViewManager::newSession()
 {
-    Profile::Ptr profile = ProfileManager::instance()->defaultProfile();
-    Session *session = SessionManager::instance()->createSession(profile);
-
-    session->addEnvironmentEntry(QStringLiteral("KONSOLE_DBUS_WINDOW=/Windows/%1").arg(managerId()));
-
-    createView(session);
-    session->run();
-
-    return session->sessionId();
+    return newSession(QString(), QString());
 }
 
 int ViewManager::newSession(const QString &profile)
 {
-    const QList<Profile::Ptr> profilelist = ProfileManager::instance()->allProfiles();
-    Profile::Ptr profileptr = ProfileManager::instance()->defaultProfile();
-
-    for (const auto &i : profilelist) {
-        if (i->name() == profile) {
-            profileptr = i;
-            break;
-        }
-    }
-
-    Session *session = SessionManager::instance()->createSession(profileptr);
-
-    session->addEnvironmentEntry(QStringLiteral("KONSOLE_DBUS_WINDOW=/Windows/%1").arg(managerId()));
-
-    createView(session);
-    session->run();
-
-    return session->sessionId();
+    return newSession(profile, QString());
 }
 
 int ViewManager::newSession(const QString &profile, const QString &directory)
 {
-    const QList<Profile::Ptr> profilelist = ProfileManager::instance()->allProfiles();
     Profile::Ptr profileptr = ProfileManager::instance()->defaultProfile();
+    if(!profile.isEmpty()) {
+        const QList<Profile::Ptr> profilelist = ProfileManager::instance()->allProfiles();
 
-    for (const auto &i : profilelist) {
-        if (i->name() == profile) {
-            profileptr = i;
-            break;
+        for (const auto &i : profilelist) {
+            if (i->name() == profile) {
+                profileptr = i;
+                break;
+            }
         }
     }
 
-    Session* session = SessionManager::instance()->createSession(profileptr);
-    session->setInitialWorkingDirectory(directory);
-
-    session->addEnvironmentEntry(QStringLiteral("KONSOLE_DBUS_WINDOW=/Windows/%1").arg(managerId()));
+    Session *session = createSession(profileptr, directory);
 
     createView(session);
     session->run();

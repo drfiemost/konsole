@@ -73,6 +73,8 @@
 #include "IncrementalSearchBar.h"
 #include "LineBlockCharacters.h"
 
+#include <utility>
+
 #define MAX_LINE_WIDTH 1024
 
 using namespace Konsole;
@@ -1155,7 +1157,8 @@ void TerminalDisplay::paintEvent(QPaintEvent* pe)
 
     // Determine which characters should be repainted (1 region unit = 1 character)
     QRegion dirtyImageRegion;
-    for(const QRect & rect: (pe->region() & contentsRect())) {
+    const QRegion region = pe->region() & contentsRect();
+    for (const QRect &rect: region) {
         dirtyImageRegion += widgetToImage(rect);
         drawBackground(paint, rect, palette().background().color(), true /* use opacity setting */);
     }
@@ -1164,7 +1167,7 @@ void TerminalDisplay::paintEvent(QPaintEvent* pe)
     // set https://bugreports.qt.io/browse/QTBUG-66036
     paint.setRenderHint(QPainter::TextAntialiasing, _antialiasText);
 
-    for(const QRect & rect: dirtyImageRegion) {
+    for (const QRect & rect: std::as_const(dirtyImageRegion)) {
         drawContents(paint, rect);
     }
     drawCurrentResultRect(paint);
@@ -2876,55 +2879,72 @@ void TerminalDisplay::doPaste(QString text, bool appendReturn)
             return;
     }
 
+    // Most code in Konsole uses UTF-32. We're filtering
+    // UTF-16 here, as all control characters can be represented
+    // in this encoding as single code unit. If you ever need to
+    // filter anything above 0xFFFF (specific code points or
+    // categories which contain such code points), convert text to
+    // UTF-32 using QString::toUcs4() and use QChar static
+    // methods which take "uint ucs4".
+    static const QVector<ushort> whitelist = { u'\t', u'\r', u'\n' };
+    static const auto isUnsafe = [](const QChar &c) {
+        return (c.category() == QChar::Category::Other_Control && !whitelist.contains(c.unicode()));
+    };
+
+    // Returns control sequence string (e.g. "^C") for control character c
+    static const auto charToSequence = [](const QChar &c) {
+        if (c.unicode() <= 0x1F) {
+            return QStringLiteral("^%1").arg(QChar(u'@' + c.unicode()));
+        } else if (c.unicode() == 0x7F) {
+            return QStringLiteral("^?");
+        } else if (c.unicode() >= 0x80 && c.unicode() <= 0x9F){
+            return QStringLiteral("^[%1").arg(QChar(u'@' + c.unicode() - 0x80));
+        }
+        return QString();
+    };
+
+    const QMap<ushort, QString> characterDescriptions = {
+        {0x0003, i18n("End Of Text/Interrupt: may exit the current process")},
+        {0x0004, i18n("End Of Transmission: may exit the current process")},
+        {0x0007, i18n("Bell: will try to emit an audible warning")},
+        {0x0008, i18n("Backspace")},
+        {0x0013, i18n("Device Control Three/XOFF: suspends output")},
+        {0x001a, i18n("Substitute/Suspend: may suspend current process")},
+        {0x001b, i18n("Escape: used for manipulating terminal state")},
+        {0x001c, i18n("File Separator/Quit: may abort the current process")},
+    };
+
     QStringList unsafeCharacters;
     for (const QChar &c : text) {
-        if (!c.isPrint() && c != QLatin1Char('\t') && c != QLatin1Char('\n')) {
-            QString description;
-            switch(c.unicode()) {
-            case '\x03':
-                description = i18n("^C Interrupt: May abort the current process");
-                break;
-            case '\x04':
-                description = i18n("^D End of transmission: May exit the current process");
-                break;
-            case '\x07':
-                description = i18n("^G Bell: Will try to emit an audible warning");
-                break;
-            case '\x08':
-                description = i18n("^H Backspace");
-                break;
-            case '\x13':
-                description = i18n("^S Scroll lock: Locks terminal output");
-                break;
-            case '\x1a':
-                description = i18n("^Z Suspend: Stops current process");
-                break;
-            case '\x1b':
-                description = i18n("ESC: Used for special commands to the current process");
-                break;
-            default:
-                description = i18n("Other unprintable character (\\x%1)", QString::number(c.unicode(), 16));
-                break;
+        if (isUnsafe(c)) {
+            const QString sequence = charToSequence(c);
+            const QString description = characterDescriptions.value(c.unicode(), QString());
+            QString entry = QStringLiteral("U+%1").arg(c.unicode(), 4, 16, QLatin1Char('0'));
+            if(!sequence.isEmpty()) {
+                entry += QStringLiteral("\t%1").arg(sequence);
             }
-            unsafeCharacters.append(description);
+            if(!description.isEmpty()) {
+                entry += QStringLiteral("\t%1").arg(description);
+            }
+            unsafeCharacters.append(entry);
         }
     }
     unsafeCharacters.removeDuplicates();
 
     if (!unsafeCharacters.isEmpty()) {
         int result = KMessageBox::warningYesNoCancelList(window(),
-                i18n("The text you're trying to paste contains hidden unprintable characters, "
+                i18n("The text you're trying to paste contains hidden control characters, "
                     "do you want to filter them out?"),
                 unsafeCharacters,
-                i18nc("@title", "Filter"),
+                i18nc("@title", "Confirm Paste"),
                 KGuiItem(i18nc("@action:button",
-                    "&Remove unprintable"),
+                    "Paste &without control characters"),
                     QStringLiteral("filter-symbolic")),
                 KGuiItem(i18nc("@action:button",
-                    "Confirm &paste"),
+                    "&Paste everything"),
                     QStringLiteral("edit-paste")),
                 KGuiItem(i18nc("@action:button",
-                    "&Cancel paste"),
+                    "&Cancel"),
                     QStringLiteral("dialog-cancel")),
                 QStringLiteral("ShowPasteUnprintableWarning")
             );
@@ -2934,7 +2954,7 @@ void TerminalDisplay::doPaste(QString text, bool appendReturn)
         case KMessageBox::Yes: {
             QString sanitized;
             for (const QChar &c : text) {
-                if (c.isPrint() || c == QLatin1Char('\t') || c == QLatin1Char('\n')) {
+                if (!isUnsafe(c)) {
                     sanitized.append(c);
                 }
             }

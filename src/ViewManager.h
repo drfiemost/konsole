@@ -174,6 +174,14 @@ public:
 
     static const ColorScheme *colorSchemeForProfile(const Profile::Ptr &profile);
 
+    /**
+     * Creates and returns new session
+     *
+     * The session has specified @p profile, working @p directory
+     * and configured environment.
+     */
+    Session* createSession(const Profile::Ptr &profile, const QString &directory = QString());
+
 signals:
     /** Emitted when the last view is removed from the view manager */
     void empty();

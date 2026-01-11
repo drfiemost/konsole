@@ -34,6 +34,8 @@
 #include "KeyboardTranslator.h"
 #include "KeyboardTranslatorManager.h"
 
+#include <utility>
+
 using namespace Konsole;
 
 KeyBindingEditor::KeyBindingEditor(QWidget* parent)
@@ -120,7 +122,8 @@ void KeyBindingEditor::removeSelectedEntry()
 {
     QList<QTableWidgetItem*> uniqueList;
 
-    foreach(QTableWidgetItem* item, _ui->keyBindingTable->selectedItems()) {
+    const QList<QTableWidgetItem *> selectedItems = _ui->keyBindingTable->selectedItems();
+    for (QTableWidgetItem *item: selectedItems) {
         if (item->column() == 1) //Select item at the first column
             item = _ui->keyBindingTable->item(item->row(), 0);
 
@@ -128,7 +131,7 @@ void KeyBindingEditor::removeSelectedEntry()
             uniqueList.append(item);
     }
 
-    foreach(QTableWidgetItem* item, uniqueList) {
+    for (QTableWidgetItem *item : std::as_const(uniqueList)) {
         // get the first item in the row which has the entry
 
         KeyboardTranslator::Entry existing = item->data(Qt::UserRole).

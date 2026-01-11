@@ -29,6 +29,8 @@
 #include <KCmdLineArgs>
 #include <KLocale>
 
+#include <utility>
+
 #define KONSOLE_VERSION "2.14.2"
 
 using Konsole::Application;
@@ -105,7 +107,7 @@ bool shouldUseNewProcess()
     qtProblematicOptions << QStringLiteral("display")
                          << QStringLiteral("visual");
 #endif
-    for(const QString& option: qtProblematicOptions) {
+    for (const QString &option: std::as_const(qtProblematicOptions)) {
         if ( qtArgs->isSet(option.toLocal8Bit()) ) {
             return true;
         }
@@ -119,7 +121,7 @@ bool shouldUseNewProcess()
 #if defined(Q_WS_X11)
     kdeProblematicOptions << QStringLiteral("waitforwm");
 #endif
-    for(const QString& option: kdeProblematicOptions) {
+    for (const QString& option: std::as_const(kdeProblematicOptions)) {
         if ( kdeArgs->isSet(option.toLocal8Bit()) ) {
             return true;
         }
