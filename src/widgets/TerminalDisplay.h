@@ -835,21 +835,6 @@ private:
 
 };
 
-class AutoScrollHandler : public QObject
-{
-    Q_OBJECT
-
-public:
-    explicit AutoScrollHandler(QWidget* parent);
-protected:
-    virtual void timerEvent(QTimerEvent* event);
-    virtual bool eventFilter(QObject* watched, QEvent* event);
-private:
-    QWidget* widget() const {
-        return static_cast<QWidget*>(parent());
-    }
-    int _timerId;
-};
 }
 
 #endif // TERMINALDISPLAY_H
