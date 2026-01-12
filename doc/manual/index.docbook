@@ -743,6 +743,17 @@ The type of alerts can be changed through
 
 <varlistentry>
 <term><menuchoice>
+<guimenu>View</guimenu><guimenuitem>Monitor for
+Process Finishing</guimenuitem></menuchoice></term>
+<listitem><para><action>Toggles the monitoring of the current tab for
+the process finishing</action>.
+</para><para>
+If checked, upon finishing the current process, &konsole; will show a notification <guilabel>The process '<replaceable>name of the process</replaceable>' has finished running in session '<replaceable>name of the session</replaceable>'</guilabel>.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
 <shortcut><keycombo action="simul">&Ctrl;<keycap>+</keycap></keycombo></shortcut>
 <guimenu>View</guimenu><guimenuitem>Enlarge Font</guimenuitem></menuchoice></term>
 <listitem><para><action>Increases the text font size</action></para></listitem>

@@ -28,6 +28,7 @@
         <Menu name="view">
             <Action name="monitor-silence" group="session-view-operations"/>
             <Action name="monitor-activity" group="session-view-operations"/>
+            <Action name="monitor-process-finish" group="session-view-operations"/>
             <Separator group="session-view-operations"/>
             <Action name="enlarge-font" group="session-view-operations"/>
             <Action name="reset-font-size" group="session-view-operations"/>

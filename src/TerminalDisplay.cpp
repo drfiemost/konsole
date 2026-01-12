@@ -126,9 +126,9 @@ void TerminalDisplay::setScreenWindow(ScreenWindow* window)
     _screenWindow = window;
 
     if (!_screenWindow.isNull()) {
-        connect(_screenWindow.data() , &Konsole::ScreenWindow::outputChanged , this , &Konsole::TerminalDisplay::updateLineProperties);
-        connect(_screenWindow.data() , &Konsole::ScreenWindow::outputChanged , this , &Konsole::TerminalDisplay::updateImage);
-        connect(_screenWindow.data() , &Konsole::ScreenWindow::currentResultLineChanged , this , &Konsole::TerminalDisplay::updateImage);
+        connect(_screenWindow.data() , &Konsole::ScreenWindow::outputChanged , this, &Konsole::TerminalDisplay::updateLineProperties);
+        connect(_screenWindow.data() , &Konsole::ScreenWindow::outputChanged , this, &Konsole::TerminalDisplay::updateImage);
+        connect(_screenWindow.data() , &Konsole::ScreenWindow::currentResultLineChanged , this, &Konsole::TerminalDisplay::updateImage);
         connect(_screenWindow, &Konsole::ScreenWindow::outputChanged, this, [this]() {
             _filterUpdateRequired = true;
         });
