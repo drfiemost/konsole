@@ -18,7 +18,7 @@
 */
 
 // Own
-#include "TabTitleFormatButton.h"
+#include "widgets/TabTitleFormatButton.h"
 
 // Qt
 #include <QList>
@@ -108,5 +108,5 @@ Session::TabTitleContext TabTitleFormatButton::context() const
     return _context;
 }
 
-#include "TabTitleFormatButton.moc"
+#include "widgets/TabTitleFormatButton.moc"
 

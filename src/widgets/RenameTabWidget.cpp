@@ -18,7 +18,7 @@
 */
 
 // Own
-#include "RenameTabWidget.h"
+#include "widgets/RenameTabWidget.h"
 
 // Konsole
 #include "ui_RenameTabWidget.h"
@@ -94,4 +94,3 @@ void RenameTabWidget::insertRemoteTabTitleText(const QString& text)
     _ui->remoteTabTitleEdit->insert(text);
     focusRemoteTabTitleText();
 }
-

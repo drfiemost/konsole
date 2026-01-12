@@ -19,7 +19,7 @@
 */
 
 // Own
-#include "HistorySizeWidget.h"
+#include "widgets/HistorySizeWidget.h"
 
 // Qt
 #include <QButtonGroup>
@@ -123,4 +123,4 @@ int HistorySizeWidget::lineCount() const
     return _ui->historyLineSpinner->value();
 }
 
-#include "HistorySizeWidget.moc"
+#include "widgets/HistorySizeWidget.moc"

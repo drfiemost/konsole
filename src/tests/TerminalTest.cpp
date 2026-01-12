@@ -23,9 +23,9 @@
 #include "qtest_kde.h"
 
 // Konsole
-#include "../TerminalDisplay.h"
-#include "../CharacterColor.h"
-#include "../ColorScheme.h"
+#include "widgets/TerminalDisplay.h"
+#include "CharacterColor.h"
+#include "ColorScheme.h"
 
 using namespace Konsole;
 

@@ -19,7 +19,7 @@
  *  02110-1301  USA.
  */
 
-#include "TerminalDisplayAccessible.h"
+#include "widgets/TerminalDisplayAccessible.h"
 
 QString Q_GUI_EXPORT qTextBeforeOffsetFromString(int offset, QAccessible2::BoundaryType boundaryType,
         int* startOffset, int* endOffset, const QString& text);

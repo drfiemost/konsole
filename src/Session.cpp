@@ -52,7 +52,7 @@
 
 #include "ProcessInfo.h"
 #include "Pty.h"
-#include "TerminalDisplay.h"
+#include "widgets/TerminalDisplay.h"
 #include "ShellCommand.h"
 #include "Vt102Emulation.h"
 #include "ZModemDialog.h"

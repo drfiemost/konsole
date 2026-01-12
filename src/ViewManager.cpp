@@ -39,11 +39,11 @@
 #include "ColorScheme.h"
 #include "ColorSchemeManager.h"
 #include "Session.h"
-#include "TerminalDisplay.h"
+#include "widgets/TerminalDisplay.h"
 #include "SessionController.h"
 #include "SessionManager.h"
 #include "ProfileManager.h"
-#include "ViewSplitter.h"
+#include "widgets/ViewSplitter.h"
 
 using namespace Konsole;
 

@@ -40,7 +40,7 @@
 #include "SessionController.h"
 #include "SessionManager.h"
 #include "ProfileManager.h"
-#include "TerminalDisplay.h"
+#include "widgets/TerminalDisplay.h"
 #include "ViewManager.h"
 #include "KonsoleSettings.h"
 #include "settings/PartInfo.h"

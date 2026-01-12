@@ -33,7 +33,7 @@
 #include "EditProfileDialog.h"
 #include "ProfileManager.h"
 #include "Session.h"
-#include "TerminalDisplay.h"
+#include "widgets/TerminalDisplay.h"
 #include "SessionManager.h"
 #include "SessionController.h"
 

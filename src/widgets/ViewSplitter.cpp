@@ -20,12 +20,12 @@
 */
 
 // Own
-#include "ViewSplitter.h"
+#include "widgets/ViewSplitter.h"
 
 // Qt
 
 // Konsole
-#include "ViewContainer.h"
+#include "widgets/ViewContainer.h"
 
 using Konsole::ViewSplitter;
 using Konsole::ViewContainer;
@@ -265,4 +265,4 @@ ViewContainer* ViewSplitter::activeContainer() const
     }
 }
 
-#include "ViewSplitter.moc"
+#include "widgets/ViewSplitter.moc"

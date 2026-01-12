@@ -67,8 +67,8 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         Filter.cpp
                         History.cpp
                         HistorySizeDialog.cpp
-                        HistorySizeWidget.cpp
-                        IncrementalSearchBar.cpp
+                        widgets/HistorySizeWidget.cpp
+                        widgets/IncrementalSearchBar.cpp
                         KeyBindingEditor.cpp
                         KeyboardTranslator.cpp
                         KeyboardTranslatorManager.cpp
@@ -80,7 +80,7 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         ProfileManager.cpp
                         Pty.cpp
                         RenameTabDialog.cpp
-                        RenameTabWidget.cpp
+                        widgets/RenameTabWidget.cpp
                         SaveHistoryTask.cpp
                         SearchHistoryTask.cpp
                         Screen.cpp
@@ -92,17 +92,17 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         SessionListModel.cpp
                         SessionTask.cpp
                         ShellCommand.cpp
-                        TabTitleFormatButton.cpp
+                        widgets/TabTitleFormatButton.cpp
                         TerminalCharacterDecoder.cpp
                         ExtendedCharTable.cpp
-                        TerminalDisplay.cpp
-                        TerminalDisplayAccessible.cpp
+                        widgets/TerminalDisplay.cpp
+                        widgets/TerminalDisplayAccessible.cpp
                         LineBlockCharacters.cpp
-                        ViewContainer.cpp
-                        ViewContainerTabBar.cpp
+                        widgets/ViewContainer.cpp
+                        widgets/ViewContainerTabBar.cpp
                         ViewManager.cpp
                         ViewProperties.cpp
-                        ViewSplitter.cpp
+                        widgets/ViewSplitter.cpp
                         Vt102Emulation.cpp
                         ZModemDialog.cpp
                         PrintOptions.cpp
@@ -130,9 +130,9 @@ kde4_add_ui_files(konsoleprivate_SRCS ColorSchemeEditor.ui
                                       EditProfileDialog.ui
                                       KeyBindingEditor.ui
                                       RenameTabDialog.ui
-                                      RenameTabWidget.ui
+                                      widgets/RenameTabWidget.ui
                                       HistorySizeDialog.ui
-                                      HistorySizeWidget.ui
+                                      widgets/HistorySizeWidget.ui
                                       PrintOptions.ui
                                       settings/GeneralSettings.ui
                                       settings/PartInfo.ui

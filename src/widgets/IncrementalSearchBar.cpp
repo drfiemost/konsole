@@ -18,7 +18,7 @@
 */
 
 // Own
-#include "IncrementalSearchBar.h"
+#include "widgets/IncrementalSearchBar.h"
 
 // Qt
 #include <QHBoxLayout>
@@ -315,4 +315,4 @@ void IncrementalSearchBar::setOptions()
     _reverseSearch->setChecked(KonsoleSettings::searchReverseSearch());
 }
 
-#include "IncrementalSearchBar.moc"
+#include "widgets/IncrementalSearchBar.moc"

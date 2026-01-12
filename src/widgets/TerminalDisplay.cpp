@@ -21,7 +21,7 @@
 */
 
 // Own
-#include "TerminalDisplay.h"
+#include "widgets/TerminalDisplay.h"
 
 // Config
 #include "config-konsole.h"
@@ -70,7 +70,7 @@
 #include "Session.h"
 #include "Profile.h"
 #include "ViewManager.h" // for colorSchemeForProfile. // TODO: Rewrite this.
-#include "IncrementalSearchBar.h"
+#include "widgets/IncrementalSearchBar.h"
 #include "LineBlockCharacters.h"
 
 #include <utility>
@@ -3734,4 +3734,4 @@ void TerminalDisplay::applyProfile(const Profile::Ptr &profile)
     setAlternateScrolling(profile->property<bool>(Profile::AlternateScrolling));
 }
 
-#include "TerminalDisplay.moc"
+#include "widgets/TerminalDisplay.moc"

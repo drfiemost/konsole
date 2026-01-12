@@ -53,7 +53,7 @@
 #include "SessionManager.h"
 #include "ProfileManager.h"
 #include "KonsoleSettings.h"
-#include "TerminalDisplay.h"
+#include "widgets/TerminalDisplay.h"
 #include "settings/GeneralSettings.h"
 #include "settings/ProfileSettings.h"
 #include "settings/TabBarSettings.h"

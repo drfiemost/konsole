@@ -20,8 +20,8 @@
 */
 
 // Own
-#include "ViewContainerTabBar.h"
-#include "ViewContainer.h"
+#include "widgets/ViewContainerTabBar.h"
+#include "widgets/ViewContainer.h"
 
 // Qt
 #include <QMimeData>

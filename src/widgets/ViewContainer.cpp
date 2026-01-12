@@ -20,7 +20,7 @@
 */
 
 // Own
-#include "ViewContainer.h"
+#include "widgets/ViewContainer.h"
 
 #include "config-konsole.h"
 
@@ -41,9 +41,9 @@
 #include <KIcon>
 
 // Konsole
-#include "IncrementalSearchBar.h"
+#include "widgets/IncrementalSearchBar.h"
 #include "ViewProperties.h"
-#include "ViewContainerTabBar.h"
+#include "widgets/ViewContainerTabBar.h"
 #include "ProfileList.h"
 #include "ViewManager.h"
 
@@ -712,4 +712,4 @@ ViewManager* TabbedViewContainer::connectedViewManager()
     return _connectedViewManager;
 }
 
-#include "ViewContainer.moc"
+#include "widgets/ViewContainer.moc"

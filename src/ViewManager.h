@@ -27,7 +27,7 @@
 
 // Konsole
 #include "Profile.h"
-#include "ViewContainer.h"
+#include "widgets/ViewContainer.h"
 
 class KActionCollection;
 class KConfigGroup;
