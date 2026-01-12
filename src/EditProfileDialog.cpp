@@ -1059,14 +1059,14 @@ void EditProfileDialog::resetKeyBindings()
 
 void EditProfileDialog::setupCheckBoxes(const QVector<BooleanOption>& options , const Profile::Ptr profile)
 {
-    for(const auto& option : options) {
+    for (const auto& option: options) {
         option.button->setChecked(profile->property<bool>(option.property));
         connect(option.button, SIGNAL(toggled(bool)), this, option.slot);
     }
 }
 void EditProfileDialog::setupRadio(const QVector<RadioOption>& possibilities, int actual)
 {
-    for(const auto& possibility : possibilities) {
+    for (const auto& possibility: possibilities) {
         possibility.button->setChecked(possibility.value == actual);
         connect(possibility.button, SIGNAL(clicked()), this, possibility.slot);
     }
@@ -1104,6 +1104,11 @@ void EditProfileDialog::setupScrollingPage(const Profile::Ptr profile)
 
     setupRadio(pageamounts, scrollFullPage);
 
+    const auto options = QVector<BooleanOption>{
+        {_ui->highlightScrolledLinesButton, Profile::HighlightScrolledLines, SLOT(toggleHighlightScrolledLines(bool))}
+    };
+    setupCheckBoxes(options, profile);
+
     // signals and slots
     connect(_ui->historySizeWidget, &Konsole::HistorySizeWidget::historySizeChanged,
             this, &Konsole::EditProfileDialog::historySizeChanged);
@@ -1137,6 +1142,12 @@ void EditProfileDialog::scrollHalfPage()
 {
     updateTempProfileProperty(Profile::ScrollFullPage, Enum::ScrollPageHalf);
 }
+
+void EditProfileDialog::toggleHighlightScrolledLines(bool enable)
+{
+    updateTempProfileProperty(Profile::HighlightScrolledLines, enable);
+}
+
 void EditProfileDialog::setupMousePage(const Profile::Ptr profile)
 {
     const auto options = QVector<BooleanOption>{
@@ -1201,23 +1212,23 @@ void EditProfileDialog::setupAdvancedPage(const Profile::Ptr profile)
 {
     const auto options = QVector<BooleanOption>{
         {
-            _ui->enableBlinkingTextButton , Profile::BlinkingTextEnabled ,
+            _ui->enableBlinkingTextButton, Profile::BlinkingTextEnabled,
             SLOT(toggleBlinkingText(bool))
         },
         {
-            _ui->enableFlowControlButton , Profile::FlowControlEnabled ,
+            _ui->enableFlowControlButton, Profile::FlowControlEnabled,
             SLOT(toggleFlowControl(bool))
         },
         {
-            _ui->enableBlinkingCursorButton , Profile::BlinkingCursorEnabled ,
+            _ui->enableBlinkingCursorButton, Profile::BlinkingCursorEnabled,
             SLOT(toggleBlinkingCursor(bool))
         },
         {
-            _ui->enableBidiRenderingButton , Profile::BidiRenderingEnabled ,
+            _ui->enableBidiRenderingButton, Profile::BidiRenderingEnabled,
             SLOT(togglebidiRendering(bool))
         }
     };
-    setupCheckBoxes(options , profile);
+    setupCheckBoxes(options, profile);
 
     const int lineSpacing = profile->lineSpacing();
     _ui->lineSpacingSpinner->setValue(lineSpacing);

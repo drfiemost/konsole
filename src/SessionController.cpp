@@ -151,45 +151,45 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
     _view->filterChain()->addFilter(new UrlFilter);
 
     // listen for session resize requests
-    connect(_session.data(), &Konsole::Session::resizeRequest, this,
+    connect(_session, &Konsole::Session::resizeRequest, this,
             &Konsole::SessionController::sessionResizeRequest);
 
     // listen for popup menu requests
-    connect(_view.data(), &Konsole::TerminalDisplay::configureRequest, this,
+    connect(_view, &Konsole::TerminalDisplay::configureRequest, this,
             &Konsole::SessionController::showDisplayContextMenu);
 
     // move view to newest output when keystrokes occur
-    connect(_view.data(), &Konsole::TerminalDisplay::keyPressedSignal, this,
+    connect(_view, &Konsole::TerminalDisplay::keyPressedSignal, this,
             &Konsole::SessionController::trackOutput);
 
     // listen to activity / silence notifications from session
-    connect(_session.data(), &Konsole::Session::notificationsChanged, this,
+    connect(_session, &Konsole::Session::notificationsChanged, this,
             &Konsole::SessionController::sessionNotificationsChanged);
     // listen to title and icon changes
-    connect(_session.data(), &Konsole::Session::sessionAttributeChanged, this, &Konsole::SessionController::sessionAttributeChanged);
+    connect(_session, &Konsole::Session::sessionAttributeChanged, this, &Konsole::SessionController::sessionAttributeChanged);
 
     connect(this, &Konsole::SessionController::tabRenamedByUser,  _session,  &Konsole::Session::tabRenamedByUser);
 
-    connect(_session.data() , &Konsole::Session::currentDirectoryChanged ,
+    connect(_session , &Konsole::Session::currentDirectoryChanged ,
             this , &Konsole::SessionController::currentDirectoryChanged);
 
     // listen for color changes
-    connect(_session.data(), &Konsole::Session::changeBackgroundColorRequest, _view.data(), &Konsole::TerminalDisplay::setBackgroundColor);
-    connect(_session.data(), &Konsole::Session::changeForegroundColorRequest, _view.data(), &Konsole::TerminalDisplay::setForegroundColor);
+    connect(_session, &Konsole::Session::changeBackgroundColorRequest, _view.data(), &Konsole::TerminalDisplay::setBackgroundColor);
+    connect(_session, &Konsole::Session::changeForegroundColorRequest, _view.data(), &Konsole::TerminalDisplay::setForegroundColor);
 
     // update the title when the session starts
-    connect(_session.data(), &Konsole::Session::started, this, &Konsole::SessionController::snapshot);
+    connect(_session, &Konsole::Session::started, this, &Konsole::SessionController::snapshot);
 
     // listen for output changes to set activity flag
     connect(_session->emulation(), &Konsole::Emulation::outputChanged, this,
             &Konsole::SessionController::fireActivity);
 
     // listen for detection of ZModem transfer
-    connect(_session.data(), &Konsole::Session::zmodemDownloadDetected, this, &Konsole::SessionController::zmodemDownload);
-    connect(_session.data(), &Konsole::Session::zmodemUploadDetected, this, &Konsole::SessionController::zmodemUpload);
+    connect(_session, &Konsole::Session::zmodemDownloadDetected, this, &Konsole::SessionController::zmodemDownload);
+    connect(_session, &Konsole::Session::zmodemUploadDetected, this, &Konsole::SessionController::zmodemUpload);
 
     // listen for flow control status changes
-    connect(_session.data(), &Konsole::Session::flowControlEnabledChanged, _view.data(),
+    connect(_session, &Konsole::Session::flowControlEnabledChanged, _view.data(),
             &Konsole::TerminalDisplay::setFlowControlWarningEnabled);
     _view->setFlowControlWarningEnabled(_session->flowControlEnabled());
 
@@ -202,7 +202,7 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
     _interactionTimer->setSingleShot(true);
     _interactionTimer->setInterval(500);
     connect(_interactionTimer, &QTimer::timeout, this, &Konsole::SessionController::snapshot);
-    connect(_view.data(), &Konsole::TerminalDisplay::keyPressedSignal, this, &Konsole::SessionController::interactionHandler);
+    connect(_view, &Konsole::TerminalDisplay::keyPressedSignal, this, &Konsole::SessionController::interactionHandler);
 
     // take a snapshot of the session state periodically in the background
     QTimer* backgroundTimer = new QTimer(_session);
@@ -212,10 +212,10 @@ SessionController::SessionController(Session* session , TerminalDisplay* view, Q
     backgroundTimer->start();
 
     // xterm '10;?' request
-    connect(_session.data(), &Konsole::Session::getForegroundColor,
+    connect(_session, &Konsole::Session::getForegroundColor,
             this, &Konsole::SessionController::sendForegroundColor);
     // xterm '11;?' request
-    connect(_session.data(), &Konsole::Session::getBackgroundColor,
+    connect(_session, &Konsole::Session::getBackgroundColor,
             this, &Konsole::SessionController::sendBackgroundColor);
 
     _allControllers.insert(this);
@@ -241,7 +241,7 @@ SessionController::~SessionController()
     _allControllers.remove(this);
 
     if (!_editProfileDialog.isNull()) {
-        delete _editProfileDialog.data();
+        _editProfileDialog->deleteLater();
     }
     if(factory()) {
         factory()->removeClient(this);
@@ -510,9 +510,9 @@ bool SessionController::eventFilter(QObject* watched , QEvent* event)
         // by the focused view
 
         // first, disconnect any other views which are listening for bell signals from the session
-        disconnect(_session.data(), &Konsole::Session::bellRequest, nullptr, nullptr);
+        disconnect(_session, &Konsole::Session::bellRequest, nullptr, nullptr);
         // second, connect the newly focused view to listen for the session's bell signal
-        connect(_session.data(), &Konsole::Session::bellRequest,
+        connect(_session, &Konsole::Session::bellRequest,
                     _view.data(), &Konsole::TerminalDisplay::bell);
 
         if (_copyInputToAllTabsAction && _copyInputToAllTabsAction->isChecked()) {
@@ -537,14 +537,14 @@ void SessionController::removeSearchFilter()
 
 void SessionController::setupSearchBar()
 {
-    connect(_searchBar.data(), &Konsole::IncrementalSearchBar::unhandledMovementKeyPressed, this, &Konsole::SessionController::movementKeyFromSearchBarReceived);
-    connect(_searchBar.data(), &Konsole::IncrementalSearchBar::closeClicked, this, &Konsole::SessionController::searchClosed);
-    connect(_searchBar.data(), &Konsole::IncrementalSearchBar::searchFromClicked, this, &Konsole::SessionController::searchFrom);
-    connect(_searchBar.data(), &Konsole::IncrementalSearchBar::findNextClicked, this, &Konsole::SessionController::findNextInHistory);
-    connect(_searchBar.data(), &Konsole::IncrementalSearchBar::findPreviousClicked, this, &Konsole::SessionController::findPreviousInHistory);
-    connect(_searchBar.data(), &Konsole::IncrementalSearchBar::highlightMatchesToggled , this , &Konsole::SessionController::highlightMatches);
-    connect(_searchBar.data(), &Konsole::IncrementalSearchBar::matchCaseToggled, this, &Konsole::SessionController::changeSearchMatch);
-    connect(_searchBar.data(), &Konsole::IncrementalSearchBar::matchRegExpToggled, this, &Konsole::SessionController::changeSearchMatch);
+    connect(_searchBar, &Konsole::IncrementalSearchBar::unhandledMovementKeyPressed, this, &Konsole::SessionController::movementKeyFromSearchBarReceived);
+    connect(_searchBar, &Konsole::IncrementalSearchBar::closeClicked, this, &Konsole::SessionController::searchClosed);
+    connect(_searchBar, &Konsole::IncrementalSearchBar::searchFromClicked, this, &Konsole::SessionController::searchFrom);
+    connect(_searchBar, &Konsole::IncrementalSearchBar::findNextClicked, this, &Konsole::SessionController::findNextInHistory);
+    connect(_searchBar, &Konsole::IncrementalSearchBar::findPreviousClicked, this, &Konsole::SessionController::findPreviousInHistory);
+    connect(_searchBar, &Konsole::IncrementalSearchBar::highlightMatchesToggled , this , &Konsole::SessionController::highlightMatches);
+    connect(_searchBar, &Konsole::IncrementalSearchBar::matchCaseToggled, this, &Konsole::SessionController::changeSearchMatch);
+    connect(_searchBar, &Konsole::IncrementalSearchBar::matchRegExpToggled, this, &Konsole::SessionController::changeSearchMatch);
 }
 
 void SessionController::setShowMenuAction(QAction* action)
@@ -822,12 +822,12 @@ void SessionController::editCurrentProfile()
     // NOTE bug311270: For to prevent the crash, the profile must be reset.
     if (!_editProfileDialog.isNull()) {
         // exists but not visible
-        delete _editProfileDialog.data();
+        _editProfileDialog->deleteLater();
     }
 
     _editProfileDialog = new EditProfileDialog(QApplication::activeWindow());
-    _editProfileDialog.data()->setProfile(SessionManager::instance()->sessionProfile(_session));
-    _editProfileDialog.data()->show();
+    _editProfileDialog->setProfile(SessionManager::instance()->sessionProfile(_session));
+    _editProfileDialog->show();
 }
 
 void SessionController::renameSession()
@@ -1135,7 +1135,7 @@ void SessionController::listenForScreenWindowUpdates()
             &Konsole::SessionController::updateSearchFilter);
     connect(_view->screenWindow(), &Konsole::ScreenWindow::scrolled, this,
             &Konsole::SessionController::updateSearchFilter);
-    connect(_view->screenWindow(), &Konsole::ScreenWindow::currentResultLineChanged, _view.data(),
+    connect(_view->screenWindow(), &Konsole::ScreenWindow::currentResultLineChanged, _view,
             static_cast<void(TerminalDisplay::*)()>(&Konsole::TerminalDisplay::update));
 
     _listenForScreenWindowUpdates = true;
@@ -1173,18 +1173,18 @@ void SessionController::enableSearchBar(bool showSearchBar)
 
     _searchBar->setVisible(showSearchBar);
     if (showSearchBar) {
-        connect(_searchBar.data(), &Konsole::IncrementalSearchBar::searchChanged, this,
+        connect(_searchBar, &Konsole::IncrementalSearchBar::searchChanged, this,
                 &Konsole::SessionController::searchTextChanged);
-        connect(_searchBar.data(), &Konsole::IncrementalSearchBar::searchReturnPressed, this,
+        connect(_searchBar, &Konsole::IncrementalSearchBar::searchReturnPressed, this,
                 &Konsole::SessionController::findPreviousInHistory);
-        connect(_searchBar.data(), &Konsole::IncrementalSearchBar::searchShiftPlusReturnPressed, this,
+        connect(_searchBar, &Konsole::IncrementalSearchBar::searchShiftPlusReturnPressed, this,
                 &Konsole::SessionController::findNextInHistory);
     } else {
-        disconnect(_searchBar.data(), &Konsole::IncrementalSearchBar::searchChanged, this,
+        disconnect(_searchBar, &Konsole::IncrementalSearchBar::searchChanged, this,
                    &Konsole::SessionController::searchTextChanged);
-        disconnect(_searchBar.data(), &Konsole::IncrementalSearchBar::searchReturnPressed, this,
+        disconnect(_searchBar, &Konsole::IncrementalSearchBar::searchReturnPressed, this,
                    &Konsole::SessionController::findPreviousInHistory);
-        disconnect(_searchBar.data(), &Konsole::IncrementalSearchBar::searchShiftPlusReturnPressed, this,
+        disconnect(_searchBar, &Konsole::IncrementalSearchBar::searchShiftPlusReturnPressed, this,
                    &Konsole::SessionController::findNextInHistory);
         if ((!_view.isNull()) && _view->screenWindow()) {
             _view->screenWindow()->setCurrentResultLine(-1);
@@ -1412,7 +1412,7 @@ void SessionController::print_screen()
 
     dialog->setOptionTabs({options});
     dialog->setWindowTitle(i18n("Print Shell"));
-    connect(dialog.data(), static_cast<void(QPrintDialog::*)()>(&QPrintDialog::accepted), options, &Konsole::PrintOptions::saveSettings);
+    connect(dialog, static_cast<void(QPrintDialog::*)()>(&QPrintDialog::accepted), options, &Konsole::PrintOptions::saveSettings);
     if (dialog->exec() != QDialog::Accepted)
         return;
 

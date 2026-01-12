@@ -101,6 +101,7 @@ public:
 
     void setScrollFullPage(bool fullPage);
     bool scrollFullPage() const;
+    void setHighlightScrolledLines(bool highlight);
 
     /**
      * Returns the display's filter chain.  When the image for the display is updated,
@@ -571,6 +572,7 @@ protected slots:
     void scrollBarPositionChanged(int value);
     void blinkTextEvent();
     void blinkCursorEvent();
+    void highlightScrolledLinesEvent();
 
 private slots:
 
@@ -591,6 +593,11 @@ private:
     void drawContents(QPainter& painter, const QRect& rect);
     // draw a transparent rectangle over the line of the current match
     void drawCurrentResultRect(QPainter& painter);
+    // draw a thin highlight on the left of the screen for lines that have been scrolled into view
+    void highlightScrolledLines(QPainter& painter);
+    // compute which region need to be repainted for scrolled lines highlight
+    QRect highlightScrolledLinesRegion(void);
+
     // draws a section of text, all the text in this section
     // has a common color and style
     void drawTextFragment(QPainter& painter, const QRect& rect,
@@ -817,6 +824,15 @@ private:
 
     QRect _searchResultRect;
     friend class TerminalDisplayAccessible;
+
+    struct {
+        bool enabled = false;
+        QRect rect;
+        int previousScrollCount = 0;
+        QTimer *timer = nullptr;
+    } _highlightScrolledLinesControl;
+    static const int HIGHLIGHT_SCROLLED_LINES_WIDTH = 3;
+
 };
 
 class AutoScrollHandler : public QObject

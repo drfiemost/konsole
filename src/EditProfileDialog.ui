@@ -709,6 +709,25 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox_8">
+         <property name="title">
+          <string>Highlighting</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QVBoxLayout">
+          <item>
+           <widget class="QCheckBox" name="highlightScrolledLinesButton">
+            <property name="text">
+              <string>Highlight the lines coming into view</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="groupBox_15">
          <property name="title">
           <string>Scroll Page Up/Down Amount</string>
@@ -1195,7 +1214,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_8">
+        <widget class="QGroupBox" name="groupBox_11">
          <property name="title">
           <string>Cursor</string>
          </property>
@@ -1334,7 +1353,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_11">
+        <widget class="QGroupBox" name="groupBox_17">
          <property name="title">
           <string>Encoding</string>
          </property>

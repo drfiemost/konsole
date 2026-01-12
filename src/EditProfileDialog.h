@@ -157,6 +157,7 @@ private slots:
 
     void scrollFullPage();
     void scrollHalfPage();
+    void toggleHighlightScrolledLines(bool enable);
 
     // keyboard page
     void editKeyBinding();
