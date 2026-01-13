@@ -253,19 +253,6 @@ private:
 
     static QString groupProfileNames(const ProfileGroup::Ptr group, int maxLength = -1);
 
-    struct RadioOption {
-        QAbstractButton* button;
-        int value;
-        const char* slot;
-    };
-    void setupRadio(const QVector<RadioOption>& possibilities, int actual);
-    struct BooleanOption {
-        QAbstractButton* button;
-        Profile::Property property;
-        const char* slot;
-    };
-    void setupCheckBoxes(const QVector<BooleanOption>& options , const Profile::Ptr profile);
-
     // returns false if:
     // - the profile name is empty
     // - the name matches the name of an already existing profile

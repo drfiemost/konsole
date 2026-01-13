@@ -1057,32 +1057,24 @@ void EditProfileDialog::resetKeyBindings()
     }
 }
 
-void EditProfileDialog::setupCheckBoxes(const QVector<BooleanOption>& options , const Profile::Ptr profile)
-{
-    for (const auto& option: options) {
-        option.button->setChecked(profile->property<bool>(option.property));
-        connect(option.button, SIGNAL(toggled(bool)), this, option.slot);
-    }
-}
-void EditProfileDialog::setupRadio(const QVector<RadioOption>& possibilities, int actual)
-{
-    for (const auto& possibility: possibilities) {
-        possibility.button->setChecked(possibility.value == actual);
-        connect(possibility.button, SIGNAL(clicked()), this, possibility.slot);
-    }
-}
-
 void EditProfileDialog::setupScrollingPage(const Profile::Ptr profile)
 {
     // setup scrollbar radio
     int scrollBarPosition = profile->property<int>(Profile::ScrollBarPosition);
-
-    const auto positions = QVector<RadioOption>{ {_ui->scrollBarHiddenButton, Enum::ScrollBarHidden, SLOT(hideScrollBar())},
+/*
+    const auto positions = QVector<RadioOption>{
+       {_ui->scrollBarHiddenButton, Enum::ScrollBarHidden, SLOT(hideScrollBar())},
         {_ui->scrollBarLeftButton, Enum::ScrollBarLeft, SLOT(showScrollBarLeft())},
         {_ui->scrollBarRightButton, Enum::ScrollBarRight, SLOT(showScrollBarRight())}
     };
+*/
+    _ui->scrollBarHiddenButton->setChecked(Enum::ScrollBarHidden == scrollBarPosition);
+    connect(_ui->scrollBarHiddenButton, &QPushButton::clicked, this, &EditProfileDialog::hideScrollBar);
+    _ui->scrollBarLeftButton->setChecked(Enum::ScrollBarLeft == scrollBarPosition);
+    connect(_ui->scrollBarLeftButton, &QPushButton::clicked, this, &EditProfileDialog::showScrollBarLeft);
+    _ui->scrollBarRightButton->setChecked(Enum::ScrollBarRight == scrollBarPosition);
+    connect(_ui->scrollBarRightButton, &QPushButton::clicked, this, &EditProfileDialog::showScrollBarRight);
 
-    setupRadio(positions , scrollBarPosition);
 
     // setup scrollback type radio
     int scrollBackType = profile->property<int>(Profile::HistoryMode);
@@ -1097,17 +1089,14 @@ void EditProfileDialog::setupScrollingPage(const Profile::Ptr profile)
     // setup scrollpageamount type radio
     int scrollFullPage = profile->property<int>(Profile::ScrollFullPage);
 
-    const auto pageamounts = QVector<RadioOption>{
-        {_ui->scrollHalfPage, Enum::ScrollPageHalf, SLOT(scrollHalfPage())},
-        {_ui->scrollFullPage, Enum::ScrollPageFull, SLOT(scrollFullPage())}
-    };
+    _ui->scrollHalfPage->setChecked(Enum::ScrollPageHalf == scrollFullPage);
+    connect(_ui->scrollHalfPage, &QPushButton::clicked, this, &EditProfileDialog::scrollFullPage);
 
-    setupRadio(pageamounts, scrollFullPage);
+    _ui->scrollFullPage->setChecked(Enum::ScrollPageFull == scrollFullPage);
+    connect(_ui->scrollFullPage, &QPushButton::clicked, this, &EditProfileDialog::scrollFullPage);
 
-    const auto options = QVector<BooleanOption>{
-        {_ui->highlightScrolledLinesButton, Profile::HighlightScrolledLines, SLOT(toggleHighlightScrolledLines(bool))}
-    };
-    setupCheckBoxes(options, profile);
+    _ui->highlightScrolledLinesButton->setChecked(profile->property<bool>(Profile::HighlightScrolledLines));
+    connect(_ui->highlightScrolledLinesButton, &QPushButton::toggled, this, &EditProfileDialog::toggleHighlightScrolledLines);
 
     // signals and slots
     connect(_ui->historySizeWidget, &Konsole::HistorySizeWidget::historySizeChanged,
@@ -1150,45 +1139,27 @@ void EditProfileDialog::toggleHighlightScrolledLines(bool enable)
 
 void EditProfileDialog::setupMousePage(const Profile::Ptr profile)
 {
-    const auto options = QVector<BooleanOption>{
-        {
-            _ui->underlineLinksButton , Profile::UnderlineLinksEnabled,
-            SLOT(toggleUnderlineLinks(bool))
-        },
-        {
-            _ui->ctrlRequiredForDragButton, Profile::CtrlRequiredForDrag,
-            SLOT(toggleCtrlRequiredForDrag(bool))
-        },
-        {
-            _ui->copyTextToClipboardButton , Profile::AutoCopySelectedText,
-            SLOT(toggleCopyTextToClipboard(bool))
-        },
-        {
-            _ui->trimLeadingSpacesButton, Profile::TrimLeadingSpacesInSelectedText,
-            SLOT(toggleTrimLeadingSpacesInSelectedText(bool))
-        },
-        {
-            _ui->trimTrailingSpacesButton , Profile::TrimTrailingSpacesInSelectedText,
-            SLOT(toggleTrimTrailingSpacesInSelectedText(bool))
-        },
-        {
-            _ui->openLinksByDirectClickButton , Profile::OpenLinksByDirectClickEnabled,
-            SLOT(toggleOpenLinksByDirectClick(bool))
-        },
-        {
-            _ui->enableAlternateScrollingButton, Profile::AlternateScrolling,
-            SLOT(toggleAlternateScrolling(bool))
-        }
-    };
-    setupCheckBoxes(options , profile);
+    _ui->underlineLinksButton->setChecked(profile->property<bool>(Profile::UnderlineLinksEnabled));
+    connect(_ui->underlineLinksButton, &QPushButton::toggled, this, &EditProfileDialog::toggleUnderlineLinks);
+    _ui->ctrlRequiredForDragButton->setChecked(profile->property<bool>(Profile::CtrlRequiredForDrag));
+    connect(_ui->ctrlRequiredForDragButton, &QPushButton::toggled, this, &EditProfileDialog::toggleCtrlRequiredForDrag);
+    _ui->copyTextToClipboardButton->setChecked(profile->property<bool>(Profile::AutoCopySelectedText));
+    connect(_ui->copyTextToClipboardButton, &QPushButton::toggled, this, &EditProfileDialog::toggleCopyTextToClipboard);
+    _ui->trimLeadingSpacesButton->setChecked(profile->property<bool>(Profile::TrimLeadingSpacesInSelectedText));
+    connect(_ui->trimLeadingSpacesButton, &QPushButton::toggled, this, &EditProfileDialog::toggleTrimLeadingSpacesInSelectedText);
+    _ui->trimTrailingSpacesButton->setChecked(profile->property<bool>(Profile::TrimTrailingSpacesInSelectedText));
+    connect(_ui->trimTrailingSpacesButton, &QPushButton::toggled, this, &EditProfileDialog::toggleTrimTrailingSpacesInSelectedText);
+    _ui->openLinksByDirectClickButton->setChecked(profile->property<bool>(Profile::OpenLinksByDirectClickEnabled));
+    connect(_ui->openLinksByDirectClickButton, &QPushButton::toggled, this, &EditProfileDialog::toggleOpenLinksByDirectClick);
+    _ui->enableAlternateScrollingButton->setChecked(profile->property<bool>(Profile::AlternateScrolling));
+    connect(_ui->enableAlternateScrollingButton, &QPushButton::toggled, this, &EditProfileDialog::toggleAlternateScrolling);
 
     // setup middle click paste mode
     const int middleClickPasteMode = profile->property<int>(Profile::MiddleClickPasteMode);
-    const auto pasteModes = QVector<RadioOption> {
-        {_ui->pasteFromX11SelectionButton, Enum::PasteFromX11Selection, SLOT(pasteFromX11Selection())},
-        {_ui->pasteFromClipboardButton, Enum::PasteFromClipboard, SLOT(pasteFromClipboard())}
-    };
-    setupRadio(pasteModes , middleClickPasteMode);
+    _ui->pasteFromX11SelectionButton->setChecked(Enum::PasteFromX11Selection == middleClickPasteMode);
+    connect(_ui->pasteFromX11SelectionButton, &QPushButton::clicked, this, &EditProfileDialog::pasteFromX11Selection);
+    _ui->pasteFromClipboardButton->setChecked(Enum::PasteFromClipboard == middleClickPasteMode);
+    connect(_ui->pasteFromClipboardButton, &QPushButton::clicked, this, &EditProfileDialog::pasteFromClipboard);
 
     // interaction options
     _ui->wordCharacterEdit->setText(profile->wordCharacters());
@@ -1210,25 +1181,14 @@ void EditProfileDialog::setupMousePage(const Profile::Ptr profile)
 }
 void EditProfileDialog::setupAdvancedPage(const Profile::Ptr profile)
 {
-    const auto options = QVector<BooleanOption>{
-        {
-            _ui->enableBlinkingTextButton, Profile::BlinkingTextEnabled,
-            SLOT(toggleBlinkingText(bool))
-        },
-        {
-            _ui->enableFlowControlButton, Profile::FlowControlEnabled,
-            SLOT(toggleFlowControl(bool))
-        },
-        {
-            _ui->enableBlinkingCursorButton, Profile::BlinkingCursorEnabled,
-            SLOT(toggleBlinkingCursor(bool))
-        },
-        {
-            _ui->enableBidiRenderingButton, Profile::BidiRenderingEnabled,
-            SLOT(togglebidiRendering(bool))
-        }
-    };
-    setupCheckBoxes(options, profile);
+    _ui->enableBlinkingTextButton->setChecked(profile->property<bool>(Profile::BlinkingTextEnabled));
+    connect(_ui->enableBlinkingTextButton, &QPushButton::toggled, this, &EditProfileDialog::toggleBlinkingText);
+    _ui->enableFlowControlButton->setChecked(profile->property<bool>(Profile::FlowControlEnabled));
+    connect(_ui->enableFlowControlButton, &QPushButton::toggled, this, &EditProfileDialog::toggleFlowControl);
+    _ui->enableBlinkingCursorButton->setChecked(profile->property<bool>(Profile::BlinkingCursorEnabled));
+    connect(_ui->enableBlinkingCursorButton, &QPushButton::toggled, this, &EditProfileDialog::toggleBlinkingCursor);
+    _ui->enableBidiRenderingButton->setChecked(profile->property<bool>(Profile::BidiRenderingEnabled));
+    connect(_ui->enableBidiRenderingButton, &QPushButton::toggled, this, &EditProfileDialog::togglebidiRendering);
 
     const int lineSpacing = profile->lineSpacing();
     _ui->lineSpacingSpinner->setValue(lineSpacing);
