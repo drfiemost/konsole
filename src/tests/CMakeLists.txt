@@ -27,7 +27,7 @@ if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_link_libraries(DBusTest ${KONSOLE_TEST_LIBS})
 endif()
 
-kde4_add_unit_test(HistoryTest HistoryTest.cpp ../History.cpp)
+kde4_add_unit_test(HistoryTest HistoryTest.cpp ../History.cpp ../HistoryFile.cpp)
 set_target_properties(HistoryTest PROPERTIES COMPILE_FLAGS -DKONSOLEPRIVATE_EXPORT=)
 target_link_libraries(HistoryTest ${KONSOLE_TEST_LIBS})
 
