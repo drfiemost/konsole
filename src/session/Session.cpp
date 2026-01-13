@@ -22,7 +22,7 @@
 */
 
 // Own
-#include "Session.h"
+#include "session/Session.h"
 
 // Standard
 #include <cstdlib>
@@ -1621,5 +1621,5 @@ void Session::handleActivity()
     }
 }
 
-#include "Session.moc"
+#include "session/Session.moc"
 

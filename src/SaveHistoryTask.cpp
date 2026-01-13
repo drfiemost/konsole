@@ -28,7 +28,7 @@
 #include <KFileDialog>
 #include <KLocalizedString>
 
-#include "SessionManager.h"
+#include "session/SessionManager.h"
 #include "Emulation.h"
 
 namespace Konsole {

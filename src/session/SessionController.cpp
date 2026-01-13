@@ -19,7 +19,7 @@
 */
 
 // Own
-#include "SessionController.h"
+#include "session/SessionController.h"
 
 // Qt
 #include <QApplication>
@@ -1672,4 +1672,4 @@ QString SessionController::userTitle() const
     }
 }
 
-#include "SessionController.moc"
+#include "session/SessionController.moc"

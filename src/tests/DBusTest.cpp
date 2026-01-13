@@ -19,7 +19,7 @@
 
 // Own
 #include "DBusTest.h"
-#include "../Session.h"
+#include "session/Session.h"
 #include <QThread>
 
 using namespace Konsole;

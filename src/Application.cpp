@@ -33,14 +33,14 @@
 #include <KStandardDirs>
 
 // Konsole
-#include "SessionManager.h"
+#include "session/SessionManager.h"
 #include "ProfileManager.h"
 #include "MainWindow.h"
-#include "Session.h"
+#include "session/Session.h"
 #include "ShellCommand.h"
 #include "KonsoleSettings.h"
 #include "ViewManager.h"
-#include "SessionController.h"
+#include "session/SessionController.h"
 
 using namespace Konsole;
 

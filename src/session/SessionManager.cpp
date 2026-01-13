@@ -20,7 +20,7 @@
 */
 
 // Own
-#include "SessionManager.h"
+#include "session/SessionManager.h"
 
 // Qt
 #include <QStringList>
@@ -349,5 +349,5 @@ Session* SessionManager::idToSession(int id)
 }
 
 
-#include "SessionManager.moc"
+#include "session/SessionManager.moc"
 

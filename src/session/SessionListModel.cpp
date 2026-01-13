@@ -20,7 +20,7 @@
 */
 
 // Own
-#include "SessionListModel.h"
+#include "session/SessionListModel.h"
 
 // KDE
 #include <KIcon>
@@ -141,4 +141,4 @@ QModelIndex SessionListModel::index(int row, int column, const QModelIndex& pare
         return QModelIndex();
 }
 
-#include "SessionListModel.moc"
+#include "session/SessionListModel.moc"

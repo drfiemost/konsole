@@ -28,9 +28,9 @@
 #include <KDialog>
 
 // Konsole
-#include "SessionManager.h"
-#include "Session.h"
-#include "SessionListModel.h"
+#include "session/SessionManager.h"
+#include "session/Session.h"
+#include "session/SessionListModel.h"
 
 namespace Ui
 {

@@ -28,7 +28,7 @@
 #include <QtCore/QVariantList>
 
 // Konsole
-#include "Session.h"
+#include "session/Session.h"
 
 class QStringList;
 class QKeyEvent;

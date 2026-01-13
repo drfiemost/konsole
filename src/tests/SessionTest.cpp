@@ -23,9 +23,9 @@
 #include "qtest_kde.h"
 
 // Konsole
-#include "../Session.h"
-#include "../Emulation.h"
-#include "../History.h"
+#include "session/Session.h"
+#include "Emulation.h"
+#include "History.h"
 
 using namespace Konsole;
 

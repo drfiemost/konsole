@@ -46,9 +46,9 @@
 #include <qtest_kde.h>
 
 // Konsole
-#include "../Pty.h"
-#include "../Session.h"
-#include "../KeyboardTranslator.h"
+#include "Pty.h"
+#include "session/Session.h"
+#include "KeyboardTranslator.h"
 
 using namespace Konsole;
 
