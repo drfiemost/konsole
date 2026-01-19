@@ -31,6 +31,7 @@
 #include <KXMLGUIClient>
 
 // Konsole
+#include "SessionDisplayConnection.h"
 #include "ViewProperties.h"
 #include "Profile.h"
 #include "Enumeration.h"
@@ -96,11 +97,11 @@ public:
 
     /** Returns the session associated with this controller */
     QPointer<Session> session() {
-        return _session;
+        return _sessionDisplayConnection->session();
     }
     /** Returns the view associated with this controller */
     QPointer<TerminalDisplay>  view()    {
-        return _view;
+        return _sessionDisplayConnection->view();
     }
 
     /**
@@ -299,14 +300,14 @@ private:
 private:
     void updateSessionIcon();
 
-    QPointer<Session>         _session;
-    QPointer<TerminalDisplay> _view;
     SessionGroup*               _copyToGroup;
 
     ProfileList* _profileList;
 
     KIcon      _sessionIcon;
     QString    _sessionIconName;
+
+    SessionDisplayConnection *_sessionDisplayConnection;
 
     RegExpFilter*   _searchFilter;
 
@@ -355,10 +356,6 @@ private:
     QString _previousForegroundProcessName;
     bool _monitorProcessFinish;
 };
-inline bool SessionController::isValid() const
-{
-    return !_session.isNull() && !_view.isNull();
-}
 
 }
 

@@ -111,6 +111,7 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         WindowSystemInfo.cpp
                         CharacterWidth.cpp
                         AutoScrollHandler.cpp
+                        session/SessionDisplayConnection.cpp
                         ${CMAKE_CURRENT_BINARY_DIR}/org.kde.konsole.Window.xml
                         ${CMAKE_CURRENT_BINARY_DIR}/org.kde.konsole.Session.xml)
 

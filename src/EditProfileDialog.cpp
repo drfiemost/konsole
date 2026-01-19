@@ -1331,7 +1331,7 @@ void EditProfileDialog::showFontDialog()
     sampleText += i18n("--- Type anything in this box ---");
     QFont currentFont = _ui->fontPreviewLabel->font();
 
-    QWeakPointer<KFontDialog> dialog = new KFontDialog(this, KFontChooser::FixedFontsOnly);
+    QWeakPointer<KFontDialog> dialog = new KFontDialog(this);
     dialog.data()->setCaption(i18n("Select Fixed Width Font"));
     dialog.data()->setFont(currentFont, true);
 
