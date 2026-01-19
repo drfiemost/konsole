@@ -34,6 +34,11 @@
 // History
 #include "HistoryFile.h"
 #include "HistoryScroll.h"
+#include "HistoryScrollFile.h"
+#include "HistoryScrollNone.h"
+#include "CharacterFormat.h"
+#include "CompactHistoryBlock.h"
+#include "CompactHistoryBlockList.h"
 
 // Konsole
 #include "Character.h"
@@ -43,139 +48,11 @@ namespace Konsole
 //////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////
-// File-based history (e.g. file log, no limitation in length)
-//////////////////////////////////////////////////////////////////////
-
-class KONSOLEPRIVATE_EXPORT HistoryScrollFile : public HistoryScroll
-{
-public:
-    explicit HistoryScrollFile();
-    ~HistoryScrollFile() override;
-
-    int  getLines() override;
-    int  getLineLen(int lineno) override;
-    void getCells(int lineno, int colno, int count, Character res[]) override;
-    bool isWrappedLine(int lineno) override;
-
-    void addCells(const Character a[], int count) override;
-    void addLine(bool previousWrapped = false) override;
-
-private:
-    qint64 startOfLine(int lineno);
-
-    HistoryFile _index; // lines Row(qint64)
-    HistoryFile _cells; // text  Row(Character)
-    HistoryFile _lineflags; // flags Row(unsigned char)
-};
-
-//////////////////////////////////////////////////////////////////////
-// Nothing-based history (no history :-)
-//////////////////////////////////////////////////////////////////////
-class KONSOLEPRIVATE_EXPORT HistoryScrollNone : public HistoryScroll
-{
-public:
-    HistoryScrollNone();
-    ~HistoryScrollNone() override;
-
-    bool hasScroll() override;
-
-    int  getLines() override;
-    int  getLineLen(int lineno) override;
-    void getCells(int lineno, int colno, int count, Character res[]) override;
-    bool isWrappedLine(int lineno) override;
-
-    void addCells(const Character a[], int count) override;
-    void addLine(bool previousWrapped = false) override;
-};
-
-//////////////////////////////////////////////////////////////////////
 // History using compact storage
 // This implementation uses a list of fixed-sized blocks
 // where history lines are allocated in (avoids heap fragmentation)
 //////////////////////////////////////////////////////////////////////
 typedef QVector<Character> TextLine;
-
-class CharacterFormat
-{
-public:
-    bool equalsFormat(const CharacterFormat& other) const {
-        return (other.rendition & ~RE_EXTENDED_CHAR) == (rendition & ~RE_EXTENDED_CHAR) && other.fgColor == fgColor && other.bgColor == bgColor;
-    }
-
-    bool equalsFormat(const Character& c) const {
-        return (c.rendition & ~RE_EXTENDED_CHAR) == (rendition & ~RE_EXTENDED_CHAR) && c.foregroundColor == fgColor && c.backgroundColor == bgColor;
-    }
-
-    void setFormat(const Character& c) {
-        rendition = c.rendition;
-        fgColor = c.foregroundColor;
-        bgColor = c.backgroundColor;
-        isRealCharacter = c.isRealCharacter;
-    }
-
-    CharacterColor fgColor, bgColor;
-    quint16 startPos;
-    RenditionFlags rendition;
-    bool isRealCharacter;
-};
-
-class CompactHistoryBlock
-{
-public:
-    CompactHistoryBlock()
-        : _blockLength(4096 * 64) // 256kb
-        , _head(static_cast<quint8 *>(mmap(nullptr, _blockLength, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0)))
-        , _tail(nullptr)
-        , _blockStart(nullptr)
-        , _allocCount(0)
-    {
-        Q_ASSERT(_head != MAP_FAILED);
-        _tail = _blockStart = _head;
-    }
-
-    virtual ~CompactHistoryBlock() {
-        //free(_blockStart);
-        munmap(_blockStart, _blockLength);
-    }
-
-    virtual unsigned int remaining() {
-        return _blockStart + _blockLength - _tail;
-    }
-    virtual unsigned  length() {
-        return _blockLength;
-    }
-    virtual void* allocate(size_t size);
-    virtual bool contains(void* addr) {
-        return addr >= _blockStart && addr < (_blockStart + _blockLength);
-    }
-    virtual void deallocate();
-    virtual bool isInUse() {
-        return _allocCount != 0;
-    }
-
-private:
-    size_t _blockLength;
-    quint8* _head;
-    quint8* _tail;
-    quint8* _blockStart;
-    int _allocCount;
-};
-
-class CompactHistoryBlockList
-{
-public:
-    CompactHistoryBlockList()
-        : list(QList<CompactHistoryBlock*>()) {}
-    ~CompactHistoryBlockList();
-
-    void* allocate(size_t size);
-    void deallocate(void *);
-    int length() {
-        return list.size();
-    }
-private:
-    QList<CompactHistoryBlock*> list;
-};
 
 class CompactHistoryLine
 {
