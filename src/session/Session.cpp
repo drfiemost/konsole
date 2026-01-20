@@ -56,9 +56,9 @@
 #include "ShellCommand.h"
 #include "Vt102Emulation.h"
 #include "ZModemDialog.h"
-#include "HistoryTypeNone.h"
-#include "HistoryTypeFile.h"
-#include "CompactHistoryType.h"
+#include "history/HistoryTypeNone.h"
+#include "history/HistoryTypeFile.h"
+#include "history/compact/CompactHistoryType.h"
 
 using namespace Konsole;
 

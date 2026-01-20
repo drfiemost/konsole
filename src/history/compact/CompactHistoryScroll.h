@@ -23,8 +23,8 @@
 
 #include "konsole_export.h"
 
-#include "HistoryScroll.h"
-#include "CompactHistoryLine.h"
+#include "history/HistoryScroll.h"
+#include "history/compact/CompactHistoryLine.h"
 
 namespace Konsole
 {

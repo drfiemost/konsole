@@ -28,12 +28,12 @@ if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 kde4_add_unit_test(HistoryTest HistoryTest.cpp
-    ../HistoryFile.cpp
-    ../HistoryScroll.cpp
+    ../history/HistoryFile.cpp
+    ../history/HistoryScroll.cpp
     ../CharacterFormat.cpp
-    ../CompactHistoryBlock.cpp
-    ../CompactHistoryBlockList.cpp
-    ../CompactHistoryLine.cpp)
+    ../history/compact/CompactHistoryBlock.cpp
+    ../history/compact/CompactHistoryBlockList.cpp
+    ../history/compact/CompactHistoryLine.cpp)
 set_target_properties(HistoryTest PROPERTIES COMPILE_FLAGS -DKONSOLEPRIVATE_EXPORT=)
 target_link_libraries(HistoryTest ${KONSOLE_TEST_LIBS})
 
