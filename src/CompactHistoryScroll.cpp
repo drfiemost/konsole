@@ -23,7 +23,7 @@
 
 #include <KDebug>
 
-#include "History.h"
+#include "CompactHistoryType.h"
 
 using namespace Konsole;
 

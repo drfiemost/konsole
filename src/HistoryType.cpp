@@ -18,51 +18,14 @@
     02110-1301  USA.
 */
 
-// Own
-#include "HistoryScrollNone.h"
-
-#include "HistoryTypeNone.h"
+#include "HistoryType.h"
 
 using namespace Konsole;
 
-// History Scroll None //////////////////////////////////////
+HistoryType::HistoryType() = default;
 
-HistoryScrollNone::HistoryScrollNone()
-    : HistoryScroll(new HistoryTypeNone())
-{
+HistoryType::~HistoryType() = default;
+
+bool HistoryType::isUnlimited() const {
+    return maximumLineCount() == -1;
 }
-
-HistoryScrollNone::~HistoryScrollNone() = default;
-
-bool HistoryScrollNone::hasScroll()
-{
-    return false;
-}
-
-int  HistoryScrollNone::getLines()
-{
-    return 0;
-}
-
-int  HistoryScrollNone::getLineLen(int)
-{
-    return 0;
-}
-
-bool HistoryScrollNone::isWrappedLine(int /*lineno*/)
-{
-    return false;
-}
-
-void HistoryScrollNone::getCells(int, int, int, Character [])
-{
-}
-
-void HistoryScrollNone::addCells(const Character [], int)
-{
-}
-
-void HistoryScrollNone::addLine(bool)
-{
-}
-

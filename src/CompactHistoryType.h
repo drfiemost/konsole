@@ -18,51 +18,29 @@
     02110-1301  USA.
 */
 
-// Own
-#include "HistoryScrollNone.h"
+#ifndef COMPACTHISTORYTYPE_H
+#define COMPACTHISTORYTYPE_H
 
-#include "HistoryTypeNone.h"
+#include "HistoryType.h"
+#include "konsole_export.h"
 
-using namespace Konsole;
-
-// History Scroll None //////////////////////////////////////
-
-HistoryScrollNone::HistoryScrollNone()
-    : HistoryScroll(new HistoryTypeNone())
+namespace Konsole
 {
+
+class KONSOLEPRIVATE_EXPORT CompactHistoryType : public HistoryType
+{
+public:
+    explicit CompactHistoryType(unsigned int nbLines);
+
+    bool isEnabled() const override;
+    int maximumLineCount() const override;
+
+    HistoryScroll* scroll(HistoryScroll *) const override;
+
+protected:
+    unsigned int _maxLines;
+};
+
 }
 
-HistoryScrollNone::~HistoryScrollNone() = default;
-
-bool HistoryScrollNone::hasScroll()
-{
-    return false;
-}
-
-int  HistoryScrollNone::getLines()
-{
-    return 0;
-}
-
-int  HistoryScrollNone::getLineLen(int)
-{
-    return 0;
-}
-
-bool HistoryScrollNone::isWrappedLine(int /*lineno*/)
-{
-    return false;
-}
-
-void HistoryScrollNone::getCells(int, int, int, Character [])
-{
-}
-
-void HistoryScrollNone::addCells(const Character [], int)
-{
-}
-
-void HistoryScrollNone::addLine(bool)
-{
-}
-
+#endif

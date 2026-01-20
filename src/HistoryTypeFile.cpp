@@ -18,70 +18,14 @@
     02110-1301  USA.
 */
 
-// Own
-#include "History.h"
-
-// System
-#include <cerrno>
-#include <cstdlib>
-#include <cstdio>
-#include <sys/types.h>
-
-// KDE
-#include <kde_file.h>
-#include <KDebug>
-
-#include <algorithm>
-
-// Reasonable line size
-static constexpr int LINE_SIZE = 1024;
+#include "HistoryFile.h"
+#include "HistoryTypeFile.h"
+#include "HistoryScrollFile.h"
 
 using namespace Konsole;
 
-/*
-   An arbitrary long scroll.
-
-   One can modify the scroll only by adding either cells
-   or newlines, but access it randomly.
-
-   The model is that of an arbitrary wide typewriter scroll
-   in that the scroll is a series of lines and each line is
-   a series of cells with no overwriting permitted.
-
-   The implementation provides arbitrary length and numbers
-   of cells and line/column indexed read access to the scroll
-   at constant costs.
-*/
-
-//////////////////////////////////////////////////////////////////////
-// History Types
-//////////////////////////////////////////////////////////////////////
-
-HistoryType::HistoryType() = default;
-
-HistoryType::~HistoryType() = default;
-
-//////////////////////////////
-
-HistoryTypeNone::HistoryTypeNone() = default;
-
-bool HistoryTypeNone::isEnabled() const
-{
-    return false;
-}
-
-HistoryScroll* HistoryTypeNone::scroll(HistoryScroll* old) const
-{
-    delete old;
-    return new HistoryScrollNone();
-}
-
-int HistoryTypeNone::maximumLineCount() const
-{
-    return 0;
-}
-
-//////////////////////////////
+// Reasonable line size
+static constexpr int LINE_SIZE = 1024;
 
 HistoryTypeFile::HistoryTypeFile() = default;
 
@@ -121,34 +65,4 @@ HistoryScroll* HistoryTypeFile::scroll(HistoryScroll* old) const
 int HistoryTypeFile::maximumLineCount() const
 {
     return -1;
-}
-
-//////////////////////////////
-
-CompactHistoryType::CompactHistoryType(unsigned int nbLines)
-    : _maxLines(nbLines)
-{
-}
-
-bool CompactHistoryType::isEnabled() const
-{
-    return true;
-}
-
-int CompactHistoryType::maximumLineCount() const
-{
-    return _maxLines;
-}
-
-HistoryScroll* CompactHistoryType::scroll(HistoryScroll* old) const
-{
-    if (old) {
-        CompactHistoryScroll* oldBuffer = dynamic_cast<CompactHistoryScroll*>(old);
-        if (oldBuffer) {
-            oldBuffer->setMaxNbLines(_maxLines);
-            return oldBuffer;
-        }
-        delete old;
-    }
-    return new CompactHistoryScroll(_maxLines);
 }

@@ -28,7 +28,6 @@ if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 kde4_add_unit_test(HistoryTest HistoryTest.cpp
-    ../History.cpp
     ../HistoryFile.cpp
     ../HistoryScroll.cpp
     ../CharacterFormat.cpp

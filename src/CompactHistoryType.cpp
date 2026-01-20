@@ -19,50 +19,36 @@
 */
 
 // Own
-#include "HistoryScrollNone.h"
+#include "CompactHistoryType.h"
 
-#include "HistoryTypeNone.h"
+#include "CompactHistoryScroll.h"
 
 using namespace Konsole;
 
-// History Scroll None //////////////////////////////////////
-
-HistoryScrollNone::HistoryScrollNone()
-    : HistoryScroll(new HistoryTypeNone())
+CompactHistoryType::CompactHistoryType(unsigned int nbLines)
+    : _maxLines(nbLines)
 {
 }
 
-HistoryScrollNone::~HistoryScrollNone() = default;
-
-bool HistoryScrollNone::hasScroll()
+bool CompactHistoryType::isEnabled() const
 {
-    return false;
+    return true;
 }
 
-int  HistoryScrollNone::getLines()
+int CompactHistoryType::maximumLineCount() const
 {
-    return 0;
+    return _maxLines;
 }
 
-int  HistoryScrollNone::getLineLen(int)
+HistoryScroll* CompactHistoryType::scroll(HistoryScroll* old) const
 {
-    return 0;
+    if (old) {
+        CompactHistoryScroll* oldBuffer = dynamic_cast<CompactHistoryScroll*>(old);
+        if (oldBuffer) {
+            oldBuffer->setMaxNbLines(_maxLines);
+            return oldBuffer;
+        }
+        delete old;
+    }
+    return new CompactHistoryScroll(_maxLines);
 }
-
-bool HistoryScrollNone::isWrappedLine(int /*lineno*/)
-{
-    return false;
-}
-
-void HistoryScrollNone::getCells(int, int, int, Character [])
-{
-}
-
-void HistoryScrollNone::addCells(const Character [], int)
-{
-}
-
-void HistoryScrollNone::addLine(bool)
-{
-}
-
