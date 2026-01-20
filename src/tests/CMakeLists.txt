@@ -33,7 +33,8 @@ kde4_add_unit_test(HistoryTest HistoryTest.cpp
     ../HistoryScroll.cpp
     ../CharacterFormat.cpp
     ../CompactHistoryBlock.cpp
-    ../CompactHistoryBlockList.cpp)
+    ../CompactHistoryBlockList.cpp
+    ../CompactHistoryLine.cpp)
 set_target_properties(HistoryTest PROPERTIES COMPILE_FLAGS -DKONSOLEPRIVATE_EXPORT=)
 target_link_libraries(HistoryTest ${KONSOLE_TEST_LIBS})
 

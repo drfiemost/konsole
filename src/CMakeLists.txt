@@ -64,7 +64,14 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         CopyInputDialog.cpp
                         EditProfileDialog.cpp
                         Emulation.cpp
-                        Filter.cpp
+                        filterHotSpots/FilterChain.cpp
+                        filterHotSpots/Filter.cpp
+                        filterHotSpots/HotSpot.cpp
+                        filterHotSpots/RegExpFilter.cpp
+                        filterHotSpots/RegExpFilterHotspot.cpp
+                        filterHotSpots/TerminalImageFilterChain.cpp
+                        filterHotSpots/UrlFilter.cpp
+                        filterHotSpots/UrlFilterHotspot.cpp
                         History.cpp
                         HistoryFile.cpp
                         HistoryScroll.cpp
@@ -73,6 +80,7 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         CharacterFormat.cpp
                         CompactHistoryBlock.cpp
                         CompactHistoryBlockList.cpp
+                        CompactHistoryLine.cpp
                         HistorySizeDialog.cpp
                         widgets/HistorySizeWidget.cpp
                         widgets/IncrementalSearchBar.cpp

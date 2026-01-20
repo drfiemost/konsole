@@ -61,7 +61,6 @@
 
 // Konsole
 #include "AutoScrollHandler.h"
-#include "Filter.h"
 #include "TerminalCharacterDecoder.h"
 #include "Screen.h"
 #include "session/SessionController.h"
@@ -73,6 +72,10 @@
 #include "ViewManager.h" // for colorSchemeForProfile. // TODO: Rewrite this.
 #include "widgets/IncrementalSearchBar.h"
 #include "LineBlockCharacters.h"
+
+#include "filterHotSpots/Filter.h"
+#include "filterHotSpots/TerminalImageFilterChain.h"
+#include "filterHotSpots/HotSpot.h"
 
 #include <utility>
 
@@ -884,7 +887,7 @@ void TerminalDisplay::scrollImage(int lines , const QRect& screenWindowRegion)
 QRegion TerminalDisplay::hotSpotRegion() const
 {
     QRegion region;
-    for (const Filter::HotSpot *hotSpot : _filterChain->hotSpots()) {
+    for (const HotSpot *hotSpot : _filterChain->hotSpots()) {
         QRect r;
         r.setLeft(hotSpot->startColumn());
         r.setTop(hotSpot->startLine());
@@ -1241,10 +1244,10 @@ void TerminalDisplay::paintFilters(QPainter& painter)
     // iterate over hotspots identified by the display's currently active filters
     // and draw appropriate visuals to indicate the presence of the hotspot
 
-    const QList<Filter::HotSpot*> spots = _filterChain->hotSpots();
-    for (Filter::HotSpot *spot: spots) {
+    const QList<HotSpot*> spots = _filterChain->hotSpots();
+    for (HotSpot *spot: spots) {
         QRegion region;
-        if (_underlineLinks && spot->type() == Filter::HotSpot::Link) {
+        if (_underlineLinks && spot->type() == HotSpot::Link) {
             QRect r;
             if (spot->startLine() == spot->endLine()) {
                 r.setCoords(spot->startColumn()*_fontWidth + _contentRect.left(),
@@ -1312,7 +1315,7 @@ void TerminalDisplay::paintFilters(QPainter& painter)
                         endColumn * _fontWidth + _contentRect.left() - 1,
                         (line + 1)*_fontHeight + _contentRect.top() - 1);
             // Underline link hotspots
-            if (_underlineLinks && spot->type() == Filter::HotSpot::Link) {
+            if (_underlineLinks && spot->type() == HotSpot::Link) {
                 QFontMetrics metrics(font());
 
                 // find the baseline (which is the invisible line that the characters in the font sit on,
@@ -1326,7 +1329,7 @@ void TerminalDisplay::paintFilters(QPainter& painter)
                 }
                 // Marker hotspots simply have a transparent rectangular shape
                 // drawn on top of them
-            } else if (spot->type() == Filter::HotSpot::Marker) {
+            } else if (spot->type() == HotSpot::Marker) {
                 //TODO - Do not use a hardcoded color for this
                 const bool isCurrentResultLine = (_screenWindow->currentResultLine() == (spot->startLine() + _screenWindow->currentLine()));
                 QColor color = isCurrentResultLine ? QColor(255, 255, 0, 120) : QColor(255, 0, 0, 120);
@@ -2081,8 +2084,8 @@ void TerminalDisplay::mousePressEvent(QMouseEvent* ev)
             }
 
             if (_underlineLinks && (_openLinksByDirectClick || (ev->modifiers() & Qt::ControlModifier))) {
-                Filter::HotSpot* spot = _filterChain->hotSpotAt(charLine, charColumn);
-                if (spot && spot->type() == Filter::HotSpot::Link) {
+                HotSpot* spot = _filterChain->hotSpotAt(charLine, charColumn);
+                if (spot && spot->type() == HotSpot::Link) {
                     QObject action;
                     action.setObjectName(QStringLiteral("open-action"));
                     spot->activate(&action);
@@ -2104,7 +2107,7 @@ QList<QAction*> TerminalDisplay::filterActions(const QPoint& position)
     int charLine, charColumn;
     getCharacterPosition(position, charLine, charColumn, false);
 
-    Filter::HotSpot* spot = _filterChain->hotSpotAt(charLine, charColumn);
+    HotSpot* spot = _filterChain->hotSpotAt(charLine, charColumn);
 
     return spot ? spot->actions() : QList<QAction*>();
 }
@@ -2118,8 +2121,8 @@ void TerminalDisplay::mouseMoveEvent(QMouseEvent* ev)
     processFilters();
     // handle filters
     // change link hot-spot appearance on mouse-over
-    Filter::HotSpot* spot = _filterChain->hotSpotAt(charLine, charColumn);
-    if (spot && spot->type() == Filter::HotSpot::Link) {
+    HotSpot* spot = _filterChain->hotSpotAt(charLine, charColumn);
+    if (spot && spot->type() == HotSpot::Link) {
         if (_underlineLinks) {
             QRegion previousHotspotArea = _mouseOverHotspotArea;
             _mouseOverHotspotArea = QRegion();
