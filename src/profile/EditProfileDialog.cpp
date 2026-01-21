@@ -40,12 +40,12 @@
 #include <KMessageBox>
 
 // Konsole
-#include "ColorSchemeManager.h"
+#include "keyboardtranslator/KeyboardTranslator.h"
+#include "keyboardtranslator/KeyboardTranslatorManager.h"
+#include "colorscheme/ColorSchemeManager.h"
+#include "profile/ProfileManager.h"
 #include "ui_EditProfileDialog.h"
 #include "KeyBindingEditor.h"
-#include "KeyboardTranslator.h"
-#include "KeyboardTranslatorManager.h"
-#include "profile/ProfileManager.h"
 #include "ShellCommand.h"
 #include "WindowSystemInfo.h"
 

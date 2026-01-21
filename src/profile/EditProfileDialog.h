@@ -31,10 +31,10 @@
 #include "Profile.h"
 #include "ProfileGroup.h"
 #include "Enumeration.h"
-#include "ColorScheme.h"
-#include "ColorSchemeEditor.h"
-#include "KeyboardTranslatorManager.h"
-#include "ColorSchemeViewDelegate.h"
+#include "keyboardtranslator/KeyboardTranslatorManager.h"
+#include "colorscheme/ColorScheme.h"
+#include "colorscheme/ColorSchemeEditor.h"
+#include "colorscheme/ColorSchemeViewDelegate.h"
 
 class QAbstractButton;
 class QItemSelectionModel;

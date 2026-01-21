@@ -38,7 +38,7 @@ set_target_properties(HistoryTest PROPERTIES COMPILE_FLAGS -DKONSOLEPRIVATE_EXPO
 target_link_libraries(HistoryTest ${KONSOLE_TEST_LIBS})
 
 
-kde4_add_unit_test(KeyboardTranslatorTest KeyboardTranslatorTest.cpp ../KeyboardTranslator.cpp)
+kde4_add_unit_test(KeyboardTranslatorTest KeyboardTranslatorTest.cpp ../keyboardtranslator/KeyboardTranslator.cpp)
 set_target_properties(KeyboardTranslatorTest PROPERTIES COMPILE_FLAGS -DKONSOLEPRIVATE_EXPORT=)
 target_link_libraries(KeyboardTranslatorTest ${KONSOLE_TEST_LIBS})
 

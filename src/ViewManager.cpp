@@ -36,13 +36,13 @@
 // Konsole
 #include <windowadaptor.h>
 
-#include "ColorScheme.h"
-#include "ColorSchemeManager.h"
+#include "colorscheme/ColorScheme.h"
+#include "colorscheme/ColorSchemeManager.h"
 #include "session/Session.h"
-#include "widgets/TerminalDisplay.h"
 #include "session/SessionController.h"
 #include "session/SessionManager.h"
 #include "profile/ProfileManager.h"
+#include "widgets/TerminalDisplay.h"
 #include "widgets/ViewSplitter.h"
 
 using namespace Konsole;

@@ -75,13 +75,13 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         ${windowadaptors_SRCS}
                         BookmarkHandler.cpp
                         BookmarkMenu.cpp
-                        ColorScheme.cpp
-                        ColorSchemeWallpaper.cpp
-                        ColorSchemeManager.cpp
-                        ColorSchemeEditor.cpp
+                        colorscheme/ColorScheme.cpp
+                        colorscheme/ColorSchemeWallpaper.cpp
+                        colorscheme/ColorSchemeManager.cpp
+                        colorscheme/ColorSchemeEditor.cpp
                         CheckableSessionModel.cpp
                         CopyInputDialog.cpp
-                        ColorSchemeViewDelegate.cpp
+                        colorscheme/ColorSchemeViewDelegate.cpp
                         Emulation.cpp
                         filterHotSpots/FilterChain.cpp
                         filterHotSpots/Filter.cpp
@@ -108,11 +108,11 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         widgets/HistorySizeWidget.cpp
                         widgets/IncrementalSearchBar.cpp
                         KeyBindingEditor.cpp
-                        KeyboardTranslator.cpp
-                        FallbackKeyboardTranslator.cpp
-                        KeyboardTranslatorReader.cpp
-                        KeyboardTranslatorWriter.cpp
-                        KeyboardTranslatorManager.cpp
+                        keyboardtranslator/KeyboardTranslator.cpp
+                        keyboardtranslator/FallbackKeyboardTranslator.cpp
+                        keyboardtranslator/KeyboardTranslatorReader.cpp
+                        keyboardtranslator/KeyboardTranslatorWriter.cpp
+                        keyboardtranslator/KeyboardTranslatorManager.cpp
                         ProcessInfo.cpp
                         NullProcessInfo.cpp
                         UnixProcessInfo.cpp
@@ -165,7 +165,7 @@ kde4_add_kcfg_files(konsoleprivate_SRCS settings/KonsoleSettings.kcfgc)
 
 ### Konsole Application
 
-kde4_add_ui_files(konsoleprivate_SRCS ColorSchemeEditor.ui
+kde4_add_ui_files(konsoleprivate_SRCS colorscheme/ColorSchemeEditor.ui
                                       CopyInputDialog.ui
                                       profile/EditProfileDialog.ui
                                       KeyBindingEditor.ui

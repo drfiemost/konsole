@@ -27,11 +27,11 @@
 #include <QWidget>
 
 // Konsole
-#include "Character.h"
 #include "konsole_export.h"
+#include "Character.h"
 #include "ScreenWindow.h"
-#include "ColorScheme.h"
 #include "Enumeration.h"
+#include "colorscheme/ColorScheme.h"
 #include "profile/Profile.h"
 
 class QDrag;

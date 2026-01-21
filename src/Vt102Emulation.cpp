@@ -37,7 +37,7 @@
 #include <KDebug>
 
 // Konsole
-#include "KeyboardTranslator.h"
+#include "keyboardtranslator/KeyboardTranslator.h"
 #include "widgets/TerminalDisplay.h"
 
 using Konsole::Vt102Emulation;

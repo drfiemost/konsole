@@ -27,7 +27,7 @@
 #include <QTextStream>
 
 // Konsole
-#include "ColorScheme.h"
+#include "colorscheme/ColorScheme.h"
 #include "ExtendedCharTable.h"
 
 using namespace Konsole;
