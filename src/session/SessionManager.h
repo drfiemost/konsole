@@ -135,19 +135,6 @@ private:
     QHash<Session*, int> _restoreMapping;
 };
 
-/** Utility class to simplify code in SessionManager::applyProfile(). */
-class ShouldApplyProperty
-{
-public:
-    ShouldApplyProperty(const Profile::Ptr profile , bool modifiedOnly) :
-        _profile(profile) , _modifiedPropertiesOnly(modifiedOnly) {}
-
-    bool shouldApply(Profile::Property property) const {
-        return !_modifiedPropertiesOnly || _profile->isPropertySet(property);
-    }
-private:
-    const Profile::Ptr _profile;
-    bool _modifiedPropertiesOnly;
-};
 }
+
 #endif //SESSIONMANAGER_H

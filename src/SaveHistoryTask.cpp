@@ -31,6 +31,9 @@
 #include "session/SessionManager.h"
 #include "Emulation.h"
 
+#include "PlainTextDecoder.h"
+#include "HTMLDecoder.h"
+
 namespace Konsole {
 
 SaveHistoryTask::SaveHistoryTask(QObject* parent)

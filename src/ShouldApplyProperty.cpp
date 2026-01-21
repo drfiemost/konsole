@@ -1,6 +1,7 @@
 /*
-    Copyright 2008 by Robert Knight <robertknight@gmail.com>
-    Copyright 2018 by Kurt Hindenburg <kurt.hindenburg@gmail.com>
+    This source file is part of Konsole, a terminal emulator.
+
+    Copyright 2006-2008 by Robert Knight <robertknight@gmail.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,28 +19,13 @@
     02110-1301  USA.
 */
 
-#ifndef TERMINALCHARACTERDECODERTEST_H
-#define TERMINALCHARACTERDECODERTEST_H
+#include "ShouldApplyProperty.h"
 
-#include "../Character.h"
+using namespace Konsole;
 
-namespace Konsole
-{
+ShouldApplyProperty::ShouldApplyProperty(const Profile::Ptr profile , bool modifiedOnly) :
+    _profile(profile) , _modifiedPropertiesOnly(modifiedOnly) {}
 
-class TerminalCharacterDecoderTest : public QObject
-{
-    Q_OBJECT
-
-private slots:
-    Character* convertToCharacter(QString text, QVector<RenditionFlags> renditions);
-
-    void testPlainTextDecoder();
-    void testPlainTextDecoder_data();
-    void testHTMLDecoder();
-    void testHTMLDecoder_data();
-};
-
+bool ShouldApplyProperty::shouldApply(Profile::Property property) const {
+    return !_modifiedPropertiesOnly || _profile->isPropertySet(property);
 }
-
-#endif // TERMINALCHARACTERDECODERTEST_H
-

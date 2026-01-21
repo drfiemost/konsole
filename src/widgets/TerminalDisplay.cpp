@@ -61,7 +61,7 @@
 
 // Konsole
 #include "AutoScrollHandler.h"
-#include "TerminalCharacterDecoder.h"
+#include "PlainTextDecoder.h"
 #include "Screen.h"
 #include "session/SessionController.h"
 #include "ExtendedCharTable.h"

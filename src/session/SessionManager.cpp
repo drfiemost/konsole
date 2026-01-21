@@ -33,6 +33,7 @@
 #include <KDebug>
 
 // Konsole
+#include "ShouldApplyProperty.h"
 #include "Session.h"
 #include "profile/ProfileManager.h"
 #include "profile/ProfileCommandParser.h"
