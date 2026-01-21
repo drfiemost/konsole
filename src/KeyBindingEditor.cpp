@@ -32,6 +32,7 @@
 #include "ui_KeyBindingEditor.h"
 #include "EditProfileDialog.h"
 #include "KeyboardTranslator.h"
+#include "KeyboardTranslatorReader.h"
 #include "KeyboardTranslatorManager.h"
 
 #include <utility>
