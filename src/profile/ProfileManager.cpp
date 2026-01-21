@@ -40,6 +40,8 @@
 // Konsole
 #include "ProfileReader.h"
 #include "ProfileWriter.h"
+#include "ProfileGroup.h"
+#include "PopStackOnExit.h"
 
 #include <utility>
 

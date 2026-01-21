@@ -119,6 +119,8 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         SSHProcessInfo.cpp
                         profile/EditProfileDialog.cpp
                         profile/Profile.cpp
+                        profile/ProfileCommandParser.cpp
+                        profile/ProfileGroup.cpp
                         profile/ProfileList.cpp
                         profile/ProfileReader.cpp
                         profile/ProfileWriter.cpp

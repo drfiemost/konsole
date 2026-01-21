@@ -35,6 +35,7 @@
 // Konsole
 #include "Session.h"
 #include "profile/ProfileManager.h"
+#include "profile/ProfileCommandParser.h"
 #include "history/HistoryType.h"
 #include "history/HistoryTypeNone.h"
 #include "history/HistoryTypeFile.h"

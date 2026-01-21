@@ -35,6 +35,7 @@
 // Konsole
 #include "session/SessionManager.h"
 #include "profile/ProfileManager.h"
+#include "profile/ProfileCommandParser.h"
 #include "MainWindow.h"
 #include "session/Session.h"
 #include "ShellCommand.h"
@@ -170,7 +171,9 @@ int Application::newInstance()
             if (createdNewMainWindow){
                 finalizeNewMainWindow(window);
             } else{
+                window->setWindowState(window->windowState() & (~Qt::WindowMinimized | Qt::WindowActive));
                 window->show();
+                window->activateWindow();
             }
         }
     }
