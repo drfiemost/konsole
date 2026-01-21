@@ -44,7 +44,7 @@
 #include "widgets/IncrementalSearchBar.h"
 #include "ViewProperties.h"
 #include "widgets/ViewContainerTabBar.h"
-#include "ProfileList.h"
+#include "profile/ProfileList.h"
 #include "ViewManager.h"
 
 // TODO Perhaps move everything which is Konsole-specific into different files

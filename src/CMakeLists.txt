@@ -54,6 +54,23 @@ qt4_add_dbus_adaptor(windowadaptors_SRCS
                     ViewManager.h
                     Konsole::ViewManager)
 
+set(konsole_LIBS ${KDE4_KPTY_LIBS}
+                 ${KDE4_KIO_LIBS}
+                 ${KDE4_KNOTIFYCONFIG_LIBS}
+                 Qt4::QtXml
+                 ${X11_LIBRARIES})
+
+if(HAVE_LIBKONQ)
+  set(konsole_LIBS ${konsole_LIBS} ${LIBKONQ_LIBRARY})
+endif()
+
+# This konsoleprivate_core is the "core" library that depends in nothing from konsole itself
+# so we can start to detangle the codebase.
+set(konsoleprivate_core_SRCS ShellCommand.cpp)
+add_library(konsoleprivate_core STATIC ${konsoleprivate_core_SRCS})
+
+target_link_libraries(konsoleprivate_core ${konsole_LIBS})
+
 set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         ${windowadaptors_SRCS}
                         BookmarkHandler.cpp
@@ -64,7 +81,6 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         ColorSchemeEditor.cpp
                         CheckableSessionModel.cpp
                         CopyInputDialog.cpp
-                        EditProfileDialog.cpp
                         ColorSchemeViewDelegate.cpp
                         Emulation.cpp
                         filterHotSpots/FilterChain.cpp
@@ -101,11 +117,12 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         NullProcessInfo.cpp
                         UnixProcessInfo.cpp
                         SSHProcessInfo.cpp
-                        Profile.cpp
-                        ProfileList.cpp
-                        ProfileReader.cpp
-                        ProfileWriter.cpp
-                        ProfileManager.cpp
+                        profile/EditProfileDialog.cpp
+                        profile/Profile.cpp
+                        profile/ProfileList.cpp
+                        profile/ProfileReader.cpp
+                        profile/ProfileWriter.cpp
+                        profile/ProfileManager.cpp
                         Pty.cpp
                         RenameTabDialog.cpp
                         widgets/RenameTabWidget.cpp
@@ -119,7 +136,6 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         session/SessionManager.cpp
                         session/SessionListModel.cpp
                         session/SessionTask.cpp
-                        ShellCommand.cpp
                         widgets/TabTitleFormatButton.cpp
                         TerminalCharacterDecoder.cpp
                         ExtendedCharTable.cpp
@@ -143,21 +159,11 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
 
 kde4_add_kcfg_files(konsoleprivate_SRCS settings/KonsoleSettings.kcfgc)
 
-set(konsole_LIBS ${KDE4_KPTY_LIBS}
-                 ${KDE4_KIO_LIBS}
-                 ${KDE4_KNOTIFYCONFIG_LIBS}
-                 Qt4::QtXml
-                 ${X11_LIBRARIES})
-
-if(HAVE_LIBKONQ)
-  set(konsole_LIBS ${konsole_LIBS} ${LIBKONQ_LIBRARY})
-endif()
-
 ### Konsole Application
 
 kde4_add_ui_files(konsoleprivate_SRCS ColorSchemeEditor.ui
                                       CopyInputDialog.ui
-                                      EditProfileDialog.ui
+                                      profile/EditProfileDialog.ui
                                       KeyBindingEditor.ui
                                       RenameTabDialog.ui
                                       widgets/RenameTabWidget.ui
@@ -170,8 +176,11 @@ kde4_add_ui_files(konsoleprivate_SRCS ColorSchemeEditor.ui
                                       settings/TabBarSettings.ui)
 
 kde4_add_library(konsoleprivate SHARED ${konsoleprivate_SRCS})
-target_link_libraries(konsoleprivate ${konsole_LIBS})
-target_link_libraries(konsoleprivate LINK_INTERFACE_LIBRARIES ${konsole_LIBS})
+target_link_libraries(konsoleprivate
+    PUBLIC
+    konsoleprivate_core
+    ${konsole_LIBS}
+)
 
 set(konsole_KDEINIT_SRCS
    Application.cpp

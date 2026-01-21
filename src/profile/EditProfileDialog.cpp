@@ -45,7 +45,7 @@
 #include "KeyBindingEditor.h"
 #include "KeyboardTranslator.h"
 #include "KeyboardTranslatorManager.h"
-#include "ProfileManager.h"
+#include "profile/ProfileManager.h"
 #include "ShellCommand.h"
 #include "WindowSystemInfo.h"
 

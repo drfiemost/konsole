@@ -59,7 +59,7 @@
 #include <KNotification>
 
 // Konsole
-#include "EditProfileDialog.h"
+#include "profile/EditProfileDialog.h"
 #include "CopyInputDialog.h"
 #include "Emulation.h"
 #include "filterHotSpots/Filter.h"
@@ -76,7 +76,7 @@
 #include "RenameTabDialog.h"
 #include "ScreenWindow.h"
 #include "Session.h"
-#include "ProfileList.h"
+#include "profile/ProfileList.h"
 #include "widgets/TerminalDisplay.h"
 #include "SessionManager.h"
 #include "Enumeration.h"

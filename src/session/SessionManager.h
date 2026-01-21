@@ -27,7 +27,7 @@
 #include <QtCore/QList>
 
 // Konsole
-#include "Profile.h"
+#include "profile/Profile.h"
 
 class KConfig;
 

@@ -29,7 +29,7 @@
 #include <QList>
 
 // Konsole
-#include "Profile.h"
+#include "profile/Profile.h"
 
 class QStackedWidget;
 class QWidget;

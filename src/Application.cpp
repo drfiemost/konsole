@@ -34,7 +34,7 @@
 
 // Konsole
 #include "session/SessionManager.h"
-#include "ProfileManager.h"
+#include "profile/ProfileManager.h"
 #include "MainWindow.h"
 #include "session/Session.h"
 #include "ShellCommand.h"

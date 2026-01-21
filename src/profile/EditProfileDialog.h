@@ -28,7 +28,7 @@
 #include <KDialog>
 
 // Konsole
-#include "Profile.h"
+#include "profile/Profile.h"
 #include "Enumeration.h"
 #include "ColorScheme.h"
 #include "ColorSchemeEditor.h"

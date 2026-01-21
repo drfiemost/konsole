@@ -24,7 +24,7 @@
 #include <KUniqueApplication>
 
 // Konsole
-#include "Profile.h"
+#include "profile/Profile.h"
 
 class KCmdLineArgs;
 

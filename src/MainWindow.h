@@ -28,7 +28,7 @@
 #include <KUrl>
 
 // Konsole
-#include "Profile.h"
+#include "profile/Profile.h"
 
 class KAction;
 class KActionMenu;

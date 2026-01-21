@@ -68,7 +68,6 @@
 #include "TerminalDisplayAccessible.h"
 #include "session/SessionManager.h"
 #include "session/Session.h"
-#include "Profile.h"
 #include "ViewManager.h" // for colorSchemeForProfile. // TODO: Rewrite this.
 #include "widgets/IncrementalSearchBar.h"
 #include "LineBlockCharacters.h"

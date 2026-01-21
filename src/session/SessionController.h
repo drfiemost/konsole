@@ -33,7 +33,7 @@
 // Konsole
 #include "SessionDisplayConnection.h"
 #include "ViewProperties.h"
-#include "Profile.h"
+#include "profile/Profile.h"
 #include "Enumeration.h"
 #include "Session.h"
 

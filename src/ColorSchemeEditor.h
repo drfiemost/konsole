@@ -27,7 +27,7 @@
 #include <KDialog>
 
 // Konsole
-#include "Profile.h"
+#include "konsole_export.h"
 
 class QTableWidgetItem;
 

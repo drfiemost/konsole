@@ -24,7 +24,7 @@
 #include <QDialog>
 
 // Konsole
-#include "Profile.h"
+#include "profile/Profile.h"
 
 class QTableWidgetItem;
 

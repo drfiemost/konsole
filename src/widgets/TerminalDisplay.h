@@ -32,7 +32,7 @@
 #include "ScreenWindow.h"
 #include "ColorScheme.h"
 #include "Enumeration.h"
-#include "Profile.h"
+#include "profile/Profile.h"
 
 class QDrag;
 class QDragEnterEvent;

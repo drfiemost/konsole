@@ -26,7 +26,7 @@
 #include <QPointer>
 
 // Konsole
-#include "Profile.h"
+#include "profile/Profile.h"
 #include "widgets/ViewContainer.h"
 
 class KActionCollection;

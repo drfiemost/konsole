@@ -34,12 +34,12 @@
 #include <KConfigDialog>
 
 // Konsole
-#include "EditProfileDialog.h"
+#include "profile/EditProfileDialog.h"
 #include "Emulation.h"
 #include "session/Session.h"
 #include "session/SessionController.h"
 #include "session/SessionManager.h"
-#include "ProfileManager.h"
+#include "profile/ProfileManager.h"
 #include "widgets/TerminalDisplay.h"
 #include "ViewManager.h"
 #include "KonsoleSettings.h"
