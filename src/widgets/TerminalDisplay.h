@@ -315,6 +315,7 @@ public:
      */
     void selectAll();
 
+    // TODO: Move this code to KonsolePrintManager
     void printContent(QPainter& painter, bool friendly);
 
     /**
@@ -473,6 +474,8 @@ public slots:
 
     IncrementalSearchBar *searchBar() const;
 
+    // Used for requestPrint
+    void printScreen();
 signals:
 
     /**

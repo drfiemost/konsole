@@ -73,16 +73,41 @@ target_link_libraries(konsoleprivate_core ${konsole_LIBS})
 
 set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         ${windowadaptors_SRCS}
+                        AutoScrollHandler.cpp
                         BookmarkHandler.cpp
                         BookmarkMenu.cpp
-                        colorscheme/ColorScheme.cpp
-                        colorscheme/ColorSchemeWallpaper.cpp
-                        colorscheme/ColorSchemeManager.cpp
-                        colorscheme/ColorSchemeEditor.cpp
+                        CharacterFormat.cpp
+                        CharacterWidth.cpp
                         CheckableSessionModel.cpp
                         CopyInputDialog.cpp
-                        colorscheme/ColorSchemeViewDelegate.cpp
                         Emulation.cpp
+                        ExtendedCharTable.cpp
+                        KeyBindingEditor.cpp
+                        HTMLDecoder.cpp
+                        LineBlockCharacters.cpp
+                        NullProcessInfo.cpp
+                        PlainTextDecoder.cpp
+                        PrintOptions.cpp
+                        ProcessInfo.cpp
+                        Pty.cpp
+                        RenameTabDialog.cpp
+                        SaveHistoryTask.cpp
+                        Screen.cpp
+                        ScreenWindow.cpp
+                        SearchHistoryTask.cpp
+                        ShouldApplyProperty.cpp
+                        SSHProcessInfo.cpp
+                        UnixProcessInfo.cpp
+                        ViewManager.cpp
+                        ViewProperties.cpp
+                        Vt102Emulation.cpp
+                        WindowSystemInfo.cpp
+                        ZModemDialog.cpp
+                        colorscheme/ColorScheme.cpp
+                        colorscheme/ColorSchemeEditor.cpp
+                        colorscheme/ColorSchemeManager.cpp
+                        colorscheme/ColorSchemeWallpaper.cpp
+                        colorscheme/ColorSchemeViewDelegate.cpp
                         filterHotSpots/FilterChain.cpp
                         filterHotSpots/Filter.cpp
                         filterHotSpots/HotSpot.cpp
@@ -95,7 +120,6 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         history/HistoryScroll.cpp
                         history/HistoryScrollFile.cpp
                         history/HistoryScrollNone.cpp
-                        CharacterFormat.cpp
                         history/compact/CompactHistoryBlock.cpp
                         history/compact/CompactHistoryBlockList.cpp
                         history/compact/CompactHistoryLine.cpp
@@ -105,19 +129,11 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         history/HistoryTypeFile.cpp
                         history/compact/CompactHistoryType.cpp
                         HistorySizeDialog.cpp
-                        widgets/HistorySizeWidget.cpp
-                        widgets/IncrementalSearchBar.cpp
-                        KeyBindingEditor.cpp
                         keyboardtranslator/KeyboardTranslator.cpp
                         keyboardtranslator/FallbackKeyboardTranslator.cpp
                         keyboardtranslator/KeyboardTranslatorReader.cpp
                         keyboardtranslator/KeyboardTranslatorWriter.cpp
                         keyboardtranslator/KeyboardTranslatorManager.cpp
-                        ProcessInfo.cpp
-                        NullProcessInfo.cpp
-                        UnixProcessInfo.cpp
-                        SSHProcessInfo.cpp
-                        profile/EditProfileDialog.cpp
                         profile/Profile.cpp
                         profile/ProfileCommandParser.cpp
                         profile/ProfileGroup.cpp
@@ -125,39 +141,24 @@ set(konsoleprivate_SRCS ${sessionadaptors_SRCS}
                         profile/ProfileReader.cpp
                         profile/ProfileWriter.cpp
                         profile/ProfileManager.cpp
-                        Pty.cpp
-                        RenameTabDialog.cpp
-                        widgets/RenameTabWidget.cpp
-                        SaveHistoryTask.cpp
-                        SearchHistoryTask.cpp
-                        Screen.cpp
-                        ScreenWindow.cpp
                         session/Session.cpp
                         session/SessionGroup.cpp
                         session/SessionController.cpp
                         session/SessionManager.cpp
-                        ShouldApplyProperty.cpp
                         session/SessionListModel.cpp
                         session/SessionTask.cpp
+                        session/SessionDisplayConnection.cpp
+                        widgets/EditProfileDialog.cpp
+                        widgets/HistorySizeWidget.cpp
+                        widgets/IncrementalSearchBar.cpp
+                        widgets/KonsolePrintManager.cpp
+                        widgets/RenameTabWidget.cpp
                         widgets/TabTitleFormatButton.cpp
-                        PlainTextDecoder.cpp
-                        HTMLDecoder.cpp
-                        ExtendedCharTable.cpp
                         widgets/TerminalDisplay.cpp
                         widgets/TerminalDisplayAccessible.cpp
-                        LineBlockCharacters.cpp
                         widgets/ViewContainer.cpp
                         widgets/ViewContainerTabBar.cpp
-                        ViewManager.cpp
-                        ViewProperties.cpp
                         widgets/ViewSplitter.cpp
-                        Vt102Emulation.cpp
-                        ZModemDialog.cpp
-                        PrintOptions.cpp
-                        WindowSystemInfo.cpp
-                        CharacterWidth.cpp
-                        AutoScrollHandler.cpp
-                        session/SessionDisplayConnection.cpp
                         ${CMAKE_CURRENT_BINARY_DIR}/org.kde.konsole.Window.xml
                         ${CMAKE_CURRENT_BINARY_DIR}/org.kde.konsole.Session.xml)
 
@@ -165,19 +166,19 @@ kde4_add_kcfg_files(konsoleprivate_SRCS settings/KonsoleSettings.kcfgc)
 
 ### Konsole Application
 
-kde4_add_ui_files(konsoleprivate_SRCS colorscheme/ColorSchemeEditor.ui
-                                      CopyInputDialog.ui
-                                      profile/EditProfileDialog.ui
+kde4_add_ui_files(konsoleprivate_SRCS CopyInputDialog.ui
                                       KeyBindingEditor.ui
                                       RenameTabDialog.ui
-                                      widgets/RenameTabWidget.ui
                                       HistorySizeDialog.ui
-                                      widgets/HistorySizeWidget.ui
                                       PrintOptions.ui
+                                      colorscheme/ColorSchemeEditor.ui
                                       settings/GeneralSettings.ui
                                       settings/PartInfo.ui
                                       settings/ProfileSettings.ui
-                                      settings/TabBarSettings.ui)
+                                      settings/TabBarSettings.ui
+                                      widgets/EditProfileDialog.ui
+                                      widgets/HistorySizeWidget.ui
+                                      widgets/RenameTabWidget.ui)
 
 kde4_add_library(konsoleprivate SHARED ${konsoleprivate_SRCS})
 target_link_libraries(konsoleprivate

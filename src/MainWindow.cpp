@@ -750,7 +750,9 @@ void MainWindow::applyKonsoleSettings()
         _viewManager->setNavigationStyleSheet(KonsoleSettings::tabBarStyleSheet());
     }
 
-    setAutoSaveSettings(QStringLiteral("MainWindow"), KonsoleSettings::saveGeometryOnExit());
+    if (KonsoleSettings::saveGeometryOnExit() != autoSaveSettings()) {
+        setAutoSaveSettings(QStringLiteral("MainWindow"), KonsoleSettings::saveGeometryOnExit());
+    }
 
     updateWindowCaption();
 }

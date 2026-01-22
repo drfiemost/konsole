@@ -168,6 +168,11 @@ signals:
      */
     void tabRenamedByUser(bool renamed) const;
 
+    /**
+     * Emmited when the user request print screen.
+     */
+    void requestPrint();
+
 public slots:
     /**
      * Issues a command to the session to navigate to the specified URL.
@@ -229,7 +234,6 @@ private slots:
     void findNextInHistory();
     void findPreviousInHistory();
     void changeSearchMatch();
-    void print_screen();
     void saveHistory();
     void showHistoryOptions();
     void clearHistory();

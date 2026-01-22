@@ -26,8 +26,6 @@
 #include <QList>
 #include <QMenu>
 #include <QKeyEvent>
-#include <QPrinter>
-#include <QPrintDialog>
 #include <QPainter>
 #include <QDir>
 
@@ -59,7 +57,7 @@
 #include <KNotification>
 
 // Konsole
-#include "profile/EditProfileDialog.h"
+#include "widgets/EditProfileDialog.h"
 #include "CopyInputDialog.h"
 #include "Emulation.h"
 #include "filterHotSpots/Filter.h"
@@ -80,7 +78,6 @@
 #include "widgets/TerminalDisplay.h"
 #include "SessionManager.h"
 #include "Enumeration.h"
-#include "PrintOptions.h"
 
 #include "SaveHistoryTask.h"
 #include "SearchHistoryTask.h"
@@ -141,6 +138,8 @@ SessionController::SessionController(Session* session, TerminalDisplay* view, QO
         setupCommonActions();
         setupExtraActions();
     }
+
+    connect(this, &SessionController::requestPrint, _sessionDisplayConnection->view(), &TerminalDisplay::printScreen);
 
     actionCollection()->addAssociatedWidget(view);
     const QList<QAction *> actionsList = actionCollection()->actions();
@@ -611,7 +610,7 @@ void SessionController::setupCommonActions()
     action = KStandardAction::saveAs(this, SLOT(saveHistory()), collection);
     action->setText(i18n("Save Output &As..."));
 
-    action = KStandardAction::print(this, SLOT(print_screen()), collection);
+    action = KStandardAction::print(this, SIGNAL(requestPrint()), collection);
     action->setText(i18n("&Print Screen..."));
     action->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_P));
 
@@ -1409,33 +1408,6 @@ void SessionController::scrollBackOptionsChanged(int mode, int lines)
         _sessionDisplayConnection->session()->setHistoryType(HistoryTypeFile());
         break;
     }
-}
-
-void SessionController::print_screen()
-{
-    QPrinter printer;
-
-    QPointer<QPrintDialog> dialog = new QPrintDialog(&printer, _sessionDisplayConnection->view());
-    PrintOptions* options = new PrintOptions();
-
-    dialog->setOptionTabs({options});
-    dialog->setWindowTitle(i18n("Print Shell"));
-    connect(dialog, static_cast<void(QPrintDialog::*)()>(&QPrintDialog::accepted), options, &Konsole::PrintOptions::saveSettings);
-    if (dialog->exec() != QDialog::Accepted)
-        return;
-
-    QPainter painter;
-    painter.begin(&printer);
-
-    KConfigGroup configGroup(KGlobal::config(), "PrintOptions");
-
-    if (configGroup.readEntry("ScaleOutput", true)) {
-        double scale = std::min(printer.pageRect().width() / static_cast<double>(_sessionDisplayConnection->view()->width()),
-                            printer.pageRect().height() / static_cast<double>(_sessionDisplayConnection->view()->height()));
-        painter.scale(scale, scale);
-    }
-
-    _sessionDisplayConnection->view()->printContent(painter, configGroup.readEntry("PrinterFriendly", true));
 }
 
 void SessionController::saveHistory()

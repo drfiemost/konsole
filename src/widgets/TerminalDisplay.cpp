@@ -71,6 +71,8 @@
 #include "ViewManager.h" // for colorSchemeForProfile. // TODO: Rewrite this.
 #include "widgets/IncrementalSearchBar.h"
 #include "LineBlockCharacters.h"
+#include "PrintOptions.h"
+#include "KonsolePrintManager.h"
 
 #include "filterHotSpots/Filter.h"
 #include "filterHotSpots/TerminalImageFilterChain.h"
@@ -1185,6 +1187,7 @@ void TerminalDisplay::paintEvent(QPaintEvent* pe)
 
 void TerminalDisplay::printContent(QPainter& painter, bool friendly)
 {
+    // TODO: Move this code to KonsolePrintManager
     // Reinitialize the font with the printers paint device so the font
     // measurement calculations will be done correctly
     QFont savedFont = getVTFont();
@@ -2091,7 +2094,7 @@ void TerminalDisplay::mousePressEvent(QMouseEvent* ev)
                 }
             }
         }
-    } else if (ev->button() == Qt::MidButton) {
+    } else if (ev->button() == Qt::MiddleButton) {
         processMidButtonClick(ev);
     } else if (ev->button() == Qt::RightButton) {
         if (!_usesMouseTracking || (ev->modifiers() & Qt::ShiftModifier))
@@ -2176,7 +2179,7 @@ void TerminalDisplay::mouseMoveEvent(QMouseEvent* ev)
         int button = 3;
         if (ev->buttons() & Qt::LeftButton)
             button = 0;
-        if (ev->buttons() & Qt::MidButton)
+        if (ev->buttons() & Qt::MiddleButton)
             button = 1;
         if (ev->buttons() & Qt::RightButton)
             button = 2;
@@ -2211,7 +2214,7 @@ void TerminalDisplay::mouseMoveEvent(QMouseEvent* ev)
     if (_actSel == 0) return;
 
 // don't extend selection while pasting
-    if (ev->buttons() & Qt::MidButton) return;
+    if (ev->buttons() & Qt::MiddleButton) return;
 
     extendSelection(ev->pos());
 }
@@ -2413,9 +2416,9 @@ void TerminalDisplay::mouseReleaseEvent(QMouseEvent* ev)
     }
 
     if (_usesMouseTracking &&
-            (ev->button() == Qt::RightButton || ev->button() == Qt::MidButton) &&
+            (ev->button() == Qt::RightButton || ev->button() == Qt::MiddleButton) &&
             !(ev->modifiers() & Qt::ShiftModifier)) {
-        emit mouseSignal(ev->button() == Qt::MidButton ? 1 : 2,
+        emit mouseSignal(ev->button() == Qt::MiddleButton ? 1 : 2,
                          charColumn + 1,
                          charLine + 1 + _scrollBar->value() - _scrollBar->maximum() ,
                          2);
@@ -2467,7 +2470,7 @@ void TerminalDisplay::processMidButtonClick(QMouseEvent* ev)
 void TerminalDisplay::mouseDoubleClickEvent(QMouseEvent* ev)
 {
     // Yes, successive middle click can trigger this event
-    if (ev->button() == Qt::MidButton) {
+    if (ev->button() == Qt::MiddleButton) {
         processMidButtonClick(ev);
         return;
     }
@@ -3677,6 +3680,14 @@ void TerminalDisplay::applyProfile(const Profile::Ptr &profile)
     // mouse wheel zoom
     _mouseWheelZoom = profile->mouseWheelZoomEnabled() ;
     setAlternateScrolling(profile->property<bool>(Profile::AlternateScrolling));
+}
+
+void TerminalDisplay::printScreen()
+{
+    auto lambda = [this](QPainter& painter, bool friendly) {
+        printContent(painter, friendly);
+    };
+    KonsolePrintManager::printRequest(lambda, this);
 }
 
 #include "widgets/TerminalDisplay.moc"

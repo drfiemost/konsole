@@ -30,7 +30,7 @@
 #include <KDebug>
 
 // Konsole
-#include "profile/EditProfileDialog.h"
+#include "widgets/EditProfileDialog.h"
 #include "profile/ProfileManager.h"
 #include "session/Session.h"
 #include "widgets/TerminalDisplay.h"
