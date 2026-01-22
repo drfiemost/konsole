@@ -17,6 +17,10 @@
     02110-1301  USA.
 */
 
+// To time the creation and total launch time (i. e. until window is
+// visible/responsive):
+//#define PROFILE_STARTUP
+
 // Own
 #include "Application.h"
 #include "MainWindow.h"
@@ -34,6 +38,12 @@
 #define KONSOLE_VERSION "2.14.2"
 
 using Konsole::Application;
+
+#ifdef PROFILE_STARTUP
+#include <QElapsedTimer>
+#include <QTimer>
+#include <QDebug>
+#endif
 
 // fill the KAboutData structure with information about contributors to Konsole.
 void fillAboutData(KAboutData& aboutData);
@@ -53,6 +63,10 @@ void restoreSession(Application& app);
 // ***
 extern "C" int KDE_EXPORT kdemain(int argc, char** argv)
 {
+#ifdef PROFILE_STARTUP
+    QElapsedTimer timer; timer.start();
+#endif
+
     KAboutData about("konsole",
                      0,
                      ki18nc("@title", "<application>Konsole</application>"),
@@ -85,6 +99,13 @@ extern "C" int KDE_EXPORT kdemain(int argc, char** argv)
     KGlobal::locale()->insertCatalog("libkonq");
 
     restoreSession(app);
+#ifdef PROFILE_STARTUP
+    qDebug() << "Construction completed in" << timer.elapsed() << "ms";
+    QTimer::singleShot(0, [&timer]() {
+        qDebug() << "Startup complete in" << timer.elapsed() << "ms";
+    });
+#endif
+
     return app.exec();
 }
 bool shouldUseNewProcess()

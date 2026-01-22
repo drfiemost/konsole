@@ -24,6 +24,7 @@
 #include <QHashIterator>
 #include <QFileInfo>
 #include <QDir>
+#include <QTimer>
 
 // KDE
 #include <KAction>
@@ -88,7 +89,7 @@ void Application::createWindow(Profile::Ptr profile, const QString& directory)
 {
     MainWindow* window = newMainWindow();
     window->createSession(profile, directory);
-    finalizeNewMainWindow(window);
+    window->show();
 }
 
 void Application::detachView(Session* session)
@@ -169,7 +170,7 @@ int Application::newInstance()
             // If not restoring size from last time or only adding new tab,
             // resize window to chosen profile size (see Bug:345403)
             if (createdNewMainWindow){
-                finalizeNewMainWindow(window);
+                QTimer::singleShot(0, window, &MainWindow::show);
             } else{
                 window->setWindowState(window->windowState() & (~Qt::WindowMinimized | Qt::WindowActive));
                 window->show();
@@ -495,13 +496,6 @@ void Application::toggleBackgroundInstance()
     } else {
         _backgroundInstance->hide();
     }
-}
-
-void Application::finalizeNewMainWindow(MainWindow* window)
-{
-    if (!KonsoleSettings::saveGeometryOnExit())
-        window->resize(window->sizeHint());
-    window->show();
 }
 
 #include "Application.moc"

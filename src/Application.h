@@ -85,7 +85,6 @@ private:
     bool processTabsFromFileArgs(KCmdLineArgs* args, MainWindow* window);
     void createTabFromArgs(KCmdLineArgs* args, MainWindow* window,
                            const QHash<QString, QString>&);
-    void finalizeNewMainWindow(MainWindow* window);
 
     MainWindow* _backgroundInstance;
 };
