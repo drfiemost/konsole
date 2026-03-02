@@ -67,7 +67,8 @@ endif()
 # This konsoleprivate_core is the "core" library that depends in nothing from konsole itself
 # so we can start to detangle the codebase.
 set(konsoleprivate_core_SRCS ShellCommand.cpp)
-add_library(konsoleprivate_core STATIC ${konsoleprivate_core_SRCS})
+kde4_add_library(konsoleprivate_core STATIC ${konsoleprivate_core_SRCS})
+set_property(TARGET konsoleprivate_core PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(konsoleprivate_core ${konsole_LIBS})
 
