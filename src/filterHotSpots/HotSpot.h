@@ -24,6 +24,9 @@
 #include <QObject>
 
 #include <QList>
+#include <QPair>
+#include <QRegion>
+#include <QRect>
 
 class QAction;
 class QMenu;
@@ -93,6 +96,8 @@ public:
         */
     virtual QList<QAction*> actions();
 
+
+    QPair<QRegion, QRect> region(int fontWidth, int fontHeight, int columns, QRect terminalDisplayRect) const;
 protected:
     /** Sets the type of a hotspot.  This should only be set once */
     void setType(Type type);

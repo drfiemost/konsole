@@ -24,11 +24,15 @@
 
 #include "PlainTextDecoder.h"
 
+#include "widgets/TerminalDisplay.h"
+
 using namespace Konsole;
 
-TerminalImageFilterChain::TerminalImageFilterChain()
-    : _buffer(nullptr)
-    , _linePositions(nullptr)
+
+TerminalImageFilterChain::TerminalImageFilterChain(TerminalDisplay *terminalDisplay) :
+    FilterChain(terminalDisplay),
+    _buffer(nullptr),
+    _linePositions(nullptr)
 {
 }
 
