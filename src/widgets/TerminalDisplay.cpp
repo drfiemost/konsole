@@ -2076,23 +2076,8 @@ void TerminalDisplay::mouseMoveEvent(QMouseEvent* ev)
     // handle filters
     // change link hot-spot appearance on mouse-over
     HotSpot* spot = _filterChain->hotSpotAt(charLine, charColumn);
-    if (spot && spot->type() == HotSpot::Link) {
-        if (_underlineLinks) {
-            QRegion previousHotspotArea = _mouseOverHotspotArea;
-            _mouseOverHotspotArea = spot->region(_fontWidth, _fontHeight, _columns, _contentRect).first;
-
-            if ((_openLinksByDirectClick || (ev->modifiers() & Qt::ControlModifier)) && (cursor().shape() != Qt::PointingHandCursor))
-                setCursor(Qt::PointingHandCursor);
-
-            update(_mouseOverHotspotArea | previousHotspotArea);
-        }
-    } else if (!_mouseOverHotspotArea.isEmpty()) {
-        if ((_underlineLinks && (_openLinksByDirectClick || (ev->modifiers() & Qt::ControlModifier))) || (cursor().shape() == Qt::PointingHandCursor))
-            setCursor(_usesMouseTracking ? Qt::ArrowCursor : Qt::IBeamCursor);
-
-        update(_mouseOverHotspotArea);
-        // set hotspot area to an invalid rectangle
-        _mouseOverHotspotArea = QRegion();
+    if (spot) {
+        spot->mouseMoveEvent(this, ev);
     }
 
     // for auto-hiding the cursor, we need mouseTracking
@@ -2145,15 +2130,11 @@ void TerminalDisplay::mouseMoveEvent(QMouseEvent* ev)
     extendSelection(ev->pos());
 }
 
-void TerminalDisplay::leaveEvent(QEvent *)
+void TerminalDisplay::leaveEvent(QEvent *ev)
 {
     // remove underline from an active link when cursor leaves the widget area,
     // also restore regular mouse cursor shape
-    if(!_mouseOverHotspotArea.isEmpty()) {
-        update(_mouseOverHotspotArea);
-        _mouseOverHotspotArea = QRegion();
-        setCursor(Qt::IBeamCursor);
-    }
+    _filterChain->leaveEvent(this, ev);
 }
 
 void TerminalDisplay::extendSelection(const QPoint& position)

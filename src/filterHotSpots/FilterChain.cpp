@@ -24,6 +24,7 @@
 
 #include "widgets/TerminalDisplay.h"
 
+#include <QEvent>
 #include <QRect>
 
 using namespace Konsole;
@@ -117,4 +118,14 @@ QRegion FilterChain::hotSpotRegion() const
         }
     }
     return region;
+}
+
+void FilterChain::leaveEvent(TerminalDisplay *td, QEvent *ev)
+{
+    Q_UNUSED(ev);
+    if(!HotSpot::mouseOverHotSpotArea.isEmpty()) {
+        td->update(HotSpot::mouseOverHotSpotArea);
+        HotSpot::mouseOverHotSpotArea = QRegion();
+        td->setCursor(Qt::IBeamCursor);
+    }
 }

@@ -20,7 +20,14 @@
 
 #include "HotSpot.h"
 
+#include <QMouseEvent>
+
+#include "widgets/TerminalDisplay.h"
+
 using namespace Konsole;
+
+QSharedPointer<HotSpot> HotSpot::currentlyHoveredHotSpot;
+QRegion HotSpot::mouseOverHotSpotArea;
 
 HotSpot::HotSpot(int startLine , int startColumn , int endLine , int endColumn)
     : _startLine(startLine)
@@ -95,4 +102,29 @@ QPair<QRegion, QRect> HotSpot::region(int fontWidth, int fontHeight, int columns
         region |= r;
     }
     return {region, r};
+}
+
+void HotSpot::mouseMoveEvent(TerminalDisplay *td, QMouseEvent* ev)
+{
+    QCursor cursor = td->cursor();
+    if (type() == HotSpot::Link) {
+        if (td->getUnderlineLinks()) {
+            QRegion previousHotspotArea = _mouseOverHotspotArea;
+            _mouseOverHotspotArea = region(td->fontWidth(), td->fontHeight(), td->columns(), td->contentRect()).first;
+
+            if ((td->openLinksByDirectClick()|| ((ev->modifiers() & Qt::ControlModifier) != 0u)) && (cursor.shape() != Qt::PointingHandCursor)) {
+                td->setCursor(Qt::PointingHandCursor);
+            }
+
+            td->update(_mouseOverHotspotArea | previousHotspotArea);
+        } else if (!_mouseOverHotspotArea.isEmpty()) {
+            if ((td->openLinksByDirectClick() || ((ev->modifiers() & Qt::ControlModifier) != 0u)) || (cursor.shape() == Qt::PointingHandCursor)) {
+                td->setCursor(td->usesMouseTracking() ? Qt::ArrowCursor : Qt::IBeamCursor);
+            }
+
+            td->update(_mouseOverHotspotArea);
+            // set hotspot area to an invalid rectangle
+            _mouseOverHotspotArea = QRegion();
+        }
+    }
 }

@@ -26,12 +26,13 @@
 #include <QSharedPointer>
 #include <QRegion>
 
+class QLeaveEvent;
+
 namespace Konsole
 {
 class Filter;
 class HotSpot;
 class TerminalDisplay;
-
 
 /**
  * A chain which allows a group of filters to be processed as one.
@@ -80,6 +81,8 @@ public:
 
     /* Returns the region of the hotspot inside of the TerminalDisplay */
     QRegion hotSpotRegion() const;
+
+    void leaveEvent(TerminalDisplay *td, QEvent *ev);
 
 protected:
     QList<Filter *> _filters;
